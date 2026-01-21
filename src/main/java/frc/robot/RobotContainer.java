@@ -4,15 +4,28 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.Prototype;
+import frc.robot.subsystems.Turret;
 
 public class RobotContainer {
+
+  public Prototype prototype = new Prototype();
+  public Turret turret = new Turret();
+
   public RobotContainer() {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    SmartDashboard.putData("run", prototype.runIndexer());
+    SmartDashboard.putData("stop", prototype.stop());
+    SmartDashboard.putData("RunTurret", turret.runTurret());
+    SmartDashboard.putData("StopTurret", turret.stopTurret());
+    turret.setDefaultCommand(turret.stopTurret());
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
