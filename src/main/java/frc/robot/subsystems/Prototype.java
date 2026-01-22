@@ -34,8 +34,8 @@ public class Prototype extends SubsystemBase {
     }
 
     private void setSpeed(double speed) {
-        indexer1.setControl(requestcycle.withOutput(speed));
-        indexer2.setControl(requestcycle.withOutput(speed));
+        indexer1.setControl(requestcycle.withOutput(-speed));
+        indexer2.setControl(requestcycle.withOutput(-speed));
     }
 
     private void stopMotors() {
