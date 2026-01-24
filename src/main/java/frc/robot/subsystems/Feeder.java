@@ -39,7 +39,7 @@ public class Feeder extends SubsystemBase {
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Turret/FeederVelocity", shooterFeeder.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Feeder/FeederVelocity", shooterFeeder.getVelocity().getValueAsDouble());
     }
 
     private void setFeederSpeed(DoubleSupplier speed) {

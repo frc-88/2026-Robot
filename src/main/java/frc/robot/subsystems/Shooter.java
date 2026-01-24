@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
         shooterFollower.setControl(new Follower(3, MotorAlignmentValue.Opposed));
     }
     public void periodic() {
-        SmartDashboard.putNumber("Turret/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
     }
 
     private void setShooterSpeed(DoubleSupplier speed) {
