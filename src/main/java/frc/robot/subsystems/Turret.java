@@ -18,7 +18,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class Turret extends SubsystemBase {
     
-    private TalonFX shooterMain = new TalonFX(3, CANBus.roboRIO()); //forward +
+    private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); //forward +
     private TalonFX shooterFollower = new TalonFX(2, CANBus.roboRIO()); //forward -
 
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
@@ -37,6 +37,7 @@ public class Turret extends SubsystemBase {
         config.Slot0.kP = mainConfig.getKP().getValue();
         config.Slot0.kI = mainConfig.getKI().getValue();
         config.Slot0.kD = mainConfig.getKD().getValue();
+        config.Slot0.kV = mainConfig.getKV().getValue();
         shooterMain.getConfigurator().apply(config);
         shooterFollower.getConfigurator().apply(config);
         shooterFollower.setControl(new Follower(3, MotorAlignmentValue.Opposed));
