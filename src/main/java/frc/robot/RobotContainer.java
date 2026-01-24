@@ -22,9 +22,13 @@ public class RobotContainer {
   private void configureBindings() {
     SmartDashboard.putData("run", prototype.runIndexer());
     SmartDashboard.putData("stop", prototype.stop());
-    SmartDashboard.putData("RunTurret", turret.runTurret());
-    SmartDashboard.putData("StopTurret", turret.stopTurret());
-    turret.setDefaultCommand(turret.stopTurret());
+    SmartDashboard.putData("RunTurret", turret.runAllTurret());
+    SmartDashboard.putData("StopTurret", turret.stopAllTurret());
+    SmartDashboard.putData("RunFeeder", turret.runOnlyFeeder());
+    SmartDashboard.putData("StopFeeder", turret.stopOnlyFeeder());
+    SmartDashboard.putData("RunShooter", turret.runOnlyShooter());
+    SmartDashboard.putData("StopShooter", turret.stopOnlyShooter());
+    turret.setDefaultCommand(turret.stopAllTurret());
   }
 
   public Command getAutonomousCommand() {
