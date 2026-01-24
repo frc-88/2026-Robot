@@ -46,15 +46,15 @@ public class Feeder extends SubsystemBase {
         shooterFeeder.setControl(requestFeeder.withVelocity(speed.getAsDouble()));
     }
 
-    private void stopOnlyFeederMotors() {
+    private void stopFeederMotors() {
         shooterFeeder.stopMotor();
     }
 
-    public Command runOnlyFeeder() {
+    public Command runFeeder() {
         return new RunCommand (() -> setFeederSpeed(() -> feedSpeed.getValue()), this);
     }
 
-    public Command stopOnlyFeeder() {
-        return new RunCommand(() -> stopOnlyFeederMotors(), this);
+    public Command stopFeeder() {
+        return new RunCommand(() -> stopFeederMotors(), this);
     }
 }

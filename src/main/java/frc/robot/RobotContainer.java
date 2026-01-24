@@ -7,13 +7,17 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Prototype;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Turret;
 
 public class RobotContainer {
 
   public Prototype prototype = new Prototype();
   public Turret turret = new Turret();
+  public Feeder feeder = new Feeder();
+  public Shooter shooter = new Shooter();
 
   public RobotContainer() {
     configureBindings();
@@ -22,12 +26,10 @@ public class RobotContainer {
   private void configureBindings() {
     SmartDashboard.putData("run", prototype.runIndexer());
     SmartDashboard.putData("stop", prototype.stop());
-    SmartDashboard.putData("RunTurret", turret.runAllTurret());
-    SmartDashboard.putData("StopTurret", turret.stopAllTurret());
-    SmartDashboard.putData("RunFeeder", turret.runOnlyFeeder());
-    SmartDashboard.putData("StopFeeder", turret.stopOnlyFeeder());
-    SmartDashboard.putData("RunShooter", turret.runOnlyShooter());
-    SmartDashboard.putData("StopShooter", turret.stopOnlyShooter());
+    SmartDashboard.putData("RunFeeder", feeder.runFeeder());
+    SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
+    SmartDashboard.putData("RunShooter", shooter.runShooter());
+    SmartDashboard.putData("StopShooter", shooter.stopShooter());
     turret.setDefaultCommand(turret.stopAllTurret());
   }
 

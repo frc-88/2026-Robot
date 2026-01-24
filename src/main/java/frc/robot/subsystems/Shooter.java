@@ -58,7 +58,7 @@ public class Shooter extends SubsystemBase {
         return new RunCommand (() -> setShooterSpeed(() -> shootSpeed.getValue()), this);
     }
 
-    public Command stopOnlyShooter() {
+    public Command stopShooter() {
         return new RunCommand(() -> stopShooterMotors(), this);
     }
 
