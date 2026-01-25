@@ -6,13 +6,17 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
@@ -25,6 +29,10 @@ public class Shooter extends SubsystemBase {
 
     private MotionMagicPIDPreferenceConstants shooterConfigConstants = new MotionMagicPIDPreferenceConstants("TurretMainMotor");
 
+    SysIdRoutine routine = new SysIdRoutine(
+        new SysIdRoutine.Config(),
+        new SysIdRoutine.Mechanism(this::setVoltage, this::logMotors, this)
+    );
 
     public Shooter() {
         configureTalons();
@@ -41,12 +49,21 @@ public class Shooter extends SubsystemBase {
         shooterFollower.getConfigurator().apply(shooterConfig);
         shooterFollower.setControl(new Follower(3, MotorAlignmentValue.Opposed));
     }
+
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
     }
 
     private void setShooterSpeed(DoubleSupplier speed) {
         shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()));
+    }
+
+    private void setVoltage(Voltage volts) {
+        shooterMain.setControl(new VoltageOut(volts));
+    }
+
+    private void logMotors(SysIdRoutineLog log) {
+        // intentionally blank
     }
 
     private void stopShooterMotors() {
@@ -60,6 +77,14 @@ public class Shooter extends SubsystemBase {
 
     public Command stopShooter() {
         return new RunCommand(() -> stopShooterMotors(), this);
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return routine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return routine.dynamic(direction);
     }
 
 }
