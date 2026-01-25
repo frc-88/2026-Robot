@@ -7,13 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.ShooterFeeder;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShooterFeeder;
+import frc.robot.subsystems.Intake;
+
 
 public class RobotContainer {
 
   public ShooterFeeder shooterFeeder = new ShooterFeeder();
   public Shooter shooter = new Shooter();
+  public Intake intake = new Intake();
 
   public RobotContainer() {
     configureBindings();
@@ -26,6 +29,8 @@ public class RobotContainer {
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
+    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("StopIntake", intake.stop());
   }
 
   public Command getAutonomousCommand() {
