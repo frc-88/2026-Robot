@@ -8,12 +8,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
 public class RobotContainer {
 
   public Feeder feeder = new Feeder();
   public Shooter shooter = new Shooter();
+  public Intake intake = new Intake();
 
   public RobotContainer() {
     configureBindings();
@@ -26,6 +28,8 @@ public class RobotContainer {
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
+    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("StopIntake", intake.stop());
   }
 
   public Command getAutonomousCommand() {
