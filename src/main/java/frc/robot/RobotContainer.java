@@ -27,11 +27,11 @@ public class RobotContainer {
   
   private void configureBindings() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
-    SmartDashboard.putData("StopFeeder", hopperFeeder.stopFeeder());
+    SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
-    SmartDashboard.putData("RunFeeder", shooterFeeder.runFeeder());
-    SmartDashboard.putData("StopFeeder", shooterFeeder.stopFeeder());
+    SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
+    SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunIntake", intake.runIndexer());
