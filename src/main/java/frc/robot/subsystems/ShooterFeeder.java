@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
-public class Feeder extends SubsystemBase {
+public class ShooterFeeder extends SubsystemBase {
 
     private TalonFX shooterFeeder = new TalonFX(18, CANBus.roboRIO());
 
@@ -24,7 +24,7 @@ public class Feeder extends SubsystemBase {
 
     private MotionMagicPIDPreferenceConstants feederConfigConstants = new MotionMagicPIDPreferenceConstants("FeederMotor");
 
-    public Feeder() {
+    public ShooterFeeder() {
         configureTalons();
     }
 
