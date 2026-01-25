@@ -40,6 +40,8 @@ public class RobotContainer {
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
     SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
     SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
+    SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
     hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
