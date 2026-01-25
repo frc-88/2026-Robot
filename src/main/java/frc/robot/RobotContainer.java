@@ -10,11 +10,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShooterFeeder;
 import frc.robot.subsystems.Spinner;
 
 public class RobotContainer {
 
   public HopperFeeder hopperFeeder = new HopperFeeder();
+  public ShooterFeeder shooterFeeder = new ShooterFeeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
@@ -22,10 +24,14 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
   }
-
+  
   private void configureBindings() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
     SmartDashboard.putData("StopFeeder", hopperFeeder.stopFeeder());
+    SmartDashboard.putData("RunShooter", shooter.runShooter());
+    SmartDashboard.putData("StopShooter", shooter.stopShooter());
+    SmartDashboard.putData("RunFeeder", shooterFeeder.runFeeder());
+    SmartDashboard.putData("StopFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunIntake", intake.runIndexer());
@@ -34,11 +40,12 @@ public class RobotContainer {
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
     SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
     SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
-
     hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
+    shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
+
 
   }
 
