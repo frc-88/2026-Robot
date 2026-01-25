@@ -7,29 +7,39 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Spinner;
 
 public class RobotContainer {
 
-  public Feeder feeder = new Feeder();
+  public HopperFeeder hopperFeeder = new HopperFeeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
+  public Spinner spinner = new Spinner();
 
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-    SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-    SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
+    SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
+    SmartDashboard.putData("StopFeeder", hopperFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
-    feeder.setDefaultCommand(feeder.stopFeeder());
-    shooter.setDefaultCommand(shooter.stopShooter());
     SmartDashboard.putData("RunIntake", intake.runIndexer());
-    SmartDashboard.putData("StopIntake", intake.stop());
+    SmartDashboard.putData("StopIntake", intake.stopIntake());
+    SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+    SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+    SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
+    SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+
+    hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
+    shooter.setDefaultCommand(shooter.stopShooter());
+    spinner.setDefaultCommand(spinner.stopSpinner());
+    intake.setDefaultCommand(intake.stopIntake());
+
   }
 
   public Command getAutonomousCommand() {

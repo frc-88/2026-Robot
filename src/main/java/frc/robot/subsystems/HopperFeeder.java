@@ -4,8 +4,10 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,17 +16,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
-public class Feeder extends SubsystemBase {
+public class HopperFeeder extends SubsystemBase {
 
-    private TalonFX shooterFeeder = new TalonFX(18, CANBus.roboRIO());
+    private TalonFX feeder = new TalonFX(19, CANBus.roboRIO());
 
-    private VelocityDutyCycle requestFeeder = new VelocityDutyCycle(0.0);
+    private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 
     private DoublePreferenceConstant feedSpeed = new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
 
     private MotionMagicPIDPreferenceConstants feederConfigConstants = new MotionMagicPIDPreferenceConstants("FeederMotor");
 
-    public Feeder() {
+    public HopperFeeder() {
         configureTalons();
     }
 
@@ -35,19 +37,20 @@ public class Feeder extends SubsystemBase {
         feederConfig.Slot0.kI = feederConfigConstants.getKI().getValue();
         feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
         feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
-        shooterFeeder.getConfigurator().apply(feederConfig);
+        feederConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        feeder.getConfigurator().apply(feederConfig);
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Feeder/FeederVelocity", shooterFeeder.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Feeder/FeederVelocity", feeder.getVelocity().getValueAsDouble());
     }
 
     private void setFeederSpeed(DoubleSupplier speed) {
-        shooterFeeder.setControl(requestFeeder.withVelocity(speed.getAsDouble()));
+        feeder.setControl(request.withVelocity(speed.getAsDouble()));
     }
 
     private void stopFeederMotors() {
-        shooterFeeder.stopMotor();
+        feeder.stopMotor();
     }
 
     public Command runFeeder() {
