@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,8 +15,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 
 public class Intake extends SubsystemBase {
     
-    private final TalonFX indexer1 = new TalonFX(2, CANBus.roboRIO());
-    //private final TalonFX indexer2 = new TalonFX(18, CANBus.roboRIO());
+    private final TalonFX intake = new TalonFX(2, CANBus.roboRIO());
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
     private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
@@ -31,14 +31,16 @@ public class Intake extends SubsystemBase {
         // config.Slot0.kI = 
         // config.Slot0.kD = 
         // config. = 
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; //this might not work yet
+        intake.getConfigurator().apply(config);
     }
 
     private void setSpeed(double speed) {
-        indexer1.setControl(requestcycle.withOutput(-speed));
+        intake.setControl(requestcycle.withOutput(speed));
     }
 
     private void stopMotors() {
-        indexer1.stopMotor();
+        intake.stopMotor();
     }
 
     public Command runIndexer() {
@@ -49,6 +51,3 @@ public class Intake extends SubsystemBase {
         return new RunCommand(() -> stopMotors(), this);
     }
 }
-
-
- 
