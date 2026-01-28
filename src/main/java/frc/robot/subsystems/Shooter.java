@@ -115,7 +115,9 @@ public class Shooter extends SubsystemBase {
         shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
         shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue();
         shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
+        shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
         shooterMain.getConfigurator().apply(shooterConfig);
+        
         // shooterFollower.getConfigurator().apply(shooterConfig);
         shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
     }
