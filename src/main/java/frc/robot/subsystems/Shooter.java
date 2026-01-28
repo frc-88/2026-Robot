@@ -117,7 +117,7 @@ public class Shooter extends SubsystemBase {
         shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
         shooterMain.getConfigurator().apply(shooterConfig);
         shooterFollower.getConfigurator().apply(shooterConfig);
-        shooterFollower.setControl(new Follower(3, MotorAlignmentValue.Opposed));
+        shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
     }
 
     public void periodic() {
