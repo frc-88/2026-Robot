@@ -116,7 +116,7 @@ public class Shooter extends SubsystemBase {
         shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue();
         shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
         shooterMain.getConfigurator().apply(shooterConfig);
-        shooterFollower.getConfigurator().apply(shooterConfig);
+        // shooterFollower.getConfigurator().apply(shooterConfig);
         shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
     }
 
@@ -155,7 +155,7 @@ public class Shooter extends SubsystemBase {
 
     private void stopShooterMotors() {
         shooterMain.stopMotor();
-        shooterFollower.stopMotor();
+        // shooterFollower.stopMotor();
     }
 
     public Command runFlywheel() {
