@@ -58,10 +58,10 @@ public class Shooter extends SubsystemBase {
         );
 
     // Volts per (radian per second)
-    private static final double kFlywheelKv = 0.1245;
+    private static final double kFlywheelKv = 0.1245; // from SysId
 
     // Volts per (radian per second squared)
-    private static final double kFlywheelKa = 0.02243;
+    private static final double kFlywheelKa = 0.02243; // from SysId
 
     // The plant holds a state-space model of our flywheel. This system has the following properties:
     //
@@ -79,8 +79,8 @@ public class Shooter extends SubsystemBase {
             Nat.N1(),
             Nat.N1(),
             m_flywheelPlant,
-            VecBuilder.fill(3.0), // How accurate we think our model is TODO: Tune
-            VecBuilder.fill(0.01), // How accurate we think our encoder TODO: Tune
+            VecBuilder.fill(0.94423), // How accurate we think our model is TODO: Tune (value based on SysId)
+            VecBuilder.fill(0.01), // How accurate we think our encoder TODO: Tune (Keep very low)
             // data is
             0.020);
 
@@ -88,7 +88,7 @@ public class Shooter extends SubsystemBase {
     private final LinearQuadraticRegulator<N1, N1, N1> m_controller =
         new LinearQuadraticRegulator<>(
             m_flywheelPlant,
-            VecBuilder.fill(8.0), // TODO: Tune
+            VecBuilder.fill(8.0), // TODO: Tune (lower)
             // qelms. Velocity error tolerance, in radians per second. Decrease
             // this to more heavily penalize state excursion, or make the controller behave more
             // aggressively.
