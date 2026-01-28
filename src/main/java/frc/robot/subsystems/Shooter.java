@@ -58,10 +58,10 @@ public class Shooter extends SubsystemBase {
         );
 
     // Volts per (radian per second)
-    private static final double kFlywheelKv = 0.023; // TODO: determine with SysId
+    private static final double kFlywheelKv = 0.1245;
 
     // Volts per (radian per second squared)
-    private static final double kFlywheelKa = 0.001; // TODO: determine with SysId
+    private static final double kFlywheelKa = 0.02243;
 
     // The plant holds a state-space model of our flywheel. This system has the following properties:
     //
