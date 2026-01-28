@@ -111,11 +111,11 @@ public class Shooter extends SubsystemBase {
     private void configureTalons() {
         TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
 
-        shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue();
+        shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue(); // SysId 0.14529
         shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
-        shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue();
-        shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
-        shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
+        shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue(); // SysId 0.0
+        shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue(); // SysId 0.12450
+        shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue(); // SysId 0.20331
         shooterMain.getConfigurator().apply(shooterConfig);
         
         // shooterFollower.getConfigurator().apply(shooterConfig);
