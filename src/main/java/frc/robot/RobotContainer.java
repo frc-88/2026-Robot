@@ -47,8 +47,6 @@ public class RobotContainer {
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
-
-
   }
 
   public Command getAutonomousCommand() {

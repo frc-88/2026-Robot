@@ -21,7 +21,7 @@ public class Shooter extends SubsystemBase {
     private TalonFX shooterFollower = new TalonFX(2, CANBus.roboRIO()); //forward -
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
-    private DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Turret/ShootSpeed", 0.0);
+    private DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
 
     private MotionMagicPIDPreferenceConstants shooterConfigConstants = new MotionMagicPIDPreferenceConstants("TurretMainMotor");
 
@@ -43,6 +43,7 @@ public class Shooter extends SubsystemBase {
     }
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
     }
 
     private void setShooterSpeed(DoubleSupplier speed) {
