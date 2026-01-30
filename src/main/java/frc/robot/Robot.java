@@ -15,6 +15,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import frc.robot.util.preferenceconstants.PreferenceConstants;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -87,6 +88,8 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+    
+    PreferenceConstants.update();
   }
 
   /** This function is called once when the robot is disabled. */
