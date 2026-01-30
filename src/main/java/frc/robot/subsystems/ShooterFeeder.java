@@ -42,6 +42,7 @@ public class ShooterFeeder extends SubsystemBase {
 
     public void periodic() {
         SmartDashboard.putNumber("Feeder/FeederVelocity", feeder.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Feeder/FeederVoltage", feeder.getMotorVoltage().getValueAsDouble());
     }
 
     private void setFeederSpeed(DoubleSupplier speed) {
