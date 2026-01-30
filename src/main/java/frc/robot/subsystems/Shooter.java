@@ -15,13 +15,15 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
-    private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); //forward +
-    private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); //forward -
+  private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); // forward +
+  private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); // forward -
 
-    private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
-    private DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+  private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
+  private DoublePreferenceConstant shootSpeed =
+      new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
 
-    private MotionMagicPIDPreferenceConstants shooterConfigConstants = new MotionMagicPIDPreferenceConstants("ShooterMotors");
+  private MotionMagicPIDPreferenceConstants shooterConfigConstants =
+      new MotionMagicPIDPreferenceConstants("ShooterMotors");
 
   public Shooter() {
     configureTalons();
@@ -38,21 +40,23 @@ public class Shooter extends SubsystemBase {
     shooterMain.getConfigurator().apply(shooterConfig);
     // shooterFollower.getConfigurator().apply(shooterConfig);
     shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
-}
+  }
 
-public void periodic() {
-    SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-}
+  public void periodic() {
+    SmartDashboard.putNumber(
+        "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
+  }
 
   private void setShooterSpeed(DoubleSupplier speed) {
     shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()));
   }
 
-    private void stopShooterMotors() {
-        shooterMain.stopMotor();
-        // shooterFollower.stopMotor();
-    }
+  private void stopShooterMotors() {
+    shooterMain.stopMotor();
+    // shooterFollower.stopMotor();
+  }
 
   public Command runShooter() {
     return new RunCommand(() -> setShooterSpeed(() -> shootSpeed.getValue()), this);
