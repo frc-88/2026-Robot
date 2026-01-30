@@ -16,31 +16,31 @@ import frc.robot.subsystems.Spinner;
 
 public class RobotContainer {
 
-  // public HopperFeeder hopperFeeder = new HopperFeeder();
+  public HopperFeeder hopperFeeder = new HopperFeeder();
   public ShooterFeeder shooterFeeder = new ShooterFeeder();
   public Shooter shooter = new Shooter();
-  // public Intake intake = new Intake();
-  // public Spinner spinner = new Spinner();
+  public Intake intake = new Intake();
+  public Spinner spinner = new Spinner();
 
   public RobotContainer() {
     configureBindings();
   }
   
   private void configureBindings() {
-    // SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
-    // SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
+    SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
+    SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
     SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
-    // SmartDashboard.putData("RunIntake", intake.runIndexer());
-    // SmartDashboard.putData("StopIntake", intake.stopIntake());
-    // SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-    // SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-    // SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
-    // SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("StopIntake", intake.stopIntake());
+    SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+    SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+    SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
+    SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
     SmartDashboard.putData("Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
@@ -48,10 +48,10 @@ public class RobotContainer {
     SmartDashboard.putData("Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
     SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
 
-    // hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
+    hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    // spinner.setDefaultCommand(spinner.stopSpinner());
-    // intake.setDefaultCommand(intake.stopIntake());
+    spinner.setDefaultCommand(spinner.stopSpinner());
+    intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
   }
 
