@@ -34,11 +34,12 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class Shooter extends SubsystemBase {
     private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); //forward +
-    private TalonFX shooterFollower = new TalonFX(2, CANBus.roboRIO()); //forward -
+    private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); //forward -
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
-    private DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Turret/ShootSpeed", 0.0);
-    private MotionMagicPIDPreferenceConstants shooterConfigConstants = new MotionMagicPIDPreferenceConstants("TurretMainMotor");
+    private DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+
+    private MotionMagicPIDPreferenceConstants shooterConfigConstants = new MotionMagicPIDPreferenceConstants("ShooterMotors");
 
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
     private final SysIdRoutine m_sysIdRoutine =
@@ -124,6 +125,7 @@ public class Shooter extends SubsystemBase {
 
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
     }
 
     private void setShooterSpeed(DoubleSupplier speed) {
