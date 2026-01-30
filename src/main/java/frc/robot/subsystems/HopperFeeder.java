@@ -9,13 +9,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class HopperFeeder extends SubsystemBase {
 
-  private TalonFX feeder = new TalonFX(19, CANBus.roboRIO());
+  private TalonFX feeder = new TalonFX(Constants.HOPPER_FEEDER_MAIN, CANBus.roboRIO());
 
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 

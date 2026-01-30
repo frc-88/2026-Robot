@@ -9,11 +9,12 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import java.util.function.DoubleSupplier;
 
 public class Spinner extends SubsystemBase {
-  private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
+  private final TalonFX spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
