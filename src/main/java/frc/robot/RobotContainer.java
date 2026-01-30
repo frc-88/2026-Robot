@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -23,7 +24,8 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
-  }
+    shooter.feederInputted.onFalse(shooter.addCurrent().andThen()); // false because false is blocked 
+  } //.andThen(shooter.runShooter()), once fixed
   
   private void configureBindings() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
@@ -47,6 +49,8 @@ public class RobotContainer {
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
+
+    SmartDashboard.putData("TestIncrease", shooter.addCurrent().andThen(shooter.runShooter())); 
   }
 
   public Command getAutonomousCommand() {
