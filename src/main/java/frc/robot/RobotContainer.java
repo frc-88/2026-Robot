@@ -40,11 +40,11 @@ public class RobotContainer {
 
   // Subsystems
   private final Drive drive;
-  public HopperFeeder hopperFeeder = new HopperFeeder();
-  public ShooterFeeder shooterFeeder = new ShooterFeeder();
-  public Shooter shooter = new Shooter();
-  public Intake intake = new Intake();
-  public Spinner spinner = new Spinner();
+  private final HopperFeeder hopperFeeder = new HopperFeeder();
+  private final ShooterFeeder shooterFeeder = new ShooterFeeder();
+  private final Shooter shooter = new Shooter();
+  private final Intake intake = new Intake();
+  private final Spinner spinner = new Spinner();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -66,24 +66,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-
-        // The ModuleIOTalonFXS implementation provides an example implementation for
-        // TalonFXS controller connected to a CANdi with a PWM encoder. The
-        // implementations
-        // of ModuleIOTalonFX, ModuleIOTalonFXS, and ModuleIOSpark (from the Spark
-        // swerve
-        // template) can be freely intermixed to support alternative hardware
-        // arrangements.
-        // Please see the AdvantageKit template documentation for more information:
-        // https://docs.advantagekit.org/getting-started/template-projects/talonfx-swerve-template#custom-module-implementations
-        //
-        // drive =
-        // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
         break;
 
       case SIM:
@@ -128,11 +110,12 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Configure the button bindings
-    configureBindings();
+    configureSmartDashboardButtons();
+    configureDefaultCommands();
+    configureDriverController();
   }
 
-  private void configureBindings() {
+  private void configureSmartDashboardButtons() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
     SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
@@ -151,19 +134,23 @@ public class RobotContainer {
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData(
         "StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
+  }
+
+  private void configureDefaultCommands() {
     hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
-
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+  }
 
+  private void configureDriverController() {
     // Lock to 0° when A button is held
     controller
         .a()
