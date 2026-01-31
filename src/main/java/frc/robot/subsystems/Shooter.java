@@ -59,6 +59,7 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
         SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
     }
