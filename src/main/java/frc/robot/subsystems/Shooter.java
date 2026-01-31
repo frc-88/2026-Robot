@@ -26,8 +26,11 @@ public class Shooter extends SubsystemBase {
     private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); //forward -
     private DigitalInput feederBeamBreak = new DigitalInput(0);
     private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
-    private Timer timeSinceBallLastSeen = new Timer();
     private boolean boosted = false;
+    private Trigger boostStarted = new Trigger(() -> boosted);
+    private Timer timeSinceBallLastSeen = new Timer();
+    private Timer timeSinceBoostStarted = new Timer();
+
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
     public DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
@@ -55,6 +58,8 @@ public class Shooter extends SubsystemBase {
         shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
         timeSinceBallLastSeen.reset();
         feederBeamBreakTrigger.onTrue(new InstantCommand(() -> {timeSinceBallLastSeen.reset(); timeSinceBallLastSeen.start();}));
+        boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset(); timeSinceBoostStarted.start();}));
+
     }
 
     public void periodic() {
@@ -62,12 +67,13 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
+        SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
         SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
         SmartDashboard.putBoolean("Shooter/Boosted", boosted);
     }
 
     private void setShooterSpeed(DoubleSupplier speed, DoubleSupplier FeedForwardIncrease) {
-        if (shooterMain.getVelocity().getValueAsDouble() >= speed.getAsDouble()) { // normal
+        if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
             shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
             boosted = false;
         }
@@ -76,7 +82,9 @@ public class Shooter extends SubsystemBase {
             boosted = false;
         }
         else { // in boost duration
-            shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(FeedForwardIncrease.getAsDouble()));
+            double boost = FeedForwardIncrease.getAsDouble() * 
+                ((timeSinceBoostStarted.get())/increaseDuration.getValue());
+            shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
             boosted = true;
         } //this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) && (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
     }
