@@ -48,6 +48,7 @@ public class RobotContainer {
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
+    SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
   }
 
   public Command getAutonomousCommand() {
