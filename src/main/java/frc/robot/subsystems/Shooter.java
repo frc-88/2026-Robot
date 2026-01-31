@@ -27,6 +27,7 @@ public class Shooter extends SubsystemBase {
     private DigitalInput feederBeamBreak = new DigitalInput(0);
     private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
     private Timer timeSinceBallLastSeen = new Timer();
+    private boolean boosted = false;
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
     public DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
@@ -62,14 +63,21 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
         SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
+        SmartDashboard.putBoolean("Shooter/Boosted", boosted);
     }
 
     private void setShooterSpeed(DoubleSupplier speed, DoubleSupplier FeedForwardIncrease) {
-        if ((timeSinceBallLastSeen.get() >= (increaseDuration.getValue() + increaseDelay.getValue())) || (timeSinceBallLastSeen.get() <= increaseDelay.getValue())) {
-            shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()));  // normal or delay time
+        if (shooterMain.getVelocity().getValueAsDouble() >= speed.getAsDouble()) { // normal
+            shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
+            boosted = false;
+        }
+        else if ((timeSinceBallLastSeen.get() >= (increaseDuration.getValue() + increaseDelay.getValue())) || (timeSinceBallLastSeen.get() <= increaseDelay.getValue())) {
+            shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));  // normal or delay time
+            boosted = false;
         }
         else { // in boost duration
             shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(FeedForwardIncrease.getAsDouble()));
+            boosted = true;
         } //this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) && (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
     }
 
