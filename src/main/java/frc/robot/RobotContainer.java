@@ -24,8 +24,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
-    shooter.feederInputted.onFalse(shooter.addCurrent().andThen()); // false because false is blocked 
-  } //.andThen(shooter.runShooter()), once fixed
+  }
   
   private void configureBindings() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
@@ -49,8 +48,6 @@ public class RobotContainer {
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
-
-    SmartDashboard.putData("TestIncrease", shooter.addCurrent().andThen(shooter.runShooter())); 
   }
 
   public Command getAutonomousCommand() {
