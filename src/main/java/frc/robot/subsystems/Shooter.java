@@ -7,6 +7,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
@@ -29,11 +30,13 @@ public class Shooter extends SubsystemBase {
     private boolean boosted = false;
     private Trigger boostStarted = new Trigger(() -> boosted);
     private Timer timeSinceBallLastSeen = new Timer();
-    private Timer timeSinceBoostStarted = new Timer();
+    //private Timer timeSinceBoostStarted = new Timer();
 
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
+    private VoltageOut voltagerequest = new VoltageOut(0);
     public DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+    public DoublePreferenceConstant shootVoltage = new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
     public DoublePreferenceConstant increaseDuration = new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.0);
     public DoublePreferenceConstant increaseDelay = new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
     public DoublePreferenceConstant increaseFeedForward = new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
@@ -58,7 +61,7 @@ public class Shooter extends SubsystemBase {
         shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
         timeSinceBallLastSeen.reset();
         feederBeamBreakTrigger.onTrue(new InstantCommand(() -> {timeSinceBallLastSeen.reset(); timeSinceBallLastSeen.start();}));
-        boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset(); timeSinceBoostStarted.start();}));
+        //boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset(); timeSinceBoostStarted.start();}));
 
     }
 
@@ -67,7 +70,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
-        SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
+        //SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
         SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
         SmartDashboard.putBoolean("Shooter/Boosted", boosted);
     }
@@ -82,11 +85,16 @@ public class Shooter extends SubsystemBase {
             boosted = false;
         }
         else { // in boost duration
-            double boost = FeedForwardIncrease.getAsDouble() * 
-                ((timeSinceBoostStarted.get())/increaseDuration.getValue());
+            //double boost = FeedForwardIncrease.getAsDouble() * 
+             //   ((increaseDuration.getValue() + increaseDelay.getValue() - timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
+            double boost = FeedForwardIncrease.getAsDouble();
             shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
             boosted = true;
         } //this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) && (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
+    }
+
+    private void setShooterVoltage(DoubleSupplier voltage) {
+        shooterMain.setControl(voltagerequest.withOutput(voltage.getAsDouble()));
     }
 
     private void stopShooterMotors() {
@@ -99,7 +107,11 @@ public class Shooter extends SubsystemBase {
     } 
 
     public Command runShooter() {
-        return new RunCommand (() -> setShooterSpeed(() -> shootSpeed.getValue(), () -> increaseFeedForward.getValue()), this);
+        return new RunCommand(() -> setShooterSpeed(() -> shootSpeed.getValue(), () -> increaseFeedForward.getValue()), this);
+    }
+
+    public Command runShooterVoltage() {
+        return new RunCommand(() -> setShooterVoltage(() -> shootVoltage.getValue()));
     }
 
     public Command stopShooter() {
