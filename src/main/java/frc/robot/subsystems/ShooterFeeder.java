@@ -17,7 +17,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class ShooterFeeder extends SubsystemBase {
 
-    private TalonFX feeder = new TalonFX(19, CANBus.roboRIO());
+    private TalonFX feeder = new TalonFX(18, CANBus.roboRIO());
 
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 
@@ -36,12 +36,13 @@ public class ShooterFeeder extends SubsystemBase {
         feederConfig.Slot0.kI = feederConfigConstants.getKI().getValue();
         feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
         feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
-        feederConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         feeder.getConfigurator().apply(feederConfig);
     }
 
     public void periodic() {
         SmartDashboard.putNumber("Feeder/FeederVelocity", feeder.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Feeder/FeederVoltage", feeder.getMotorVoltage().getValueAsDouble());
     }
 
     private void setFeederSpeed(DoubleSupplier speed) {
