@@ -51,6 +51,10 @@ public class RobotContainer {
     SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
   }
 
+  public void disabledInit() {
+    shooter.resetBPS();
+  }
+
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
