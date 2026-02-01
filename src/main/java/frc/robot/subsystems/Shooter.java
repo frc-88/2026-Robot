@@ -71,7 +71,7 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
         SmartDashboard.putNumber("Shooter/BallsPerSecond", (Math.round((100.0 * BallsPerSecond)) / 100.0)); //round to hundredths
         //SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
