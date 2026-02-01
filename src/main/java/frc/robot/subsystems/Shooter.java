@@ -222,6 +222,8 @@ public class Shooter extends SubsystemBase {
             new InstantCommand(() -> setStateSpaceController(0), this),
             new RunCommand (() -> runStateSpaceController(), this)
         );
+    }
+    
     private void calculateBPS() {
         ballsCount = ballsCount + 1;
         double currentTime = Timer.getFPGATimestamp();
