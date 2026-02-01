@@ -31,7 +31,7 @@ private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
         // config.Slot0.kI = 
         // config.Slot0.kD = 
         // config. = 
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         spinner.getConfigurator().apply(config);
     }
 
