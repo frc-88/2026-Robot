@@ -32,6 +32,7 @@ private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
 
     public void periodic() {
         SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
     }
 
     private void configureTalons() {
