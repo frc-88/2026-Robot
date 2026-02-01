@@ -42,10 +42,14 @@ public class Shooter extends SubsystemBase {
     private DigitalInput feederBeamBreak = new DigitalInput(0);
     private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
     private boolean boosted = false;
-    private Trigger boostStarted = new Trigger(() -> boosted);
+    //private Trigger boostStarted = new Trigger(() -> boosted);
     private Timer timeSinceBallLastSeen = new Timer();
     //private Timer timeSinceBoostStarted = new Timer();
 
+    private int ballsCount;
+    private double earliestBallTime = 0;
+    private double lastBallTime;
+    private double BallsPerSecond;
 
     private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
     private VoltageOut voltagerequest = new VoltageOut(0);
@@ -139,15 +143,16 @@ public class Shooter extends SubsystemBase {
         shooterFollower.setControl(new Follower(12, MotorAlignmentValue.Opposed));
         timeSinceBallLastSeen.reset();
         feederBeamBreakTrigger.onTrue(new InstantCommand(() -> {timeSinceBallLastSeen.reset(); timeSinceBallLastSeen.start();}));
+        feederBeamBreakTrigger.onTrue(new InstantCommand(() -> calculateBPS()));
         //boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset(); timeSinceBoostStarted.start();}));
-
     }
 
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
+        SmartDashboard.putNumber("Shooter/BallsPerSecond", (Math.round((100.0 * BallsPerSecond)) / 100.0)); //round to hundredths
         //SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
         SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
         SmartDashboard.putBoolean("Shooter/Boosted", boosted);
@@ -217,6 +222,24 @@ public class Shooter extends SubsystemBase {
             new InstantCommand(() -> setStateSpaceController(0), this),
             new RunCommand (() -> runStateSpaceController(), this)
         );
+    private void calculateBPS() {
+        ballsCount = ballsCount + 1;
+        double currentTime = Timer.getFPGATimestamp();
+        if (earliestBallTime==0) { //if it is not yet set
+            earliestBallTime = currentTime;
+        } 
+        else {
+            lastBallTime = currentTime;
+        }
+        if (earliestBallTime > 0 && lastBallTime > 0) {
+            BallsPerSecond = (ballsCount)/(lastBallTime-earliestBallTime);
+        }
+    }
+
+    public void resetBPS() {
+        ballsCount = 0;
+        earliestBallTime = 0;
+        lastBallTime = 0;
     }
 
     private boolean isBeamBlocked() {
