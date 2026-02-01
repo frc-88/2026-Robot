@@ -18,14 +18,16 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
 
   private final TalonFX intake = new TalonFX(Constants.INTAKE_MAIN, CANBus.roboRIO());
-  private final var supplyCurrent = intake.getSupplyCurrent();
-  private final var motorVoltage = intake.getMotorVoltage();
+  private final var supplyCurrent;
+  private final var motorVoltage;
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
   private DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
 
   public Intake() {
+    supplyCurrent = intake.getSupplyCurrent();
+    motorVoltage = intake.getMotorVoltage();
     configureTalons();
   }
 
