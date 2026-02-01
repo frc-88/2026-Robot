@@ -17,7 +17,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class HopperFeeder extends SubsystemBase {
 
-    private TalonFX feeder = new TalonFX(19, CANBus.roboRIO());
+    private TalonFX feeder = new TalonFX(7, CANBus.roboRIO());  //set to fake ID in order to build
 
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 
