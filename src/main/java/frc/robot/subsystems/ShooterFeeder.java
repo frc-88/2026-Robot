@@ -17,7 +17,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class ShooterFeeder extends SubsystemBase {
 
-    private TalonFX feeder = new TalonFX(18, CANBus.roboRIO());
+    private TalonFX feeder = new TalonFX(19, CANBus.roboRIO());
 
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 

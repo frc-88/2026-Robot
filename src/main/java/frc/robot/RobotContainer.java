@@ -30,8 +30,6 @@ public class RobotContainer {
   private void configureBindings() {
     SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
     SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
-    SmartDashboard.putData("RunShooter", shooter.runShooter());
-    SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
     SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
@@ -40,8 +38,8 @@ public class RobotContainer {
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-    SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
-    SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    SmartDashboard.putData("RunHopper", shooterFeeder.runFeeder().alongWith(spinner.runSpinner()));
+    SmartDashboard.putData("StopHopper", shooterFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
     SmartDashboard.putData("Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
@@ -54,7 +52,7 @@ public class RobotContainer {
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
-    SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+    //SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
   }
 
   public void disabledInit() {
