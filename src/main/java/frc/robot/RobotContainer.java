@@ -7,17 +7,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterFeeder;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Spinner;
 
 public class RobotContainer {
 
-  public HopperFeeder hopperFeeder = new HopperFeeder();
-  public ShooterFeeder shooterFeeder = new ShooterFeeder();
+  public Feeder shooterFeeder = new Feeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
@@ -27,8 +24,6 @@ public class RobotContainer {
   }
   
   private void configureBindings() {
-    SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
-    SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
     SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
     SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
@@ -42,7 +37,6 @@ public class RobotContainer {
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
 
-    hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
