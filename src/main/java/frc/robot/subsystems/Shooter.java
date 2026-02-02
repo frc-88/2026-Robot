@@ -94,7 +94,7 @@ public class Shooter extends SubsystemBase {
         else { // in boost duration
             //double boost = FeedForwardIncrease.getAsDouble() * 
              //   ((increaseDuration.getValue() + increaseDelay.getValue() - timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
-            double boost = FeedForwardIncrease.getAsDouble() * Math.pow(speed.getAsDouble() - shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
+            double boost = FeedForwardIncrease.getAsDouble(); // * Math.pow(speed.getAsDouble() - shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
             shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
             boosted = true;
         } //this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) && (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
