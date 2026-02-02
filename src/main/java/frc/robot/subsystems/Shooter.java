@@ -9,7 +9,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
     private double lastBallTime;
     private double BallsPerSecond;
 
-    private VelocityDutyCycle requestShooter = new VelocityDutyCycle(0.0);
+    private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
     private VoltageOut voltagerequest = new VoltageOut(0);
     public DoublePreferenceConstant shootSpeed = new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
     public DoublePreferenceConstant shootVoltage = new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
@@ -79,10 +79,10 @@ public class Shooter extends SubsystemBase {
         );
 
     // Volts per (radian per second)
-    private static final double kFlywheelKv = 0.01245; // from SysId
+    private static final double kFlywheelKv = 0.1245; // from SysId
 
     // Volts per (radian per second squared)
-    private static final double kFlywheelKa = 0.002243; // from SysId
+    private static final double kFlywheelKa = 0.02243; // from SysId
 
     // The plant holds a state-space model of our flywheel. This system has the following properties:
     //
@@ -132,10 +132,10 @@ public class Shooter extends SubsystemBase {
     private void configureTalons() {
         TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
 
-        shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue(); // SysId 0.014529
+        shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue(); // SysId 0.14529
         shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
         shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue(); // SysId 0.0
-        shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue(); // SysId 0.012450
+        shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue(); // SysId 0.12450
         shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue(); // measured 0.19
         shooterMain.getConfigurator().apply(shooterConfig);
         
