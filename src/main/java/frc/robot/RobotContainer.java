@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Feeder;
@@ -36,6 +38,10 @@ public class RobotContainer {
     SmartDashboard.putData("StopHopper", shooterFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
+    SmartDashboard.putData("Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
 
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
