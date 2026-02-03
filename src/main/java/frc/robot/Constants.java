@@ -28,4 +28,24 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  // Intake
+  public static final int INTAKE_MAIN = 2;
+
+  // Spinner
+  public static final int SPINNER_MAIN = 6;
+
+  // Hopper Feeder
+  public static final int HOPPER_FEEDER_MAIN = 19;
+
+  // Shooter Feeder
+  public static final int FEEDER_MAIN = 18;
+
+  // Shooter
+  public static final int SHOOTER_MAIN = 12;
+  public static final int SHOOTER_FOLLOWER = 3;
+
+  // Drive
+  // See generated/TunerConstants.java
+
 }

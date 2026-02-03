@@ -12,14 +12,18 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -39,9 +43,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
+
   private final Drive drive;
   private final Vision vision;
+  public Feeder shooterFeeder = new Feeder();
+  public Shooter shooter = new Shooter();
+  public Intake intake = new Intake();
+  public Spinner spinner = new Spinner();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -137,25 +145,54 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Configure the button bindings
-    configureButtonBindings();
+    configureSmartDashboardButtons();
+    configureDefaultCommands();
+    configureDriverController();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
+  private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
+    SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
+    SmartDashboard.putData("RunShooter", shooter.runShooter());
+    SmartDashboard.putData("StopShooter", shooter.stopShooter());
+    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("StopIntake", intake.stopIntake());
+    SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+    SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+    SmartDashboard.putData("RunHopper", shooterFeeder.runFeeder().alongWith(spinner.runSpinner()));
+    SmartDashboard.putData(
+        "StopHopper", shooterFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
+    SmartDashboard.putData(
+        "StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData(
+        "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
+  }
+
+  private void configureDefaultCommands() {
+    spinner.setDefaultCommand(spinner.stopSpinner());
+    intake.setDefaultCommand(intake.stopIntake());
+    shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+    // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+  }
 
+  public void disabledInit() {
+    shooter.resetBPS();
+  }
+
+  private void configureDriverController() {
     // Lock to 0° when A button is held
     controller
         .a()
