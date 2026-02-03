@@ -150,7 +150,10 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Shooter/ShooterCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
         SmartDashboard.putNumber("Shooter/BallsPerSecond", (Math.round((100.0 * BallsPerSecond)) / 100.0)); //round to hundredths
         //SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
@@ -170,7 +173,7 @@ public class Shooter extends SubsystemBase {
         else { // in boost duration
             //double boost = FeedForwardIncrease.getAsDouble() * 
              //   ((increaseDuration.getValue() + increaseDelay.getValue() - timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
-            double boost = FeedForwardIncrease.getAsDouble();
+            double boost = FeedForwardIncrease.getAsDouble(); // * Math.pow(speed.getAsDouble() - shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
             shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
             boosted = true;
         } //this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) && (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
