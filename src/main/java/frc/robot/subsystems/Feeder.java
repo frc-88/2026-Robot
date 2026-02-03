@@ -14,7 +14,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
-public class HopperFeeder extends SubsystemBase {
+public class Feeder extends SubsystemBase {
 
   private TalonFX feeder = new TalonFX(Constants.HOPPER_FEEDER_MAIN, CANBus.roboRIO());
 
@@ -26,7 +26,7 @@ public class HopperFeeder extends SubsystemBase {
   private MotionMagicPIDPreferenceConstants feederConfigConstants =
       new MotionMagicPIDPreferenceConstants("FeederMotor");
 
-  public HopperFeeder() {
+  public Feeder() {
     configureTalons();
   }
 
@@ -37,12 +37,15 @@ public class HopperFeeder extends SubsystemBase {
     feederConfig.Slot0.kI = feederConfigConstants.getKI().getValue();
     feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
-    feederConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    feederConfig.MotorOutput.Inverted =
+        InvertedValue.Clockwise_Positive; // inverted for full hopper+shooter test
     feeder.getConfigurator().apply(feederConfig);
   }
 
   public void periodic() {
     SmartDashboard.putNumber("Feeder/FeederVelocity", feeder.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Feeder/FeederVoltage", feeder.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Feeder/FeederCurrent", feeder.getTorqueCurrent().getValueAsDouble());
   }
 
   private void setFeederSpeed(DoubleSupplier speed) {
