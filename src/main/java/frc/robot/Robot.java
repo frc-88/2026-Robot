@@ -25,7 +25,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.disabledInit();
+  }
 
   @Override
   public void disabledPeriodic() {}

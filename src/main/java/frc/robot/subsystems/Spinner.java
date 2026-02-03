@@ -9,34 +9,45 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
+import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class Spinner extends SubsystemBase {
 private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
     private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
-    private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
+    //private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
     private DoublePreferenceConstant spinnerSpeed = new DoublePreferenceConstant("Spinner/SpinnerSpeed", 0.0);
+    
+    private MotionMagicPIDPreferenceConstants spinnerConfigConstants = new MotionMagicPIDPreferenceConstants("SpinnerMotors");
+
 
     public Spinner() {
         configureTalons();
     }
 
+    public void periodic() {
+        SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    }
+
     private void configureTalons() {
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        // config.Slot0.kP = 
-        // config.Slot0.kI = 
-        // config.Slot0.kD = 
-        // config. = 
-        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        spinner.getConfigurator().apply(config);
+        TalonFXConfiguration spinnerConfig = new TalonFXConfiguration();
+        spinnerConfig.Slot0.kP = spinnerConfigConstants.getKP().getValue();
+        spinnerConfig.Slot0.kI = spinnerConfigConstants.getKI().getValue();
+        spinnerConfig.Slot0.kD = spinnerConfigConstants.getKD().getValue();
+        spinnerConfig.Slot0.kV = spinnerConfigConstants.getKV().getValue();
+        spinnerConfig.Slot0.kS = spinnerConfigConstants.getKS().getValue();
+        spinnerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        spinner.getConfigurator().apply(spinnerConfig);
     }
 
     private void setSpinnerSpeed(DoubleSupplier speed) {
-        spinner.setControl(requestcycle.withOutput(speed.getAsDouble()));
+        spinner.setControl(request.withVelocity(speed.getAsDouble()));
     }
 
     private void stopSpinnerMotors() {

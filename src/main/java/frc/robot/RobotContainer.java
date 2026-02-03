@@ -7,17 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterFeeder;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Spinner;
 
 public class RobotContainer {
 
-  public HopperFeeder hopperFeeder = new HopperFeeder();
-  public ShooterFeeder shooterFeeder = new ShooterFeeder();
+  public Feeder shooterFeeder = new Feeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
@@ -27,10 +26,6 @@ public class RobotContainer {
   }
   
   private void configureBindings() {
-    SmartDashboard.putData("RunHopperFeeder", hopperFeeder.runFeeder());
-    SmartDashboard.putData("StopHopperFeeder", hopperFeeder.stopFeeder());
-    SmartDashboard.putData("RunShooter", shooter.runShooter());
-    SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunShooterFeeder", shooterFeeder.runFeeder());
     SmartDashboard.putData("StopShooterFeeder", shooterFeeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
@@ -39,15 +34,24 @@ public class RobotContainer {
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-    SmartDashboard.putData("RunHopper", hopperFeeder.runFeeder().alongWith(spinner.runSpinner()));
-    SmartDashboard.putData("StopHopper", hopperFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    SmartDashboard.putData("RunHopper", shooterFeeder.runFeeder().alongWith(spinner.runSpinner()));
+    SmartDashboard.putData("StopHopper", shooterFeeder.stopFeeder().alongWith(spinner.stopSpinner()));
     SmartDashboard.putData("RunFooter", shooterFeeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", shooterFeeder.stopFeeder().alongWith(shooter.stopShooter()));
-    hopperFeeder.setDefaultCommand(hopperFeeder.stopFeeder());
+    SmartDashboard.putData("Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
+
     shooter.setDefaultCommand(shooter.stopShooter());
     spinner.setDefaultCommand(spinner.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake());
     shooterFeeder.setDefaultCommand(shooterFeeder.stopFeeder());
+    //SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+  }
+
+  public void disabledInit() {
+    shooter.resetBPS();
   }
 
   public Command getAutonomousCommand() {
