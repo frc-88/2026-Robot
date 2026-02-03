@@ -1,4 +1,3 @@
-
 package frc.robot.util.preferenceconstants;
 
 import java.util.LinkedList;
