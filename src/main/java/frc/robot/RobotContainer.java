@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.HopperFeeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -21,6 +22,7 @@ public class RobotContainer {
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
+  public Climber climber = new Climber();
 
   public RobotContainer() {
     configureBindings();
