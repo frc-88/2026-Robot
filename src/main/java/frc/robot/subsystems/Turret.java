@@ -4,51 +4,56 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.ErrorCode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
-import com.ctre.phoenix.sensors.MagnetFieldStrength;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.RobotContainer;
-import frc.robot.util.NumberCache;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIO.GyroIOInputs;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
-import frc.robot.util.preferenceconstants.PIDPreferenceConstants;
+import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
-/**
- * a green glowing eye
- * rises up and lights the way
- * turn towards the light
- **/
-
+/** insert new haiku here */
 public class Turret extends SubsystemBase {
-  private TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, "1");
-  private CANCoder m_cancoder = new CANCoder(Constants.TURRET_CANCODER_ID, "1");
+  private TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());
+  private CANcoder m_cancoder = new CANcoder(Constants.TURRET_CANCODER_ID, CANBus.roboRIO());
 
-  private Sensors m_sensors;
+  private GyroIO m_gyro;
+
+  private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(null);
+  private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
+  private VoltageOut voltageReq = new VoltageOut(0);
 
   // Preferences
-  private DoublePreferenceConstant p_zeroPosition = new DoublePreferenceConstant("Turret Zero", 0.0);
-  private DoublePreferenceConstant p_limitBuffer = new DoublePreferenceConstant("Turret Limit Buffer", 0.0);
-  private DoublePreferenceConstant p_syncThreshold = new DoublePreferenceConstant("Turret Sync Threshold", 0.0);
-  private PIDPreferenceConstants p_turretPID = new PIDPreferenceConstants("Turret PID", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-  private DoublePreferenceConstant p_maxVelocity = new DoublePreferenceConstant("Turret Max Velocity", 0);
-  private DoublePreferenceConstant p_maxAcceleration = new DoublePreferenceConstant("Turret Max Acceleration", 0);
-  private DoublePreferenceConstant p_nominalForward = new DoublePreferenceConstant("Turret Nominal Forward", 0.0);
-  private DoublePreferenceConstant p_nominalReverse = new DoublePreferenceConstant("Turret Nominal Reverse", 0.0);
-  private DoublePreferenceConstant p_forwardLimit = new DoublePreferenceConstant("Turret Forward Limit", 0.0);
-  private DoublePreferenceConstant p_reverseLimit = new DoublePreferenceConstant("Turret Reverse Limit", 0.0);
+  private DoublePreferenceConstant p_zeroPosition =
+      new DoublePreferenceConstant("Turret Zero", 0.0);
+  private DoublePreferenceConstant p_limitBuffer =
+      new DoublePreferenceConstant("Turret Limit Buffer", 0.0);
+  private DoublePreferenceConstant p_syncThreshold =
+      new DoublePreferenceConstant("Turret Sync Threshold", 0.0);
+  private MotionMagicPIDPreferenceConstants p_turretPID =
+      new MotionMagicPIDPreferenceConstants("Turret PID", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  private DoublePreferenceConstant p_maxVelocity =
+      new DoublePreferenceConstant("Turret Max Velocity", 0);
+  private DoublePreferenceConstant p_maxAcceleration =
+      new DoublePreferenceConstant("Turret Max Acceleration", 0);
+  private DoublePreferenceConstant p_nominalForward =
+      new DoublePreferenceConstant("Turret Nominal Forward", 0.0);
+  private DoublePreferenceConstant p_nominalReverse =
+      new DoublePreferenceConstant("Turret Nominal Reverse", 0.0);
+  private DoublePreferenceConstant p_forwardLimit =
+      new DoublePreferenceConstant("Turret Forward Limit", 0.0);
+  private DoublePreferenceConstant p_reverseLimit =
+      new DoublePreferenceConstant("Turret Reverse Limit", 0.0);
 
   //
   private boolean m_tracking = false;
@@ -60,68 +65,56 @@ public class Turret extends SubsystemBase {
   private double m_target = 0;
 
   /** Creates a new Turret. */
-  public Turret(Sensors sensors) {
-    m_sensors = sensors;
+  public Turret(GyroIO gyro) {
+    m_gyro = gyro;
 
-    configureFalcon();
+    configureMotors();
     configureCANCoder();
 
-    p_turretPID.addChangeHandler((Double unused) -> configureFalcon());
-    p_maxVelocity.addChangeHandler((Double unused) -> configureFalcon());
-    p_maxAcceleration.addChangeHandler((Double unused) -> configureFalcon());
-    p_nominalForward.addChangeHandler((Double unused) -> configureFalcon());
-    p_nominalReverse.addChangeHandler((Double unused) -> configureFalcon());
-    p_forwardLimit.addChangeHandler((Double unused) -> configureFalcon());
-    p_reverseLimit.addChangeHandler((Double unused) -> configureFalcon());
+    p_turretPID.addChangeHandler((Double unused) -> configureMotors());
+    p_maxVelocity.addChangeHandler((Double unused) -> configureMotors());
+    p_maxAcceleration.addChangeHandler((Double unused) -> configureMotors());
+    p_nominalForward.addChangeHandler((Double unused) -> configureMotors());
+    p_nominalReverse.addChangeHandler((Double unused) -> configureMotors());
+    p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
+    p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
 
     // initialize Falcon to correct position when we wake up based on CANcoder absolute position
     sync();
   }
 
-  private void configureFalcon() {
+  private void configureMotors() {
     // configure TalonFX
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
-    config.motionCruiseVelocity = p_maxVelocity.getValue();
-    config.motionAcceleration = p_maxAcceleration.getValue();
-    config.slot0.kP = p_turretPID.getKP().getValue();
-    config.slot0.kI = p_turretPID.getKI().getValue();
-    config.slot0.kD = p_turretPID.getKD().getValue();
-    config.slot0.kF = p_turretPID.getKF().getValue();
-    config.slot0.integralZone = p_turretPID.getIZone().getValue();
-    config.slot0.maxIntegralAccumulator = p_turretPID.getIMax().getValue();
-    config.forwardSoftLimitThreshold = turretFacingToEncoderPosition(p_forwardLimit.getValue());
-    config.forwardSoftLimitEnable = true;
-    config.reverseSoftLimitThreshold = turretFacingToEncoderPosition(p_reverseLimit.getValue());
-    config.reverseSoftLimitEnable = true;
-    config.peakOutputForward = 1.0;
-    config.peakOutputReverse = -1.0;
-    config.nominalOutputForward = p_nominalForward.getValue();
-    config.nominalOutputReverse = p_nominalReverse.getValue();
-    config.neutralDeadband = 0.001;
-    m_turret.configAllSettings(config);
+    config.MotionMagic.MotionMagicCruiseVelocity = p_turretPID.getMaxVelocity().getValue();
+    config.MotionMagic.MotionMagicAcceleration = p_turretPID.getMaxAcceleration().getValue();
+    config.Slot0.kP = p_turretPID.getKP().getValue();
+    config.Slot0.kI = p_turretPID.getKI().getValue();
+    config.Slot0.kD = p_turretPID.getKD().getValue();
+    config.Slot0.kV = p_turretPID.getKV().getValue();
+    config.Slot0.kS = p_turretPID.getKS().getValue();
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        turretFacingToEncoderPosition(p_forwardLimit.getValue());
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        turretFacingToEncoderPosition(p_reverseLimit.getValue());
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+    m_turret.getConfigurator().apply(config);
   }
 
   private void configureCANCoder() {
-    CANCoderConfiguration encConfig = new CANCoderConfiguration();
-    encConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
-    encConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
-    // Other configuration options, with defaults noted
-    // velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_100Ms
-    // velocityMeasurementWindow = 64
-    // magnetOffsetDegrees = 0
-    // sensorDirection = false
-    // sensorCoefficient = 360.0 / 4096.0
-    // unitString = "deg"
-    // sensorTimeBase = SensorTimeBase.PerSecond
-    m_cancoder.configAllSettings(encConfig);
+    CANcoderConfiguration config = new CANcoderConfiguration();
+
+    m_cancoder.getConfigurator().apply(config);
   }
 
   public void sync() {
     if (isEncoderConnected()) {
-        m_turret.setSelectedSensorPosition(cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition()));
+      m_turret.setPosition(
+          cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble()));
     } else {
-      m_turret.setSelectedSensorPosition(0.0);
+      m_turret.setPosition(0.0);
     }
   }
 
@@ -130,22 +123,24 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    p_zeroPosition.setValue(m_cancoder.getAbsolutePosition());
+    p_zeroPosition.setValue(m_cancoder.getAbsolutePosition().getValueAsDouble());
     sync();
   }
 
   public boolean isEncoderConnected() {
-    if (m_cancoder.getLastError() == ErrorCode.SensorNotPresent
-            || m_cancoder.getMagnetFieldStrength() == MagnetFieldStrength.BadRange_RedLED
-            || m_cancoder.getMagnetFieldStrength() == MagnetFieldStrength.Invalid_Unknown
-            || Robot.isSimulation()) {
-        return false;
-    } 
+    if (m_cancoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Red
+        || m_cancoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Invalid) {
+      return false;
+    }
     return true;
   }
 
-  public void setPercentOutput(double percentOutput) {
-    m_turret.set(TalonFXControlMode.PercentOutput, percentOutput);
+  public void setDutyCycle(double dutyCycle) {
+    m_turret.setControl(dutyCycleReq.withOutput(dutyCycle));
+  }
+
+  public void setVoltage(double voltage) {
+    m_turret.setControl(voltageReq.withOutput(voltage));
   }
 
   public void goToFacing(double target) {
@@ -189,7 +184,8 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean notMoving() {
-    return Math.abs(turretEncoderPositionToFacing(m_turret.getSelectedSensorVelocity()) * 10.) < 45.;
+    return Math.abs(turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble()) * 10.)
+        < 45.;
   }
 
   public double getTarget() {
@@ -199,7 +195,7 @@ public class Turret extends SubsystemBase {
   private double calcCircumnavigationTarget(double origin) {
     double target;
 
-    if(origin > 0.0) { 
+    if (origin > 0.0) {
       target = origin - 360.0;
     } else {
       target = origin + 360.0;
@@ -217,11 +213,15 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isSynchronized() {
-    return Math.abs(getFacing() -
-    turretEncoderPositionToFacing(cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition()))) < p_syncThreshold.getValue();
+    return Math.abs(
+            getFacing()
+                - turretEncoderPositionToFacing(
+                    cancoderPostionToFalconPosition(
+                        m_cancoder.getAbsolutePosition().getValueAsDouble())))
+        < p_syncThreshold.getValue();
   }
 
-  public void setNeutralMode(NeutralMode mode) {
+  public void setNeutralMode(NeutralModeValue mode) {
     m_turret.setNeutralMode(mode);
   }
 
@@ -242,23 +242,32 @@ public class Turret extends SubsystemBase {
   }
 
   private double getPosition() {
-    if (NumberCache.hasValue("Turret Position")) {
-      return NumberCache.getValue("Turret Position");
-    }
-    return NumberCache.pushValue("Turret Position", m_turret.getSelectedSensorPosition());
+    return m_turret.getPosition().getValueAsDouble();
   }
 
   private void goToPosition(double position, boolean spinCompensation) {
     if (spinCompensation) {
-      m_turret.set(TalonFXControlMode.MotionMagic, position, DemandType.ArbitraryFeedForward, 5*0.1*p_turretPID.getKF().getValue()*turretFacingToEncoderPosition(m_sensors.navx.getYawRate())/1023.);
+      GyroIOInputs gyroInputs = new GyroIOInputs();
+      m_gyro.updateInputs(gyroInputs);
+      m_turret.setControl(
+          motionMagicReq
+              .withPosition(position)
+              .withFeedForward(
+                  5
+                      * 0.1
+                      * p_turretPID.getKV().getValue()
+                      * turretFacingToEncoderPosition(gyroInputs.yawVelocityRadPerSec)
+                      / 1023.0));
     } else {
-      m_turret.set(TalonFXControlMode.MotionMagic, position, DemandType.ArbitraryFeedForward, 0);
+      m_turret.setControl(motionMagicReq.withPosition(position));
     }
   }
 
   private boolean isPositionSafe(double position) {
-    return (position < turretFacingToEncoderPosition(p_forwardLimit.getValue() - p_limitBuffer.getValue())) &&
-        (position > turretFacingToEncoderPosition(p_reverseLimit.getValue() + p_limitBuffer.getValue()));
+    return (position
+            < turretFacingToEncoderPosition(p_forwardLimit.getValue() - p_limitBuffer.getValue()))
+        && (position
+            > turretFacingToEncoderPosition(p_reverseLimit.getValue() + p_limitBuffer.getValue()));
   }
 
   private double cancoderPostionToFalconPosition(double position) {
@@ -267,8 +276,8 @@ public class Turret extends SubsystemBase {
     // if (normalPosition > 180) { normalPosition -= 360; }
     // if (normalPosition < -180) { normalPosition += 360; }
 
-    return turretFacingToEncoderPosition(normalPosition *
-    (Constants.TURRET_CANCODER_GEAR_RATIO/Constants.TURRET_GEAR_RATIO));
+    return turretFacingToEncoderPosition(
+        normalPosition * (Constants.TURRET_CANCODER_GEAR_RATIO / Constants.TURRET_GEAR_RATIO));
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
@@ -281,13 +290,14 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (!RobotContainer.isPublishingEnabled()) {
-      return;
-    }
-
-    SmartDashboard.putNumber("Turret:CANCoder Absolute", m_cancoder.getAbsolutePosition());
-    SmartDashboard.putNumber("Turret:CANCoder Position", m_cancoder.getPosition());
-    SmartDashboard.putNumber("Turret:CANCoder Turret Facing",  turretEncoderPositionToFacing(cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition())));
+    SmartDashboard.putNumber(
+        "Turret:CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Turret:CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Turret:CANCoder Turret Facing",
+        turretEncoderPositionToFacing(
+            cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble())));
     SmartDashboard.putNumber("Turret:Position", getPosition());
     SmartDashboard.putNumber("Turret:Facing", getFacing());
     SmartDashboard.putBoolean("Turret:Synchonized", isSynchronized());
