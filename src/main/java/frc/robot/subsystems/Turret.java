@@ -35,36 +35,24 @@ public class Turret extends SubsystemBase {
 
   // Preferences
   private DoublePreferenceConstant p_zeroPosition =
-      new DoublePreferenceConstant("Turret Zero", 0.0);
+      new DoublePreferenceConstant("Turret/Zero", 0.0);
   private DoublePreferenceConstant p_limitBuffer =
-      new DoublePreferenceConstant("Turret Limit Buffer", 0.0);
+      new DoublePreferenceConstant("Turret/Limit Buffer", 0.0);
   private DoublePreferenceConstant p_syncThreshold =
-      new DoublePreferenceConstant("Turret Sync Threshold", 0.0);
+      new DoublePreferenceConstant("Turret/Sync Threshold", 0.0);
   private MotionMagicPIDPreferenceConstants p_turretPID =
-      new MotionMagicPIDPreferenceConstants("Turret PID", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-  private DoublePreferenceConstant p_maxVelocity =
-      new DoublePreferenceConstant("Turret Max Velocity", 0);
-  private DoublePreferenceConstant p_maxAcceleration =
-      new DoublePreferenceConstant("Turret Max Acceleration", 0);
-  private DoublePreferenceConstant p_nominalForward =
-      new DoublePreferenceConstant("Turret Nominal Forward", 0.0);
-  private DoublePreferenceConstant p_nominalReverse =
-      new DoublePreferenceConstant("Turret Nominal Reverse", 0.0);
+      new MotionMagicPIDPreferenceConstants("Turret/PID", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   private DoublePreferenceConstant p_forwardLimit =
-      new DoublePreferenceConstant("Turret Forward Limit", 0.0);
+      new DoublePreferenceConstant("Turret/Forward Limit", 0.0);
   private DoublePreferenceConstant p_reverseLimit =
-      new DoublePreferenceConstant("Turret Reverse Limit", 0.0);
+      new DoublePreferenceConstant("Turret/Reverse Limit", 0.0);
 
-  //
   private boolean m_tracking = false;
   private boolean m_circumnavigating = false;
   private double m_circumnavigationTarget;
-
   private double m_defaultFacing = 0.;
-  private boolean m_hasTarget = true;
   private double m_target = 0;
 
-  /** Creates a new Turret. */
   public Turret(GyroIO gyro) {
     m_gyro = gyro;
 
@@ -72,10 +60,6 @@ public class Turret extends SubsystemBase {
     configureCANCoder();
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
-    p_maxVelocity.addChangeHandler((Double unused) -> configureMotors());
-    p_maxAcceleration.addChangeHandler((Double unused) -> configureMotors());
-    p_nominalForward.addChangeHandler((Double unused) -> configureMotors());
-    p_nominalReverse.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
     p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
 
@@ -84,7 +68,6 @@ public class Turret extends SubsystemBase {
   }
 
   private void configureMotors() {
-    // configure TalonFX
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.MotionMagic.MotionMagicCruiseVelocity = p_turretPID.getMaxVelocity().getValue();
     config.MotionMagic.MotionMagicAcceleration = p_turretPID.getMaxAcceleration().getValue();
@@ -291,21 +274,17 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber(
-        "Turret:CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
+        "Turret/CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
     SmartDashboard.putNumber(
-        "Turret:CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
+        "Turret/CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
     SmartDashboard.putNumber(
-        "Turret:CANCoder Turret Facing",
+        "Turret/CANCoder Turret Facing",
         turretEncoderPositionToFacing(
             cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble())));
-    SmartDashboard.putNumber("Turret:Position", getPosition());
-    SmartDashboard.putNumber("Turret:Facing", getFacing());
-    SmartDashboard.putBoolean("Turret:Synchonized", isSynchronized());
-    SmartDashboard.putBoolean("Turret:Tracking", isTracking());
-    SmartDashboard.putBoolean("Turret:Safe", isPositionSafe(getPosition()));
-  }
-
-  public void setHasTarget(boolean hasTarget) {
-    m_hasTarget = true;
+    SmartDashboard.putNumber("Turret/Position", getPosition());
+    SmartDashboard.putNumber("Turret/Facing", getFacing());
+    SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
+    SmartDashboard.putBoolean("Turret/Tracking", isTracking());
+    SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
   }
 }
