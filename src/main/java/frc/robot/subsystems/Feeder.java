@@ -16,7 +16,7 @@ import java.util.function.DoubleSupplier;
 
 public class Feeder extends SubsystemBase {
 
-  private TalonFX feeder = new TalonFX(Constants.HOPPER_FEEDER_MAIN, CANBus.roboRIO());
+  private TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
 
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
 
@@ -38,7 +38,7 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
     feederConfig.MotorOutput.Inverted =
-        InvertedValue.Clockwise_Positive; // inverted for full hopper+shooter test
+        InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test; counterclockwise + for shooter
     feeder.getConfigurator().apply(feederConfig);
   }
 

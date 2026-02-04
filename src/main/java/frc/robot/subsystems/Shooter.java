@@ -35,8 +35,9 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
-  private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); // forward +
-  private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); // forward -
+  private TalonFX shooterMain = new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
+  private TalonFX shooterFollower =
+      new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
   private DigitalInput feederBeamBreak = new DigitalInput(0);
   private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
   private boolean boosted = false;
