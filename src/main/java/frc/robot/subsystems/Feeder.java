@@ -22,16 +22,8 @@ import java.util.function.DoubleSupplier;
 
 public class Feeder extends SubsystemBase {
 
-  private TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
-
-  private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
-
-  private DoublePreferenceConstant feedSpeed =
-      new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
-
-  private MotionMagicPIDPreferenceConstants feederConfigConstants =
-      new MotionMagicPIDPreferenceConstants("FeederMotor");
-
+  private final TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
+  private final VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -42,6 +34,11 @@ public class Feeder extends SubsystemBase {
               // Log state with Phoenix SignalLogger class
               (state) -> SignalLogger.writeString("state", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
+
+  private final DoublePreferenceConstant feedSpeed =
+      new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
+  private final MotionMagicPIDPreferenceConstants feederConfigConstants =
+      new MotionMagicPIDPreferenceConstants("Feeder/MotorPID");
 
   public Feeder() {
     configureTalons();
