@@ -1,4 +1,3 @@
-
 package frc.robot.util.preferenceconstants;
 
 /** Represents a constant which knows how to update it's own value. */
