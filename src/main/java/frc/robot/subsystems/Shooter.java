@@ -184,8 +184,8 @@ public class Shooter extends SubsystemBase {
     if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
       shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
       boosted = false;
-    } else if ((timeSinceBallLastSeen.get() >= (increaseDuration.getValue() + Delay.getAsDouble()))
-        || (timeSinceBallLastSeen.get() <= Delay.getAsDouble())) {
+    } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
+        || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
       shooterMain.setControl(
           requestShooter
               .withVelocity(speed.getAsDouble())
