@@ -7,6 +7,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.Voltage;
@@ -23,7 +24,7 @@ import java.util.function.DoubleSupplier;
 public class Feeder extends SubsystemBase {
 
   private final TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
-  private final VelocityDutyCycle request = new VelocityDutyCycle(0.0);
+  private final VelocityVoltage request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -35,7 +36,7 @@ public class Feeder extends SubsystemBase {
               (state) -> SignalLogger.writeString("state", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
-  private final DoublePreferenceConstant feedSpeed =
+  private DoublePreferenceConstant feedSpeed =
       new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
   private final MotionMagicPIDPreferenceConstants feederConfigConstants =
       new MotionMagicPIDPreferenceConstants("Feeder/MotorPID");
@@ -56,6 +57,8 @@ public class Feeder extends SubsystemBase {
         InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test;
     // counterclockwise + for shooter
     feeder.getConfigurator().apply(feederConfig);
+
+    feeder.getVelocity().setUpdateFrequency(100);
   }
 
   public void periodic() {
