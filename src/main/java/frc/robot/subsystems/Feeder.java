@@ -38,7 +38,8 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
     feederConfig.MotorOutput.Inverted =
-        InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test; counterclockwise + for shooter
+        InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test;
+    // counterclockwise + for shooter
     feeder.getConfigurator().apply(feederConfig);
   }
 
