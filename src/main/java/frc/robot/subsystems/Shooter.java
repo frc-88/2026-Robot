@@ -35,8 +35,9 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
-  private TalonFX shooterMain = new TalonFX(12, CANBus.roboRIO()); // forward +
-  private TalonFX shooterFollower = new TalonFX(3, CANBus.roboRIO()); // forward -
+  private TalonFX shooterMain = new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
+  private TalonFX shooterFollower =
+      new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
   private DigitalInput feederBeamBreak = new DigitalInput(0);
   private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
   private boolean boosted = false;
@@ -150,6 +151,7 @@ public class Shooter extends SubsystemBase {
     feederBeamBreakTrigger.onTrue(new InstantCommand(() -> calculateBPS()));
     // boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset();
     // timeSinceBoostStarted.start();}));
+    shooterMain.getVelocity().setUpdateFrequency(100);
   }
 
   public void periodic() {
@@ -174,13 +176,16 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Boosted", boosted);
   }
 
-  private void setShooterSpeed(DoubleSupplier speed, DoubleSupplier FeedForwardIncrease) {
+  private void setShooterSpeed(
+      DoubleSupplier speed,
+      DoubleSupplier FeedForwardIncrease,
+      DoubleSupplier Delay,
+      DoubleSupplier Duration) {
     if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
       shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
       boosted = false;
-    } else if ((timeSinceBallLastSeen.get()
-            >= (increaseDuration.getValue() + increaseDelay.getValue()))
-        || (timeSinceBallLastSeen.get() <= increaseDelay.getValue())) {
+    } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
+        || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
       shooterMain.setControl(
           requestShooter
               .withVelocity(speed.getAsDouble())
@@ -190,7 +195,13 @@ public class Shooter extends SubsystemBase {
       // double boost = FeedForwardIncrease.getAsDouble() *
       //   ((increaseDuration.getValue() + increaseDelay.getValue() -
       // timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
-      double boost = FeedForwardIncrease.getAsDouble(); // * Math.pow(speed.getAsDouble() -
+      double boost =
+          FeedForwardIncrease.getAsDouble()
+              / 3
+              * (speed.getAsDouble()
+                  - shooterMain
+                      .getVelocity()
+                      .getValueAsDouble()); // * Math.pow(speed.getAsDouble() -
       // shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
       shooterMain.setControl(
           requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
@@ -270,7 +281,12 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooter() {
     return new RunCommand(
-        () -> setShooterSpeed(() -> shootSpeed.getValue(), () -> increaseFeedForward.getValue()),
+        () ->
+            setShooterSpeed(
+                () -> shootSpeed.getValue(),
+                () -> increaseFeedForward.getValue(),
+                () -> increaseDelay.getValue(),
+                () -> increaseDuration.getValue()),
         this);
   }
 
