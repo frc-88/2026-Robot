@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,7 +18,7 @@ public class Feeder extends SubsystemBase {
 
   private TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
 
-  private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
+  private VelocityVoltage request = new VelocityVoltage(0.0);
 
   private DoublePreferenceConstant feedSpeed =
       new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
@@ -37,10 +37,13 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kI = feederConfigConstants.getKI().getValue();
     feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
+    feederConfig.Slot0.kS = feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted =
         InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test;
     // counterclockwise + for shooter
     feeder.getConfigurator().apply(feederConfig);
+
+    feeder.getVelocity().setUpdateFrequency(100);
   }
 
   public void periodic() {
