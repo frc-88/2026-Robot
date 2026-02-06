@@ -44,7 +44,6 @@ import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -170,7 +169,7 @@ public class Drive extends SubsystemBase {
 
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      if(Util.logif()) { 
+      if (Util.logif()) {
         Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
         Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
       }
@@ -224,7 +223,7 @@ public class Drive extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
-    if(Util.logif()) {
+    if (Util.logif()) {
       Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
       Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
     }
@@ -235,7 +234,7 @@ public class Drive extends SubsystemBase {
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
-    if(Util.logif()) {
+    if (Util.logif()) {
       Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
   }

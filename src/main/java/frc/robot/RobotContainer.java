@@ -26,9 +26,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.Util;
-
-import java.nio.charset.UnmappableCharacterException;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -49,7 +46,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    if(!Util.logif()) {
+    if (!Util.logif()) {
       Unmanaged.setPhoenixDiagnosticsStartTime(-1);
     }
     switch (Constants.currentMode) {

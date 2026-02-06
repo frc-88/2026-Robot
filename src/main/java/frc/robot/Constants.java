@@ -37,6 +37,6 @@ public class Constants {
   }
 
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
-  //TODO Replace this
+  // TODO Replace this
   public static Pose3d HUB_POSE = Pose3d.kZero;
 }

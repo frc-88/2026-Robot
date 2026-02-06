@@ -60,7 +60,10 @@ public class Batman extends SubsystemBase {
       if (poses.length > 0) {
         currentPose = poses[poses.length - 1].questPose3d();
         lastPose = currentPose;
+
       }
     }
+    
+
   }
 }
