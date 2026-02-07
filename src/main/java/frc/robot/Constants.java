@@ -45,6 +45,11 @@ public final class Constants {
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
 
+  // Climber
+  public static final int CLIMBER_LIFT = 42;
+  public static final int CLIMBER_PIVOT = 43;
+  public static final int CLIMBER_CANRANGE = 8;
+
   // Drive
   // See generated/TunerConstants.java
 
