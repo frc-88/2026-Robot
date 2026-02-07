@@ -43,7 +43,7 @@ public final class Constants {
 
   // Shooter
   public static final int SHOOTER_MAIN = 12;
-  public static final int SHOOTER_FOLLOWER = 3;
+  public static final int SHOOTER_FOLLOWER = 5;
 
   // Drive
   // See generated/TunerConstants.java
