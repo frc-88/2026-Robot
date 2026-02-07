@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -78,6 +79,7 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     configureTalons();
+    configureSmartDashboardButtons();
   }
 
   private void configureTalons() {
@@ -117,6 +119,19 @@ public class Shooter extends SubsystemBase {
     // boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset();
     // timeSinceBoostStarted.start();}));
     shooterMain.getVelocity().setUpdateFrequency(100);
+  }
+
+  private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("Shooter/RunShooter", runShooter());
+    SmartDashboard.putData("Shooter/StopShooter", stopShooter());
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData(
+        "Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   public void periodic() {
