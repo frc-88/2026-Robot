@@ -28,39 +28,32 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
-  private CANrange canRange = new CANrange(Constants.SHOOTER_CANRANGE);
-  private TalonFX shooterMain = new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
-  private TalonFX shooterFollower =
+  private final TalonFX shooterMain =
+      new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
+  private final TalonFX shooterFollower =
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
-  private DigitalInput feederBeamBreak = new DigitalInput(0);
-  private Trigger feederBeamBreakTrigger = new Trigger(() -> canRange.getIsDetected().getValue());
-  private boolean boosted = false;
-  // private Trigger boostStarted = new Trigger(() -> boosted);
-  private Timer timeSinceBallLastSeen = new Timer();
-  // private Timer timeSinceBoostStarted = new Timer();
+  private CANrange canRange = new CANrange(Constants.SHOOTER_CANRANGE);
+  private final DigitalInput feederBeamBreak = new DigitalInput(0);
+  private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
+  private final Timer timeSinceBallLastSeen = new Timer();
 
-  private int ballsCount;
-  private double earliestBallTime = 0;
-  private double lastBallTime;
-  private double BallsPerSecond;
+  private final VelocityVoltage requestShooter = new VelocityVoltage(0.0);
+  private final VoltageOut voltagerequest = new VoltageOut(0);
+  private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
-  private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
-  private VoltageOut voltagerequest = new VoltageOut(0);
-  public DoublePreferenceConstant shootSpeed =
+  private final DoublePreferenceConstant shootSpeed =
       new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
-  public DoublePreferenceConstant shootVoltage =
+  private final DoublePreferenceConstant shootVoltage =
       new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
-  public DoublePreferenceConstant increaseDuration =
+  private final DoublePreferenceConstant increaseDuration =
       new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.0);
-  public DoublePreferenceConstant increaseDelay =
+  private final DoublePreferenceConstant increaseDelay =
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
-  public DoublePreferenceConstant increaseFeedForward =
+  private final DoublePreferenceConstant increaseFeedForward =
       new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
-
-  private MotionMagicPIDPreferenceConstants shooterConfigConstants =
+  private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants("ShooterMotors");
 
-  private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -70,6 +63,12 @@ public class Shooter extends SubsystemBase {
               // Log state with Phoenix SignalLogger class
               (state) -> SignalLogger.writeString("state", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
+
+  private boolean boosted = false;
+  private int ballsCount;
+  private double earliestBallTime = 0;
+  private double lastBallTime;
+  private double ballsPerSecond;
 
   public Shooter() {
     configureTalons();
@@ -84,7 +83,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
     shooterMain.getConfigurator().apply(shooterConfig);
-    // shooterFollower.getConfigurator().apply(shooterConfig);
+
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     timeSinceBallLastSeen.reset();
@@ -123,7 +122,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
     SmartDashboard.putNumber(
         "Shooter/BallsPerSecond",
-        (Math.round((100.0 * BallsPerSecond)) / 100.0)); // round to hundredths
+        (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
     // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
     SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
     SmartDashboard.putBoolean("Shooter/Boosted", boosted);
@@ -184,7 +183,6 @@ public class Shooter extends SubsystemBase {
 
   private void stopShooterMotors() {
     shooterMain.stopMotor();
-    // shooterFollower.stopMotor();
   }
 
   private void calculateBPS() {
@@ -196,7 +194,7 @@ public class Shooter extends SubsystemBase {
       lastBallTime = currentTime;
     }
     if (earliestBallTime > 0 && lastBallTime > 0) {
-      BallsPerSecond = (ballsCount) / (lastBallTime - earliestBallTime);
+      ballsPerSecond = (ballsCount) / (lastBallTime - earliestBallTime);
     }
   }
 
