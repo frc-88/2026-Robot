@@ -42,7 +42,7 @@ public class Intake extends SubsystemBase {
     intakeConfig.Slot0.kP = intakeConfigConstants.getKP().getValue();
     intakeConfig.Slot0.kI = intakeConfigConstants.getKI().getValue();
     intakeConfig.Slot0.kD = intakeConfigConstants.getKD().getValue();
-    intakeConfig.Slot0.kV = intakeConfigConstants.getKV().getValue();
+    intakeConfig.Slot0.kV = intakeConfigConstants.getKV().getValue(); //0.125
     intakeConfig.Slot0.kS = intakeConfigConstants.getKS().getValue();
     intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     intakeRoller.getConfigurator().apply(intakeConfig);
