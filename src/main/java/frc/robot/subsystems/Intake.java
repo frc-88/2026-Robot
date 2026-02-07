@@ -49,7 +49,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void setSpeed(DoubleSupplier speed) {
-    intakeRoller.setControl(request.withVelocity(speed.getAsDouble()));
+    intakeRoller.setControl(request.withVelocity(speed.getAsDouble()).withUpdateFreqHz(1000.0));
   }
 
   private void stopMotors() {
