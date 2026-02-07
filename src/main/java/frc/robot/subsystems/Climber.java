@@ -104,8 +104,16 @@ public class Climber extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("caNrange", f.calculate(canRange.getDistance().getValueAsDouble()));
-    SmartDashboard.putBoolean("caNrangeDetected", isDetected());
+    SmartDashboard.putNumber("Climber/CANrange/Distance", f.calculate(canRange.getDistance().getValueAsDouble()));
+    SmartDashboard.putBoolean("Climber/CANrange/Detected", isDetected());
+    SmartDashboard.putNumber("Climber/Lift/Position", lift.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Lift/Velocity", lift.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Lift/Voltage", lift.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Lift/Current", lift.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Pivot/Position", pivot.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Pivot/Velocity", pivot.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Pivot/Voltage", pivot.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
   }
 
   public Command liftGoto(double position) {
