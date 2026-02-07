@@ -45,6 +45,7 @@ public final class Constants {
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
   public static final int HOOD = 0;
+  public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Drive
   // See generated/TunerConstants.java

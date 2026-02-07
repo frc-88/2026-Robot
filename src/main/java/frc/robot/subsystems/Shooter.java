@@ -47,6 +47,7 @@ public class Shooter extends SubsystemBase {
   private double ballsPerSecond;
 
   // Shooter
+  private double targetVelocity = 0;
   private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
   public DoublePreferenceConstant shootSpeed =
       new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
@@ -61,6 +62,7 @@ public class Shooter extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("ShooterMotors");
 
   // Hood
+  private double targetAngle = 0;
   private MotionMagicVoltage hoodRequest = new MotionMagicVoltage(0.0);
   private MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("HoodMotor");
@@ -128,10 +130,8 @@ public class Shooter extends SubsystemBase {
         "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
     SmartDashboard.putData(
         "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData(
-        "Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData(
-        "Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   public void periodic() {
@@ -156,11 +156,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Boosted", boosted);
   }
 
-  private void setShooterSpeed(
-      DoubleSupplier speed,
-      DoubleSupplier FeedForwardIncrease,
-      DoubleSupplier Delay,
-      DoubleSupplier Duration) {
+  private void setShooterSpeed(DoubleSupplier speed) {
     if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
       shooterMain.setControl(
           requestShooter
@@ -168,8 +164,9 @@ public class Shooter extends SubsystemBase {
               .withFeedForward(0.0)
               .withUpdateFreqHz(1000.0));
       boosted = false;
-    } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
-        || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
+    } else if ((timeSinceBallLastSeen.get()
+            > (increaseDuration.getValue() + increaseDelay.getValue()))
+        || (timeSinceBallLastSeen.get() < increaseDelay.getValue())) {
       shooterMain.setControl(
           requestShooter
               .withVelocity(speed.getAsDouble())
@@ -181,8 +178,7 @@ public class Shooter extends SubsystemBase {
       //   ((increaseDuration.getValue() + increaseDelay.getValue() -
       // timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
       double boost =
-          FeedForwardIncrease.getAsDouble()
-              / 3
+          increaseFeedForward.getValue()
               * (speed.getAsDouble()
                   - shooterMain
                       .getVelocity()
@@ -202,10 +198,15 @@ public class Shooter extends SubsystemBase {
     shooterMain.setControl(m_voltReq.withOutput(volts));
   }
 
-  private void stopShooterMotors() {
-    shooterMain.stopMotor();
+  private void setShooterSpeed() {
+    setShooterSpeed(() -> targetVelocity);
   }
 
+  private void setHoodPosition() {
+    hood.setControl(hoodRequest.withPosition(targetAngle / Constants.HOOD_DEGREES_PER_ROTATION));
+  }
+
+  // This should eventually be moved to utils in base or something
   private void calculateBPS() {
     ballsCount = ballsCount + 1;
     double currentTime = Timer.getFPGATimestamp();
@@ -230,18 +231,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runShooter() {
-    return new RunCommand(
-        () ->
-            setShooterSpeed(
-                () -> shootSpeed.getValue(),
-                () -> increaseFeedForward.getValue(),
-                () -> increaseDelay.getValue(),
-                () -> increaseDuration.getValue()),
-        this);
+    return setVelocity(shootSpeed.getValue());
   }
 
   public Command stopShooter() {
-    return new RunCommand(() -> stopShooterMotors(), this);
+    return setVelocity(0.0);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -250,5 +244,22 @@ public class Shooter extends SubsystemBase {
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
+  }
+
+  public InstantCommand setVelocity(double velocity) {
+    return new InstantCommand(() -> targetVelocity = velocity);
+  }
+
+  public InstantCommand setAngle(double angle) {
+    return new InstantCommand(() -> targetAngle = angle);
+  }
+
+  public Command defaultCommand() {
+    return new RunCommand(
+        () -> {
+          setHoodPosition();
+          setShooterSpeed();
+        },
+        this);
   }
 }
