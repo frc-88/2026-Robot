@@ -30,7 +30,8 @@ public final class Constants {
   }
 
   // Intake
-  public static final int INTAKE_MAIN = 2;
+  public static final int INTAKE_ROLLER = 2;
+  // public static final int INTAKE_PIVOT = ;
 
   // Spinner
   public static final int SPINNER_MAIN = 6;
