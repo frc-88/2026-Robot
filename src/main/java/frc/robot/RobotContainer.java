@@ -22,6 +22,7 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -39,6 +40,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final Drive drive;
+  private final Turret turret;
   public Feeder feeder = new Feeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
@@ -52,40 +54,44 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    GyroIO gyro;
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
+        gyro = new GyroIOPigeon2();
         drive =
             new Drive(
-                new GyroIOPigeon2(),
+                gyro,
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        turret = new Turret(gyro);
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        gyro = new GyroIO() {};
         drive =
             new Drive(
-                new GyroIO() {},
+                gyro,
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        turret = new Turret(gyro);
         break;
 
       default:
         // Replayed robot, disable IO implementations
+        gyro = new GyroIO() {};
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+        turret = new Turret(gyro);
         break;
     }
 

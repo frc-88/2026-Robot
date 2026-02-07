@@ -45,6 +45,13 @@ public final class Constants {
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
 
+  // Turret
+  public static final int TURRET_MOTOR_ID = 8;
+  public static final int TURRET_CANCODER_ID = 8;
+  public static final int TURRET_CANCODER_GEAR_RATIO = 0;
+  public static final int TURRET_GEAR_RATIO = 0;
+  public static final double TURRET_COUNTS_PER_REV = 0;
+
   // Drive
   // See generated/TunerConstants.java
 
