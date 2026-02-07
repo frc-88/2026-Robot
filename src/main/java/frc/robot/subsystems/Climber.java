@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
 public class Climber extends SubsystemBase {
@@ -33,6 +34,8 @@ public class Climber extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
   private final MotionMagicPIDPreferenceConstants pivotPID =
       new MotionMagicPIDPreferenceConstants("Climber/PivotPID");
+  private final DoublePreferenceConstant liftTarget= new DoublePreferenceConstant("Climber/LiftTarget", 0.0);
+  private final DoublePreferenceConstant pivotTarget= new DoublePreferenceConstant("Climber/PivotTarget", 0.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
@@ -104,6 +107,8 @@ public class Climber extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(liftTarget.getValue()));
+    SmartDashboard.putData("Climber/Pivot/Goto Target", pivotGoto(pivotTarget.getValue()));
     SmartDashboard.putData(
         "Climber/Lift/SysId/Quasistatic Forward", liftSysIdQuasistatic(Direction.kForward));
     SmartDashboard.putData(
