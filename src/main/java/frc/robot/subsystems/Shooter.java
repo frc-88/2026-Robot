@@ -4,10 +4,12 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
@@ -26,9 +28,11 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
-  private final TalonFX shooterMain = new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
+  private final TalonFX shooterMain =
+      new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
   private final TalonFX shooterFollower =
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
+  private CANrange canRange = new CANrange(Constants.SHOOTER_CANRANGE);
   private final DigitalInput feederBeamBreak = new DigitalInput(0);
   private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
   private final Timer timeSinceBallLastSeen = new Timer();
@@ -93,6 +97,13 @@ public class Shooter extends SubsystemBase {
     // boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset();
     // timeSinceBoostStarted.start();}));
     shooterMain.getVelocity().setUpdateFrequency(100);
+    canRange.getIsDetected().setUpdateFrequency(1000.0);
+
+    CANrangeConfiguration rangeConfig = new CANrangeConfiguration();
+    rangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 4500;
+    rangeConfig.ProximityParams.ProximityThreshold = 0.135;
+    rangeConfig.ProximityParams.ProximityHysteresis = 0.01;
+    canRange.getConfigurator().apply(rangeConfig);
   }
 
   public void periodic() {
@@ -115,6 +126,9 @@ public class Shooter extends SubsystemBase {
     // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
     SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
     SmartDashboard.putBoolean("Shooter/Boosted", boosted);
+    SmartDashboard.putNumber(
+        "Shooter/CANRange/Distance", canRange.getDistance().getValueAsDouble());
+    SmartDashboard.putBoolean("Shooter/CANrange/IsDetected", canRange.getIsDetected().getValue());
   }
 
   private void setShooterSpeed(
