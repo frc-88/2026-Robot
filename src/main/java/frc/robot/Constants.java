@@ -36,7 +36,7 @@ public final class Constants {
   public static final int SPINNER_MAIN = 6;
 
   // Hopper Feeder
-  public static final int HOPPER_FEEDER_MAIN = 19;
+  public static final int HOPPER_FEEDER_MAIN = 19; // Not used
 
   // Shooter Feeder
   public static final int FEEDER_MAIN = 18;
@@ -44,6 +44,8 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
+  public static final int HOOD = 0;
+  public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Drive
   // See generated/TunerConstants.java
