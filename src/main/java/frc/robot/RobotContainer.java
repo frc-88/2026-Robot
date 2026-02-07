@@ -114,8 +114,6 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-    SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
     SmartDashboard.putData("RunShooterFeeder", feeder.runFeeder());
     SmartDashboard.putData("StopShooterFeeder", feeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());

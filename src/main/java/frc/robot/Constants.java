@@ -44,6 +44,7 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
+  public static final int SHOOTER_CANRANGE = 7;
 
   // Drive
   // See generated/TunerConstants.java
