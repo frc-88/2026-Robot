@@ -182,14 +182,19 @@ public class Shooter extends SubsystemBase {
       DoubleSupplier Delay,
       DoubleSupplier Duration) {
     if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
-      shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
+      shooterMain.setControl(
+          requestShooter
+              .withVelocity(speed.getAsDouble())
+              .withFeedForward(0.0)
+              .withUpdateFreqHz(1000.0));
       boosted = false;
     } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
         || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
       shooterMain.setControl(
           requestShooter
               .withVelocity(speed.getAsDouble())
-              .withFeedForward(0.0)); // normal or delay time
+              .withFeedForward(0.0)
+              .withUpdateFreqHz(1000.0)); // normal or delay time
       boosted = false;
     } else { // in boost duration
       // double boost = FeedForwardIncrease.getAsDouble() *
@@ -204,7 +209,10 @@ public class Shooter extends SubsystemBase {
                       .getValueAsDouble()); // * Math.pow(speed.getAsDouble() -
       // shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
       shooterMain.setControl(
-          requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(boost));
+          requestShooter
+              .withVelocity(speed.getAsDouble())
+              .withFeedForward(boost)
+              .withUpdateFreqHz(1000.0));
       boosted = true;
     } // this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) &&
     // (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
