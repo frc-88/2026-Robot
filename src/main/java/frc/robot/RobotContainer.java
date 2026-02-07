@@ -136,6 +136,12 @@ public class RobotContainer {
         "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
     SmartDashboard.putData(
         "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
   }
 
   private void configureDefaultCommands() {
