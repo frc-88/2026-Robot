@@ -31,6 +31,7 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
+  private Batman batman = new Batman();
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
@@ -147,7 +148,9 @@ public class Vision extends SubsystemBase {
         if (observation.type() == PoseObservationType.MEGATAG_1) {
           currentPose = observation.pose();
         }
-        // Send vision observation
+        // Send vision observation also to batman
+        batman.checkPose(observation.pose().toPose2d(), linearStdDev, angularStdDev);
+
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
