@@ -49,9 +49,8 @@ public final class Constants {
   public static final int CLIMBER_LIFT = 42;
   public static final int CLIMBER_PIVOT = 43;
   public static final int CLIMBER_CANRANGE = 8;
-  public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144*37)/9;
+  public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
 
-  
   // Drive
   // See generated/TunerConstants.java
 

@@ -34,8 +34,10 @@ public class Climber extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
   private final MotionMagicPIDPreferenceConstants pivotPID =
       new MotionMagicPIDPreferenceConstants("Climber/PivotPID");
-  private final DoublePreferenceConstant liftTarget= new DoublePreferenceConstant("Climber/LiftTarget", 0.0);
-  private final DoublePreferenceConstant pivotTarget= new DoublePreferenceConstant("Climber/PivotTarget", 0.0);
+  private final DoublePreferenceConstant liftTarget =
+      new DoublePreferenceConstant("Climber/LiftTarget", 0.0);
+  private final DoublePreferenceConstant pivotTarget =
+      new DoublePreferenceConstant("Climber/PivotTarget", 0.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
@@ -175,6 +177,10 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber/Pivot/Velocity", pivot.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Climber/Pivot/Voltage", pivot.getMotorVoltage().getValueAsDouble());
     SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
+  }
+
+  private void climb() {
+    // if ()
   }
 
   public Command liftGoto(double position) {
