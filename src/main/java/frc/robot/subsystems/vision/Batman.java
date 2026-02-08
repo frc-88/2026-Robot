@@ -14,7 +14,7 @@ import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 
 public class Batman extends SubsystemBase {
-  public double bestScore;
+  public double bestScore = 0;
   public Pose2d drivePose;
   public Pose3d visionPose;
   private DoublePreferenceConstant rotationWeight =
