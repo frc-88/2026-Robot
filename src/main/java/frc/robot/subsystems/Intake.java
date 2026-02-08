@@ -24,6 +24,7 @@ public class Intake extends SubsystemBase {
   private MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
 
   private DoublePreferenceConstant intakeSpeed = new DoublePreferenceConstant("Intake/Speed", 0.8);
+  public double commandedVelocity = 0;
 
   private MotionMagicPIDPreferenceConstants intakeConfigConstants =
       new MotionMagicPIDPreferenceConstants("IntakeMotors");
@@ -50,11 +51,16 @@ public class Intake extends SubsystemBase {
 
   private void setSpeed(DoubleSupplier speed) {
     intakeRoller.setControl(
-        request.withVelocity(speed.getAsDouble())); // .withUpdateFreqHz(1000.0));
+        request.withVelocity(
+            speed.getAsDouble())); // * (commandedVelocity / 4.58))); // .withUpdateFreqHz(1000.0));
   }
 
   private void stopMotors() {
     intakeRoller.stopMotor();
+  }
+
+  public void setCommandedVelocity(double velocity) {
+    commandedVelocity = velocity;
   }
 
   public Command runIntake() {

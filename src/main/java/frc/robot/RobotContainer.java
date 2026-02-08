@@ -158,6 +158,10 @@ public class RobotContainer {
     // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
   }
 
+  public void periodic() {
+    intake.setCommandedVelocity(Math.hypot(controller.getLeftX(), controller.getLeftY()));
+  }
+
   public void disabledInit() {
     shooter.resetBPS();
   }
