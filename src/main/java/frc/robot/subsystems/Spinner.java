@@ -5,15 +5,19 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.FieldObject3D;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.Random;
 import java.util.function.DoubleSupplier;
 
 public class Spinner extends SubsystemBase {
+  FieldObject3D fuel = new FieldObject3D("Field/Fuel");
+  Random rand = new Random();
   private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   // private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
@@ -29,9 +33,9 @@ public class Spinner extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    double num1 = rand.nextGaussian();
+    double num2 = rand.nextGaussian();
+    fuel.setPose(num1, num2, 0, Rotation3d.kZero);
   }
 
   private void configureTalons() {

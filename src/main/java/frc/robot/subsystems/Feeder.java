@@ -61,9 +61,11 @@ public class Feeder extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Feeder/FeederVelocity", feeder.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Feeder/FeederVoltage", feeder.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Feeder/FeederCurrent", feeder.getTorqueCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Feeder/FeederVelocity", 0.5);
+    // SmartDashboard.putNumber("Feeder/FeederVoltage",
+    // feeder.getMotorVoltage().getValueAsDouble());
+    // SmartDashboard.putNumber("Feeder/FeederCurrent",
+    // feeder.getTorqueCurrent().getValueAsDouble());
   }
 
   private void setVoltage(Voltage volts) {

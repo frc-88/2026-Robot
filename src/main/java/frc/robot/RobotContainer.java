@@ -10,12 +10,10 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Feeder;
@@ -114,24 +112,26 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-    SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-    SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-    SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
-    SmartDashboard.putData("RunIntake", intake.runIndexer());
-    SmartDashboard.putData("StopIntake", intake.stopIntake());
-    SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-    SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-    SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
-    SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
-    SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
-    SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-    SmartDashboard.putData(
-        "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData("Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+    // SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
+    // SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
+    // SmartDashboard.putData("RunFeeder", feeder.runFeeder());
+    // SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
+    // SmartDashboard.putData("RunIntake", intake.runIndexer());
+    // SmartDashboard.putData("StopIntake", intake.stopIntake());
+    // SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+    // SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+    // SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
+    // SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    // SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
+    // SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
+    // SmartDashboard.putData(
+    //     "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData("Feeder/SysId/Dynamic Forward",
+    // feeder.sysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData("Feeder/SysId/Dynamic Reverse",
+    // feeder.sysIdDynamic(Direction.kReverse));
   }
 
   private void configureDefaultCommands() {

@@ -247,7 +247,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public InstantCommand setVelocity(double velocity) {
-    return new InstantCommand(() -> targetVelocity = velocity);
+    return new InstantCommand(() -> targetVelocity = velocity, this);
   }
 
   public InstantCommand setAngle(double angle) {
