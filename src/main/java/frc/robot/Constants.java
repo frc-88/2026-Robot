@@ -46,8 +46,8 @@ public final class Constants {
   public static final int SHOOTER_FOLLOWER = 5;
 
   // Climber
-  public static final int CLIMBER_LIFT = 42;
-  public static final int CLIMBER_PIVOT = 43;
+  public static final int CLIMBER_LIFT = 21;
+  public static final int CLIMBER_PIVOT = 22;
   public static final int CLIMBER_CANRANGE = 8;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
 

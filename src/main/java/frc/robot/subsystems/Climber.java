@@ -48,7 +48,7 @@ public class Climber extends SubsystemBase {
       new SysIdRoutine(
           new SysIdRoutine.Config(
               null, // Use default ramp rate (1 V/s)
-              Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+              Volts.of(2), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
               (state) -> SignalLogger.writeString("state", state.toString())),
