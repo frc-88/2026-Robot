@@ -151,6 +151,7 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
+    climber.setDefaultCommand(climber.idle());
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,

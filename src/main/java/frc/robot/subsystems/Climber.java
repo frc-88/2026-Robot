@@ -6,6 +6,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -16,10 +17,11 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -35,7 +37,9 @@ public class Climber extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants pivotPID =
       new MotionMagicPIDPreferenceConstants("Climber/PivotPID");
   private final DoublePreferenceConstant liftTarget =
-      new DoublePreferenceConstant("Climber/LiftTarget", 0.0);
+      new DoublePreferenceConstant("Climber/LiftTarget", 3.0);
+  private final DoublePreferenceConstant liftTargetClimb =
+      new DoublePreferenceConstant("Climber/LiftTargetClimb", 3.0);
   private final DoublePreferenceConstant pivotTarget =
       new DoublePreferenceConstant("Climber/PivotTarget", 0.0);
 
@@ -104,27 +108,35 @@ public class Climber extends SubsystemBase {
     pivotConfig.Slot0.kS = pivotPID.getKS().getValue();
     pivotConfig.MotionMagic.MotionMagicCruiseVelocity = pivotPID.getMaxVelocity().getValue();
     pivotConfig.MotionMagic.MotionMagicAcceleration = pivotPID.getMaxAcceleration().getValue();
-    pivotConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO
-    pivot.getConfigurator().apply(liftConfig);
+    pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO
+    pivot.getConfigurator().apply(pivotConfig);
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(liftTarget.getValue()));
+    SmartDashboard.putData("Climber/Lift/Goto TargetClimb", liftGoto(liftTargetClimb.getValue()));
     SmartDashboard.putData("Climber/Pivot/Goto Target", pivotGoto(pivotTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Lift/SysId/Quasistatic Forward", liftSysIdQuasistatic(Direction.kForward));
+        "Climber/Pivot/Zero", new InstantCommand(() -> pivot.setPosition(0.0), this));
     SmartDashboard.putData(
-        "Climber/Lift/SysId/Quasistatic Reverse", liftSysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData(
-        "Climber/Pivot/SysId/Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Climber/Pivot/SysId/Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData(
-        "Climber/Lift/SysId/Dynamic Forward", liftSysIdDynamic(Direction.kForward));
-    SmartDashboard.putData(
-        "Climber/Lift/SysId/Dynamic Reverse", liftSysIdDynamic(Direction.kReverse));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", pivotSysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
+        "Climber/Lift/Zero", new InstantCommand(() -> lift.setPosition(0.0), this));
+    // SmartDashboard.putData(
+    //     "Climber/Lift/SysId/Quasistatic Forward", liftSysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Climber/Lift/SysId/Quasistatic Reverse", liftSysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData(
+    //     "Climber/Pivot/SysId/Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Climber/Pivot/SysId/Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData(
+    //     "Climber/Lift/SysId/Dynamic Forward", liftSysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Climber/Lift/SysId/Dynamic Reverse", liftSysIdDynamic(Direction.kReverse));
+    // SmartDashboard.putData("Shooter/SysId/Dynamic Forward",
+    // pivotSysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData("Shooter/SysId/Dynamic Reverse",
+    // pivotSysIdDynamic(Direction.kReverse));
   }
 
   public boolean isDetected() {
@@ -157,12 +169,23 @@ public class Climber extends SubsystemBase {
     pivot.setControl(pivotMotionMagic.withPosition(position));
   }
 
+  private boolean atLiftPosition() {
+    return Math.abs(
+            lift.getPosition().getValueAsDouble() * Constants.CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES
+                - liftTarget.getValue())
+        < 0.25;
+  }
+
   private void setLiftVoltage(Voltage volts) {
     lift.setControl(liftVoltage.withOutput(volts));
   }
 
   private void setPivotVoltage(Voltage volts) {
     lift.setControl(pivotVoltage.withOutput(volts));
+  }
+
+  private void setCalibrate() {
+    lift.setControl(new DutyCycleOut(-0.04));
   }
 
   public void periodic() {
@@ -179,8 +202,17 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
   }
 
-  private void climb() {
-    // if ()
+  public Command climb() {
+    return new SequentialCommandGroup(
+        liftGoto(liftTarget.getValue()).until(() -> atLiftPosition()), null);
+  }
+
+  public Command calibrate() {
+    return new SequentialCommandGroup(
+            new RunCommand(() -> setCalibrate(), this)
+                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 15.0),
+            new InstantCommand(() -> lift.setPosition(0.0), this))
+        .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
 
   public Command liftGoto(double position) {
