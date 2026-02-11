@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -121,22 +122,20 @@ public class Climber extends SubsystemBase {
         "Climber/Pivot/Zero", new InstantCommand(() -> pivot.setPosition(0.0), this));
     SmartDashboard.putData(
         "Climber/Lift/Zero", new InstantCommand(() -> lift.setPosition(0.0), this));
-    // SmartDashboard.putData(
-    //     "Climber/Lift/SysId/Quasistatic Forward", liftSysIdQuasistatic(Direction.kForward));
-    // SmartDashboard.putData(
-    //     "Climber/Lift/SysId/Quasistatic Reverse", liftSysIdQuasistatic(Direction.kReverse));
-    // SmartDashboard.putData(
-    //     "Climber/Pivot/SysId/Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
-    // SmartDashboard.putData(
-    //     "Climber/Pivot/SysId/Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
-    // SmartDashboard.putData(
-    //     "Climber/Lift/SysId/Dynamic Forward", liftSysIdDynamic(Direction.kForward));
-    // SmartDashboard.putData(
-    //     "Climber/Lift/SysId/Dynamic Reverse", liftSysIdDynamic(Direction.kReverse));
-    // SmartDashboard.putData("Shooter/SysId/Dynamic Forward",
-    // pivotSysIdDynamic(Direction.kForward));
-    // SmartDashboard.putData("Shooter/SysId/Dynamic Reverse",
-    // pivotSysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Climber/Lift/SysId/Quasistatic Forward", liftSysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Climber/Lift/SysId/Quasistatic Reverse", liftSysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Climber/Pivot/SysId/Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Climber/Pivot/SysId/Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Climber/Lift/SysId/Dynamic Forward", liftSysIdDynamic(Direction.kForward));
+    SmartDashboard.putData(
+        "Climber/Lift/SysId/Dynamic Reverse", liftSysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", pivotSysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
   }
 
   public boolean isDetected() {
