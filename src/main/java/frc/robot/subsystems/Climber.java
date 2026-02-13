@@ -48,7 +48,8 @@ public class Climber extends SubsystemBase {
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
-  private final DynamicMotionMagicVoltage liftMotionMagicSlow = new DynamicMotionMagicVoltage(0, 0, 0);
+  private final DynamicMotionMagicVoltage liftMotionMagicSlow =
+      new DynamicMotionMagicVoltage(0, 0, 0);
   private final VoltageOut liftVoltage = new VoltageOut(0.0);
   private final VoltageOut pivotVoltage = new VoltageOut(0.0);
 
@@ -225,10 +226,12 @@ public class Climber extends SubsystemBase {
   }
 
   public Command liftAndClimb() {
-    return new RunCommand(() -> {
-      liftGotoPosition(liftTargetClimb.getValue());
-      pivotGoto(pivotTarget.getValue());
-    }, this);
+    return new RunCommand(
+        () -> {
+          liftGotoPosition(liftTargetClimb.getValue());
+          pivotGoto(pivotTarget.getValue());
+        },
+        this);
   }
 
   public Command pivotGoto(double position) {
