@@ -120,7 +120,7 @@ public class RobotContainer {
     SmartDashboard.putData("StopShooterFeeder", feeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
-    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("RunIntake", intake.runIntake());
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
@@ -156,6 +156,10 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
     // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+  }
+
+  public void periodic() {
+    intake.setCommandedVelocity(Math.hypot(controller.getLeftX(), controller.getLeftY()));
   }
 
   public void disabledInit() {
