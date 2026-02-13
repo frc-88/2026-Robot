@@ -14,6 +14,7 @@ public class MotionMagicPIDPreferenceConstants {
   private DoublePreferenceConstant kD;
   private DoublePreferenceConstant kV;
   private DoublePreferenceConstant kS;
+  private DoublePreferenceConstant kA;
 
   /**
    * Consturctor for MotionMagic PreferenceConstants
@@ -32,6 +33,8 @@ public class MotionMagicPIDPreferenceConstants {
    *     used
    * @param kS The static friction feedforward gain. Units should be determined depending on the
    *     request used
+   * @param kA The acceleration feedforward gain. Units should be determined depending on the
+   *     request used
    */
   public MotionMagicPIDPreferenceConstants(
       String name,
@@ -42,7 +45,8 @@ public class MotionMagicPIDPreferenceConstants {
       double kI,
       double kD,
       double kV,
-      double kS) {
+      double kS,
+      double kA) {
     this.maxVelocity =
         new DoublePreferenceConstant(String.format("%s MaxVelocity", name), maxVelocity);
     this.maxAcceleration =
@@ -53,10 +57,11 @@ public class MotionMagicPIDPreferenceConstants {
     this.kD = new DoublePreferenceConstant(String.format("%s kD", name), kD);
     this.kV = new DoublePreferenceConstant(String.format("%s kV", name), kV);
     this.kS = new DoublePreferenceConstant(String.format("%s kS", name), kS);
+    this.kA = new DoublePreferenceConstant(String.format("%s kA", name), kA);
   }
 
   public MotionMagicPIDPreferenceConstants(String name) {
-    this(name, 0, 0, 0, 0, 0, 0, 0, 0);
+    this(name, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   /**
@@ -131,6 +136,15 @@ public class MotionMagicPIDPreferenceConstants {
     return kS;
   }
 
+  /**
+   * Get the kS PreferenceConstant
+   *
+   * @return The kS PreferenceConstant
+   */
+  public DoublePreferenceConstant getKA() {
+    return kA;
+  }
+
   /** Update Velocity, Acceleration, Jerk, and PID PreferenceConstants */
   public void updateAll() {
     this.maxVelocity.update();
@@ -141,6 +155,7 @@ public class MotionMagicPIDPreferenceConstants {
     this.kD.update();
     this.kV.update();
     this.kS.update();
+    this.kA.update();
   }
 
   /**
@@ -157,5 +172,6 @@ public class MotionMagicPIDPreferenceConstants {
     this.kD.addChangeHandler(handler);
     this.kV.addChangeHandler(handler);
     this.kS.addChangeHandler(handler);
+    this.kA.addChangeHandler(handler);
   }
 }
