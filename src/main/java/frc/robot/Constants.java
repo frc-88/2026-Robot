@@ -7,7 +7,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -15,8 +15,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
-public class Constants {
-
+public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
@@ -31,12 +30,27 @@ public class Constants {
     REPLAY
   }
 
-  public enum ModeCode {
-    DEVELOPMENT,
-    COMP
-  }
+  // Intake
+  public static final int INTAKE_MAIN = 2;
 
-  public static ModeCode MODE = ModeCode.DEVELOPMENT;
-  // TODO Replace this
-  public static Pose3d HUB_POSE = Pose3d.kZero;
+  // Spinner
+  public static final int SPINNER_MAIN = 6;
+
+  // Hopper Feeder
+  public static final int HOPPER_FEEDER_MAIN = 19;
+
+  // Shooter Feeder
+  public static final int FEEDER_MAIN = 18;
+
+  // Shooter
+  public static final int SHOOTER_MAIN = 12;
+  public static final int SHOOTER_FOLLOWER = 5;
+
+  // Drive
+  // See generated/TunerConstants.java
+
+  public static final Translation2d ZEROED_YAW_ROBOT_CENTER_TO_TURRET_CENTER = new Translation2d(0.3, (-3/4) *Math.PI); //GUESS
+  //After we zero yaw, this would be the heading corresponding to the turret direction and the distance
+  //Angle should be around -3PI/4 Rad
+
 }
