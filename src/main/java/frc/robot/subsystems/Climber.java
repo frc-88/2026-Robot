@@ -111,6 +111,7 @@ public class Climber extends SubsystemBase {
     pivotConfig.Slot0.kD = pivotPID.getKD().getValue();
     pivotConfig.Slot0.kV = pivotPID.getKV().getValue();
     pivotConfig.Slot0.kS = pivotPID.getKS().getValue();
+    pivotConfig.Slot0.kA = pivotPID.getKA().getValue();
     pivotConfig.MotionMagic.MotionMagicCruiseVelocity = pivotPID.getMaxVelocity().getValue();
     pivotConfig.MotionMagic.MotionMagicAcceleration = pivotPID.getMaxAcceleration().getValue();
     pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO
