@@ -15,10 +15,11 @@ public class TrajectorySolver {
   public Translation2d robotVelocity = new Translation2d(); // m/s
   public double robotRotationalVelocity = 0.1; // rad/s
 
-  public boolean hasPreviousTimeOfFlightGuess = false;
-  public double timeOfFlight = 0; // seconds
-  public Translation2d turretToTarget; // m; distanceToTarget
-  public int numberOfIterations = 5;
+  private boolean hasPreviousTimeOfFlightGuess = false;
+  private double timeOfFlight = 0; // seconds
+  private Translation2d turretToProjectedTarget; // m; distanceToTarget
+  private double turretToProjectedTargetDistance;
+  private int numberOfIterations = 5;
 
   public double hoodAngle;
   public double shootSpeed;
@@ -45,22 +46,24 @@ public class TrajectorySolver {
                 .times(robotRotationalVelocity));
     if (!hasPreviousTimeOfFlightGuess) {
       timeOfFlight = lookupTime(turretDistanceToTarget.getNorm());
-    } //otherwise use last value
+    } // otherwise use last value
     int i;
     for (i = 0; i < numberOfIterations; i++) {
-      Translation2d turretToProjectedTarget =
+      turretToProjectedTarget =
           turretDistanceToTarget.minus(turretRelativeVelocityToTarget.times(timeOfFlight));
-      double projectedTargetDistance = turretToProjectedTarget.getNorm();
+      turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
       timeOfFlight =
           timeOfFlight
-              - (timeOfFlight - lookupTime(projectedTargetDistance))
+              - (timeOfFlight - lookupTime(turretToProjectedTargetDistance))
                   / (1
-                      - (lookupTimePrime(projectedTargetDistance))
-                          * (turretToProjectedTarget.dot(turretRelativeVelocityToTarget.unaryMinus())
-                              / projectedTargetDistance));
+                      - (lookupTimePrime(turretToProjectedTargetDistance))
+                          * (turretToProjectedTarget.dot(
+                                  turretRelativeVelocityToTarget.unaryMinus())
+                              / turretToProjectedTargetDistance));
     }
-    turretToTarget = turretDistanceToTarget.minus(turretRelativeVelocityToTarget.times(timeOfFlight));
-    double turretToProjectedTargetDistance = turretToTarget.getNorm();
+    turretToProjectedTarget =
+        turretDistanceToTarget.minus(turretRelativeVelocityToTarget.times(timeOfFlight));
+    turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
   }
