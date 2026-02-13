@@ -7,6 +7,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.DoubleSupplier;
 
 public class Climber extends SubsystemBase {
 
@@ -46,6 +48,7 @@ public class Climber extends SubsystemBase {
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
+  private final DynamicMotionMagicVoltage liftMotionMagicSlow = new DynamicMotionMagicVoltage(0.0, 0.3, );
   private final VoltageOut liftVoltage = new VoltageOut(0.0);
   private final VoltageOut pivotVoltage = new VoltageOut(0.0);
 
@@ -115,8 +118,9 @@ public class Climber extends SubsystemBase {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
-    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(liftTarget.getValue()));
-    SmartDashboard.putData("Climber/Lift/Goto TargetClimb", liftGoto(liftTargetClimb.getValue()));
+    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTarget.getValue()));
+    SmartDashboard.putData(
+        "Climber/Lift/Goto TargetClimb", liftGoto(() -> liftTargetClimb.getValue()));
     SmartDashboard.putData("Climber/Pivot/Goto Target", pivotGoto(pivotTarget.getValue()));
     SmartDashboard.putData(
         "Climber/Pivot/Zero", new InstantCommand(() -> pivot.setPosition(0.0), this));
@@ -127,15 +131,17 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData(
         "Climber/Lift/SysId/Quasistatic Reverse", liftSysIdQuasistatic(Direction.kReverse));
     SmartDashboard.putData(
-        "Climber/Pivot/SysId/Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
+        "Climber/Pivot/SysId/Pivot Quasistatic Forward", pivotSysIdQuasistatic(Direction.kForward));
     SmartDashboard.putData(
-        "Climber/Pivot/SysId/Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
+        "Climber/Pivot/SysId/Pivot Quasistatic Reverse", pivotSysIdQuasistatic(Direction.kReverse));
     SmartDashboard.putData(
         "Climber/Lift/SysId/Dynamic Forward", liftSysIdDynamic(Direction.kForward));
     SmartDashboard.putData(
         "Climber/Lift/SysId/Dynamic Reverse", liftSysIdDynamic(Direction.kReverse));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", pivotSysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Climber/Pivot/SysId/Pivot Dynamic Forward", pivotSysIdDynamic(Direction.kForward));
+    SmartDashboard.putData(
+        "Climber/Pivot/SysId/Pivot Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
   }
 
   public boolean isDetected() {
@@ -180,7 +186,7 @@ public class Climber extends SubsystemBase {
   }
 
   private void setPivotVoltage(Voltage volts) {
-    lift.setControl(pivotVoltage.withOutput(volts));
+    pivot.setControl(pivotVoltage.withOutput(volts));
   }
 
   private void setCalibrate() {
@@ -203,7 +209,7 @@ public class Climber extends SubsystemBase {
 
   public Command climb() {
     return new SequentialCommandGroup(
-        liftGoto(liftTarget.getValue()).until(() -> atLiftPosition()), null);
+        liftGoto(() -> liftTarget.getValue()).until(() -> atLiftPosition()), null);
   }
 
   public Command calibrate() {
@@ -214,8 +220,15 @@ public class Climber extends SubsystemBase {
         .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
 
-  public Command liftGoto(double position) {
-    return new RunCommand(() -> liftGotoPosition(position), this);
+  public Command liftGoto(DoubleSupplier target) {
+    return new RunCommand(() -> liftGotoPosition(target.getAsDouble()), this);
+  }
+
+  public Command liftAndClimb() {
+    return new RunCommand(() -> {
+      liftGotoPosition(liftTargetClimb.getValue());
+      pivotGoto(pivotTarget.getValue());
+    }, this);
   }
 
   public Command pivotGoto(double position) {
