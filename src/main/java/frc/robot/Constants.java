@@ -49,8 +49,10 @@ public final class Constants {
   // Drive
   // See generated/TunerConstants.java
 
-  public static final Translation2d ZEROED_YAW_ROBOT_CENTER_TO_TURRET_CENTER = new Translation2d(0.3, (-3/4) *Math.PI); //GUESS
-  //After we zero yaw, this would be the heading corresponding to the turret direction and the distance
-  //Angle should be around -3PI/4 Rad
+  public static final Translation2d ZEROED_YAW_ROBOT_CENTER_TO_TURRET_CENTER =
+      new Translation2d(0.3, (-3 / 4) * Math.PI); // GUESS
+  // After we zero yaw, this would be the heading corresponding to the turret direction and the
+  // distance
+  // Angle should be around -3PI/4 Rad
 
 }
