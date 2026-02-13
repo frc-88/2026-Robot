@@ -36,8 +36,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber(
         "Intake/RollerVelocity", intakeRoller.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Intake/Current", intakeRoller.getTorqueCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Intake/Current", intakeRoller.getTorqueCurrent().getValueAsDouble());
   }
 
   private void configureTalons() {
