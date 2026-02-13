@@ -123,6 +123,4 @@ public class Trajectory extends SubsystemBase {
     res[2] = angle;
     return res;
   }
-
 }
-

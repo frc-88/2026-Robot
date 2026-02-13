@@ -119,12 +119,11 @@ public class ProjectileSimulator {
     double vx = s[3], vy = s[4], vz = s[5];
     double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
 
-  
     double dragFactor = -0.5 * AIR_DENSITY * DRAG_COEFF * area * v / MASS;
     double fxD = dragFactor * vx;
     double fyD = dragFactor * vy;
     double fzD = dragFactor * vz;
-    
+
     double fxM = 0.0;
     double fyM = 0.0;
     double fzM = 0.5 * AIR_DENSITY * MAGNUS_COEFF * area * v * v / MASS;
