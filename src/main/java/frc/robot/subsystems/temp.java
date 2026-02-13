@@ -38,7 +38,7 @@ public class temp {
         }
         int i;
         for (i=0; i<numberOfIterations; i++) {
-            Translation2d projectedDistance = turretDistanceToTarget.plus(turretRelativeVelocityToTarget.times(timeOfFlight));
+            Translation2d projectedDistance = turretDistanceToTarget.minus(turretRelativeVelocityToTarget.times(timeOfFlight));
             timeOfFlight = timeOfFlight -
             (timeOfFlight - lookup(projectedDistance.getNorm()))
             /(1 - (lookupPrime(projectedDistance.getNorm()))*
