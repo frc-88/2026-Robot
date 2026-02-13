@@ -48,7 +48,7 @@ public class Climber extends SubsystemBase {
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
-  private final DynamicMotionMagicVoltage liftMotionMagicSlow = new DynamicMotionMagicVoltage(0.0, 0.3, );
+  private final DynamicMotionMagicVoltage liftMotionMagicSlow = new DynamicMotionMagicVoltage(0, 0, 0);
   private final VoltageOut liftVoltage = new VoltageOut(0.0);
   private final VoltageOut pivotVoltage = new VoltageOut(0.0);
 
