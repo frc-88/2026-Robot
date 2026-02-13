@@ -8,17 +8,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -37,13 +31,15 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final Drive drive;
-  public Feeder feeder = new Feeder();
-  public Shooter shooter = new Shooter();
-  public Intake intake = new Intake();
-  public Spinner spinner = new Spinner();
+  // public Feeder feeder = new Feeder();
+  // public Shooter shooter = new Shooter();
+  // public Intake intake = new Intake();
+  public Spinner spinner;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  // private final CommandXboxController controller = new CommandXboxController(0);
+
+  private Joystick joystick = new Joystick(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -86,6 +82,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
+
+    spinner = new Spinner(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -136,46 +134,46 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     spinner.setDefaultCommand(spinner.stopSpinner());
-    intake.setDefaultCommand(intake.stopIntake());
-    feeder.setDefaultCommand(feeder.stopFeeder());
-    shooter.setDefaultCommand(shooter.stopShooter());
+    // intake.setDefaultCommand(intake.stopIntake());
+    // feeder.setDefaultCommand(feeder.stopFeeder());
+    // shooter.setDefaultCommand(shooter.stopShooter());
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> joystick.getRawAxis(1),
+            () -> joystick.getRawAxis(0),
+            () -> joystick.getRawAxis(2)));
     // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
   }
 
   public void disabledInit() {
-    shooter.resetBPS();
+    // shooter.resetBPS();
   }
 
   private void configureDriverController() {
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> Rotation2d.kZero));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // // Switch to X pattern when X button is pressed
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //             .ignoringDisable(true));
   }
 
   /**

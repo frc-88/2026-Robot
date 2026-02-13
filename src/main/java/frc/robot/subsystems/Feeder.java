@@ -10,7 +10,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -61,7 +60,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Feeder/FeederVelocity", 0.5);
+    // SmartDashboard.putNumber("Feeder/FeederVelocity", 0.5);
     // SmartDashboard.putNumber("Feeder/FeederVoltage",
     // feeder.getMotorVoltage().getValueAsDouble());
     // SmartDashboard.putNumber("Feeder/FeederCurrent",

@@ -15,14 +15,12 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -124,36 +122,36 @@ public class Shooter extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("Shooter/RunShooter", runShooter());
-    SmartDashboard.putData("Shooter/StopShooter", stopShooter());
-    SmartDashboard.putData(
-        "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    // SmartDashboard.putData("Shooter/RunShooter", runShooter());
+    // SmartDashboard.putData("Shooter/StopShooter", stopShooter());
+    // SmartDashboard.putData(
+    //     "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   public void periodic() {
-    SmartDashboard.putNumber(
-        "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
-    SmartDashboard.putNumber(
-        "Shooter/BallsPerSecond",
-        (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
-    // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
-    SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
-    SmartDashboard.putBoolean("Shooter/Boosted", boosted);
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
+    // SmartDashboard.putNumber(
+    //     "Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
+    // SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
+    // SmartDashboard.putNumber(
+    //     "Shooter/BallsPerSecond",
+    //     (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
+    // // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
+    // SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
+    // SmartDashboard.putBoolean("Shooter/Boosted", boosted);
   }
 
   private void setShooterSpeed(DoubleSupplier speed) {

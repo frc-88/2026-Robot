@@ -7,6 +7,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -50,4 +54,15 @@ public final class Constants {
   // Drive
   // See generated/TunerConstants.java
 
+  public static Translation2d HUB_POSE =
+      new Translation2d(Units.inchesToMeters(188.178500), Units.inchesToMeters(158.955000));
+  public static Translation2d ROBOT_CENTER_TO_TURRET_CENTER =
+      new Translation2d(0, 0); // absolute when yaw = 0 TODO
+  public static Rotation2d ANGLE_OF_ROBOT_ZERO_HEADING_TO_TURRET = Rotation2d.kZero; // TODO
+
+  public static Translation2d getTurretPose(Pose2d drivePose) {
+    return drivePose
+        .getTranslation()
+        .plus(ROBOT_CENTER_TO_TURRET_CENTER.rotateBy(drivePose.getRotation()));
+  }
 }
