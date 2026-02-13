@@ -12,7 +12,7 @@ public class TrajectorySolver {
 
   public Translation2d robotPosition = new Translation2d(1.0, 1.0); // m
   public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
-  public Translation2d robotVelocity = new Translation2d(); // m/s
+  public Translation2d robotVelocity = new Translation2d(0.2,0.2); // m/s
   public double robotRotationalVelocity = 0.1; // rad/s
 
   private boolean hasPreviousTimeOfFlightGuess = false;
@@ -31,8 +31,8 @@ public class TrajectorySolver {
       hasPreviousTimeOfFlightGuess = false;
       double staticDistance =
           goalPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw)).getNorm();
-      lookupAngle(staticDistance);
-      lookupSpeed(staticDistance);
+      hoodAngle = lookupAngle(staticDistance);
+      shootSpeed = lookupSpeed(staticDistance);
     }
   }
 
