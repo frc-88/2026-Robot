@@ -206,7 +206,7 @@ public class Climber extends SubsystemBase {
   }
 
   private void flip(boolean flipRight) {
-    if (lift.getPosition().getValueAsDouble() > 30) {
+    if (lift.getPosition().getValueAsDouble() < (flipRight ? 50 : 65)) {
       pivotGotoPosition(
           flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
     }
