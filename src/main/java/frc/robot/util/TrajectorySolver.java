@@ -11,6 +11,13 @@ public class TrajectorySolver extends SubsystemBase {
 
   // TO GO IN CONSTANTS ^^
 
+  private DoublePreferenceConstant robotPoseX = new Double DoublePreferenceConstant("TrajSolv/RobotPoseX", 0.0);
+  private DoublePreferenceConstant robotPoseY = new Double DoublePreferenceConstant("TrajSolv/RobotPoseY", 0.0);
+  private DoublePreferenceConstant robotPoseYaw = new Double DoublePreferenceConstant("TrajSolv/RobotPoseYaw", 0.0);
+  private DoublePreferenceConstant robotVelocityX = new Double DoublePreferenceConstant("TrajSolv/RobotVelX", 0.0);
+  private DoublePreferenceConstant robotVelocityY = new Double DoublePreferenceConstant("TrajSolv/RobotVelY", 0.0);
+  private DoublePreferenceConstant robotVelocityRot = new Double DoublePreferenceConstant("TrajSolv/RobotVelRot", 0.0);
+
   public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m
   public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
   public Translation2d robotVelocity = new Translation2d(-0.2,-0.2); // m/s
