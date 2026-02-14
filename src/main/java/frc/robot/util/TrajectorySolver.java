@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -18,6 +19,9 @@ public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotVelocity = new Translation2d(-0.2, -0.2); // m/s
   public double robotRotationalVelocity = 0.0; // rad/s
   public Translation2d targetVelocity = new Translation2d(0, 0); // for hub: 0
+
+  public DoublePreferenceConstant angle = new DoublePreferenceConstant("Traj/angle", 0.0);
+  public DoublePreferenceConstant speed = new DoublePreferenceConstant("Traj/speed", 0.0);
 
   private Translation2d turretToTargetDistance;
   private Translation2d turretToTargetRelativeVelocity;
@@ -42,11 +46,13 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double getAngle() {
-    return hoodAngle;
+    // return hoodAngle;
+    return angle.getValue();
   }
 
   public double getShootSpeed() {
-    return shootSpeed;
+    // return shootSpeed;
+    return speed.getValue();
   }
 
   public double getYaw() {
@@ -69,6 +75,8 @@ public class TrajectorySolver extends SubsystemBase {
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
+      turretToProjectedTarget = turretToTargetDistance;
+      Logger.recordOutput("Field/distance", turretToProjectedTarget.getNorm());
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
       shootSpeed = lookupSpeed(turretToTargetDistance.getNorm());
@@ -109,27 +117,29 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 2.27097
-        - 1.07608 * distance
-        + 0.301204 * (Math.pow(distance, 2.0))
-        - 0.0249606 * (Math.pow(distance, 3.0));
+    return 0.921749
+        - 0.0138832 * distance
+        + 0.009373 * (Math.pow(distance, 2.0));
+        //- 0.0249606 * (Math.pow(distance, 3.0));
   }
 
   public double lookupTimePrime(double distance) {
-    return -1.07608 + 0.602408 * distance - 0.0748818 * (Math.pow(distance, 2.0));
+    return - 0.0138832
+     + 0.0188 * distance;
+     //- 0.0748818 * (Math.pow(distance, 2.0));
   }
 
   public double lookupAngle(double distance) {
-    return 128.0
-        - 48.9 * distance
-        + 12.7 * (Math.pow(distance, 2.0))
-        - 1.11 * (Math.pow(distance, 3.0));
+    return 91.33289
+        - 11.95018 * distance
+        + 0.880906 * (Math.pow(distance, 2.0));
+        //- 1.11 * (Math.pow(distance, 3.0));
   }
 
   public double lookupSpeed(double distance) {
-    return 9.7
-        - 2.6 * (distance)
-        + 0.719 * (Math.pow(distance, 2.0))
-        - 0.0514 * (Math.pow(distance, 3.0));
+    return 5.3731
+        + 0.356504 * (distance)
+        + 0.0279446 * (Math.pow(distance, 2.0));
+        //- 0.0514 * (Math.pow(distance, 3.0));
   }
 }
