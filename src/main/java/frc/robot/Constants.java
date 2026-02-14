@@ -47,6 +47,13 @@ public final class Constants {
   public static final int HOOD = 0;
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
+  // Climber
+  public static final int CLIMBER_LIFT = 21;
+  public static final int CLIMBER_PIVOT = 22;
+  public static final int CLIMBER_CANRANGE = 8;
+  public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
+  public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);
+
   // Drive
   // See generated/TunerConstants.java
 
