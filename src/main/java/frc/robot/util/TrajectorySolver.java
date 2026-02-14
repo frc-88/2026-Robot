@@ -46,13 +46,13 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double getAngle() {
-    // return hoodAngle;
-    return angle.getValue();
+    return hoodAngle;
+    // return angle.getValue(); // for testing
   }
 
   public double getShootSpeed() {
-    // return shootSpeed;
-    return speed.getValue();
+    return shootSpeed;
+    // return speed.getValue(); // for testing
   }
 
   public double getYaw() {
@@ -117,29 +117,22 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.921749
-        - 0.0138832 * distance
-        + 0.009373 * (Math.pow(distance, 2.0));
-        //- 0.0249606 * (Math.pow(distance, 3.0));
+    return 0.921749 - 0.0138832 * distance + 0.009373 * (Math.pow(distance, 2.0));
+    // - 0.0249606 * (Math.pow(distance, 3.0));
   }
 
   public double lookupTimePrime(double distance) {
-    return - 0.0138832
-     + 0.0188 * distance;
-     //- 0.0748818 * (Math.pow(distance, 2.0));
+    return -0.0138832 + 0.0188 * distance;
+    // - 0.0748818 * (Math.pow(distance, 2.0));
   }
 
   public double lookupAngle(double distance) {
-    return 91.33289
-        - 11.95018 * distance
-        + 0.880906 * (Math.pow(distance, 2.0));
-        //- 1.11 * (Math.pow(distance, 3.0));
+    return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
+    // - 1.11 * (Math.pow(distance, 3.0));
   }
 
   public double lookupSpeed(double distance) {
-    return 5.3731
-        + 0.356504 * (distance)
-        + 0.0279446 * (Math.pow(distance, 2.0));
-        //- 0.0514 * (Math.pow(distance, 3.0));
+    return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
+    // - 0.0514 * (Math.pow(distance, 3.0));
   }
 }
