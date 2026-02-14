@@ -129,9 +129,13 @@ public class Climber extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
     SmartDashboard.putData("Climber/Flip Left", leftFlip());
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
-    SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
+    SmartDashboard.putData("Climber/Go Grip", gotoGrip());
+    SmartDashboard.putData("Climber/Go L1", gotoL1());
+    SmartDashboard.putData("Climber/Go Ground", gotoGround());
+
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
         "Climber/Lift/Goto TargetClimb", liftGoto(() -> liftGripTarget.getValue()));
@@ -257,6 +261,18 @@ public class Climber extends SubsystemBase {
                 .until(() -> lift.getStatorCurrent().getValueAsDouble() > 15.0),
             new InstantCommand(() -> lift.setPosition(0.0), this))
         .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
+  }
+
+  public Command gotoGrip() {
+    return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
+  }
+
+  public Command gotoL1() {
+    return new RunCommand(() -> liftGotoPosition(liftTuckTarget.getValue()), this);
+  }
+
+  public Command gotoGround() {
+    return new RunCommand(() -> liftGotoPosition(liftDownTarget.getValue()), this);
   }
 
   public Command rightFlip() {
