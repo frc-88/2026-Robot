@@ -2,7 +2,11 @@ package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 
 public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
@@ -11,18 +15,24 @@ public class TrajectorySolver extends SubsystemBase {
 
   // TO GO IN CONSTANTS ^^
 
-  private DoublePreferenceConstant robotPoseX = new Double DoublePreferenceConstant("TrajSolv/RobotPoseX", 0.0);
-  private DoublePreferenceConstant robotPoseY = new Double DoublePreferenceConstant("TrajSolv/RobotPoseY", 0.0);
-  private DoublePreferenceConstant robotPoseYaw = new Double DoublePreferenceConstant("TrajSolv/RobotPoseYaw", 0.0);
-  private DoublePreferenceConstant robotVelocityX = new Double DoublePreferenceConstant("TrajSolv/RobotVelX", 0.0);
-  private DoublePreferenceConstant robotVelocityY = new Double DoublePreferenceConstant("TrajSolv/RobotVelY", 0.0);
-  private DoublePreferenceConstant robotVelocityRot = new Double DoublePreferenceConstant("TrajSolv/RobotVelRot", 0.0);
+  private DoublePreferenceConstant robotPoseX =
+      new DoublePreferenceConstant("TrajSolv/RobotPoseX", 0.0);
+  private DoublePreferenceConstant robotPoseY =
+      new DoublePreferenceConstant("TrajSolv/RobotPoseY", 0.0);
+  private DoublePreferenceConstant robotPoseYaw =
+      new DoublePreferenceConstant("TrajSolv/RobotPoseYaw", 0.0);
+  private DoublePreferenceConstant robotVelocityX =
+      new DoublePreferenceConstant("TrajSolv/RobotVelX", 0.0);
+  private DoublePreferenceConstant robotVelocityY =
+      new DoublePreferenceConstant("TrajSolv/RobotVelY", 0.0);
+  private DoublePreferenceConstant robotVelocityRot =
+      new DoublePreferenceConstant("TrajSolv/RobotVelRot", 0.0);
 
   public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m
   public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
-  public Translation2d robotVelocity = new Translation2d(-0.2,-0.2); // m/s
+  public Translation2d robotVelocity = new Translation2d(-0.2, -0.2); // m/s
   public double robotRotationalVelocity = 0.0; // rad/s
-  public Translation2d targetVelocity = new Translation2d(0,0); // for hub: 0
+  public Translation2d targetVelocity = new Translation2d(0, 0); // for hub: 0
 
   private Translation2d turretToTargetDistance;
   private Translation2d turretToTargetRelativeVelocity;
@@ -42,21 +52,22 @@ public class TrajectorySolver extends SubsystemBase {
 
   public void setInputs() {
     robotPosition = new Translation2d(robotPoseX.getValue(), robotPoseY.getValue()); // m
-    robotYaw = new Rotation2d.fromDegrees(robotPoseYaw.getValue()); // rad
+    robotYaw = new Rotation2d(robotPoseYaw.getValue()); // rad
     robotVelocity = new Translation2d(robotVelocityX.getValue(), robotPoseY.getValue()); // m/s
     robotRotationalVelocity = robotVelocityRot.getValue(); // rad/s
-    targetVelocity = new Translation2d(0,0); // for hub: 0
+    targetVelocity = new Translation2d(0, 0); // for hub: 0
   }
 
   public void periodic() {
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
     turretToTargetRelativeVelocity =
-        robotVelocity.plus(
-            robotToTurret
-                .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
-                .times(robotRotationalVelocity))
-                .minus(targetVelocity);
+        robotVelocity
+            .plus(
+                robotToTurret
+                    .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
+                    .times(robotRotationalVelocity))
+            .minus(targetVelocity);
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
@@ -88,8 +99,8 @@ public class TrajectorySolver extends SubsystemBase {
                               / turretToProjectedTargetDistance));
     }
     if (timeOfFlight > 5) {
-        timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
-        System.out.println("Newton Solution Diverged");
+      timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
+      System.out.println("Newton Solution Diverged");
     }
     turretToProjectedTarget =
         turretToTargetDistance.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
@@ -115,6 +126,6 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Command updateTestInputs() {
-    return new InstantCommand(()-> setInputs();)
+    return new InstantCommand(() -> setInputs());
   }
 }
