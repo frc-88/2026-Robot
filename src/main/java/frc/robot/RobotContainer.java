@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.BatteryFuelGauge;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -43,6 +44,7 @@ public class RobotContainer {
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
+  public BatteryFuelGauge batteryFuelGauge = new BatteryFuelGauge();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
