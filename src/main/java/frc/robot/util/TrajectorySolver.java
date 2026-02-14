@@ -11,8 +11,6 @@ import org.littletonrobotics.junction.Logger;
 public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
   public Translation2d targetPosition = new Translation2d(2.0, 2.0);
-  public static Rotation2d quarterRotation = Rotation2d.fromRadians(Math.PI / 2.0);
-
   // TO GO IN CONSTANTS ^^
 
   public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m

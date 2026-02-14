@@ -30,7 +30,7 @@ public class Spinner extends SubsystemBase {
   Function<Double, Double> pitch;
 
   ProjectileSimulator sim = new ProjectileSimulator();
-  TrajectorySolver trajectory;
+  TrajectorySolver trajectorySolver;
 
   Supplier<Pose2d> drivePose1;
   Supplier<Translation2d> velocity1;
@@ -48,7 +48,7 @@ public class Spinner extends SubsystemBase {
   public Spinner(Supplier<Pose2d> drivePose, Supplier<Translation2d> velocity) {
     drivePose1 = drivePose;
     velocity1 = velocity;
-    trajectory = new TrajectorySolver(drivePose, velocity);
+    trajectorySolver = new TrajectorySolver(drivePose, velocity);
     // yaw =
     //     () -> {
     //       return drivePose1.get().relativeTo(HUB_POSE).getTranslation().getAngle().getDegrees()
@@ -74,17 +74,17 @@ public class Spinner extends SubsystemBase {
         } else if (fuel.hasTrajectory() && timeSinceLastShot <= 2) {
 
         } else {
-          double speed = trajectory.getShootSpeed();
-          double angle = trajectory.getAngle();
-          double yaw = trajectory.getYaw();
+          double speed = trajectorySolver.getShootSpeed();
+          double angle = trajectorySolver.getAngle();
+          double yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
               sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
         }
       } else {
         if (!fuel.setPose()) {
-          double speed = trajectory.getShootSpeed();
-          double angle = trajectory.getAngle();
-          double yaw = trajectory.getYaw();
+          double speed = trajectorySolver.getShootSpeed();
+          double angle = trajectorySolver.getAngle();
+          double yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
               sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
         }
