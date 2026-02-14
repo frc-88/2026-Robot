@@ -64,6 +64,10 @@ public class TrajectorySolver extends SubsystemBase {
       hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
       shootSpeed = lookupSpeed(turretToTargetDistance.getNorm());
     }
+
+    SmartDashboard.putNumber("TrajSolv/Hood", hoodAngle);
+    SmartDashboard.putNumber("TrajSolv/Shoot", shootSpeed);
+    SmartDashboard.putData("TrajSolv/Update Inputs", updateTestInputs());
   }
 
   public void newton() {
@@ -109,5 +113,9 @@ public class TrajectorySolver extends SubsystemBase {
 
   public double lookupSpeed(double distance) {
     return distance * 30.0; // temp
+  }
+
+  public Command updateTestInputs() {
+    return new InstantCommand(()-> setInputs();)
   }
 }
