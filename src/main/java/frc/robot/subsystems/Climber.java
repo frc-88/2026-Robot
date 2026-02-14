@@ -39,12 +39,22 @@ public class Climber extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
   private final MotionMagicPIDPreferenceConstants pivotPID =
       new MotionMagicPIDPreferenceConstants("Climber/PivotPID");
-  private final DoublePreferenceConstant liftTarget =
-      new DoublePreferenceConstant("Climber/LiftTarget", 3.0);
-  private final DoublePreferenceConstant liftTargetClimb =
-      new DoublePreferenceConstant("Climber/LiftTargetClimb", 3.0);
-  private final DoublePreferenceConstant pivotTarget =
-      new DoublePreferenceConstant("Climber/PivotTarget", 0.0);
+  private final DoublePreferenceConstant liftTestTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
+  private final DoublePreferenceConstant liftGripTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 90.0);
+  private final DoublePreferenceConstant liftTuckTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 45.0);
+  private final DoublePreferenceConstant liftDownTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/Down", 0.0);
+  private final DoublePreferenceConstant pivotTestTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
+  private final DoublePreferenceConstant pivotLeftFlipTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 0.0);
+  private final DoublePreferenceConstant pivotRightFlipTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", 0.0);
+  private final DoublePreferenceConstant pivotSwitchTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 0.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
@@ -119,11 +129,14 @@ public class Climber extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData("Climber/Flip Left", leftFlip());
+    SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
-    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTarget.getValue()));
+    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Lift/Goto TargetClimb", liftGoto(() -> liftTargetClimb.getValue()));
-    SmartDashboard.putData("Climber/Pivot/Goto Target", pivotGoto(pivotTarget.getValue()));
+        "Climber/Lift/Goto TargetClimb", liftGoto(() -> liftGripTarget.getValue()));
+    SmartDashboard.putData(
+        "Climber/Pivot/Goto Target", pivotGoto(() -> pivotTestTarget.getValue()));
     SmartDashboard.putData(
         "Climber/Pivot/Zero", new InstantCommand(() -> pivot.setPosition(0.0), this));
     SmartDashboard.putData(
@@ -176,13 +189,6 @@ public class Climber extends SubsystemBase {
     pivot.setControl(pivotMotionMagic.withPosition(position));
   }
 
-  private boolean atLiftPosition() {
-    return Math.abs(
-            lift.getPosition().getValueAsDouble() * Constants.CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES
-                - liftTarget.getValue())
-        < 0.25;
-  }
-
   private void setLiftVoltage(Voltage volts) {
     lift.setControl(liftVoltage.withOutput(volts));
   }
@@ -193,6 +199,18 @@ public class Climber extends SubsystemBase {
 
   private void setCalibrate() {
     lift.setControl(new DutyCycleOut(-0.04));
+  }
+
+  private void flip(boolean flipRight) {
+    pivotGotoPosition(flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
+
+    double position = Math.abs(pivot.getPosition().getValueAsDouble());
+
+    if (position > pivotSwitchTarget.getValue()) {
+      liftGotoPosition(liftGripTarget.getValue());
+    } else {
+      liftGotoPosition(liftTuckTarget.getValue());
+    }
   }
 
   public void periodic() {
@@ -209,34 +227,12 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
   }
 
-  public Command climb() {
-    return new SequentialCommandGroup(
-        liftGoto(() -> liftTarget.getValue()).until(() -> atLiftPosition()), null);
-  }
-
-  public Command calibrate() {
-    return new SequentialCommandGroup(
-            new RunCommand(() -> setCalibrate(), this)
-                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 15.0),
-            new InstantCommand(() -> lift.setPosition(0.0), this))
-        .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
-  }
-
   public Command liftGoto(DoubleSupplier target) {
     return new RunCommand(() -> liftGotoPosition(target.getAsDouble()), this);
   }
 
-  public Command liftAndClimb() {
-    return new RunCommand(
-        () -> {
-          liftGotoPosition(liftTargetClimb.getValue());
-          pivotGoto(pivotTarget.getValue());
-        },
-        this);
-  }
-
-  public Command pivotGoto(double position) {
-    return new RunCommand(() -> pivotGotoPosition(position), this);
+  public Command pivotGoto(DoubleSupplier position) {
+    return new RunCommand(() -> pivotGotoPosition(position.getAsDouble()), this);
   }
 
   public Command liftSysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -253,5 +249,21 @@ public class Climber extends SubsystemBase {
 
   public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
     return pivotIdRoutine.dynamic(direction);
+  }
+
+  public Command calibrate() {
+    return new SequentialCommandGroup(
+            new RunCommand(() -> setCalibrate(), this)
+                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 15.0),
+            new InstantCommand(() -> lift.setPosition(0.0), this))
+        .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
+  }
+
+  public Command rightFlip() {
+    return new RunCommand(() -> flip(true), this);
+  }
+
+  public Command leftFlip() {
+    return new RunCommand(() -> flip(false), this);
   }
 }
