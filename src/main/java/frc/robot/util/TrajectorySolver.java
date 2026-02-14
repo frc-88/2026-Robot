@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
+import frc.robot.util.preferenceconstants.PreferenceConstants;
 
 public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
@@ -126,6 +127,10 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Command updateTestInputs() {
-    return new InstantCommand(() -> setInputs());
+    return new InstantCommand(
+        () -> {
+          PreferenceConstants.update();
+          setInputs();
+        });
   }
 }
