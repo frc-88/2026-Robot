@@ -45,6 +45,9 @@ public final class Constants {
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
 
+  // Battery Fuel Gauge
+  public static final int BATTERY_FUEL_GAUGE = 0;
+
   // Drive
   // See generated/TunerConstants.java
 
