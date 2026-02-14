@@ -13,13 +13,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.util.TrajectorySolver;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -34,7 +34,8 @@ public class RobotContainer {
   // public Feeder feeder = new Feeder();
   // public Shooter shooter = new Shooter();
   // public Intake intake = new Intake();
-  public Spinner spinner;
+  // public Spinner spinner;
+  private final TrajectorySolver trajSolv = new TrajectorySolver();
 
   // Controller
   // private final CommandXboxController controller = new CommandXboxController(0);
@@ -83,7 +84,7 @@ public class RobotContainer {
         break;
     }
 
-    spinner = new Spinner(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    // spinner = new Spinner(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -133,7 +134,7 @@ public class RobotContainer {
   }
 
   private void configureDefaultCommands() {
-    spinner.setDefaultCommand(spinner.stopSpinner());
+    // spinner.setDefaultCommand(spinner.stopSpinner());
     // intake.setDefaultCommand(intake.stopIntake());
     // feeder.setDefaultCommand(feeder.stopFeeder());
     // shooter.setDefaultCommand(shooter.stopShooter());
