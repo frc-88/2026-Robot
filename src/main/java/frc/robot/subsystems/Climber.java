@@ -42,17 +42,21 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant liftTestTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
   private final DoublePreferenceConstant liftGripTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 90.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 92.5);
   private final DoublePreferenceConstant liftTuckTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 45.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 30.0);
   private final DoublePreferenceConstant liftDownTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Down", 0.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Down", 0.5);
   private final DoublePreferenceConstant pivotTestTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
   private final DoublePreferenceConstant pivotLeftFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 300.0);
+  private final DoublePreferenceConstant pivotLeftFlipDelay =
+      new DoublePreferenceConstant("Climber/Pivot/Target/LeftDelay", 65.0);
   private final DoublePreferenceConstant pivotRightFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", 310.0);
+  private final DoublePreferenceConstant pivotRightFlipDelay =
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightDelay", 45.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 0.0);
 
@@ -206,7 +210,8 @@ public class Climber extends SubsystemBase {
   }
 
   private void flip(boolean flipRight) {
-    if (lift.getPosition().getValueAsDouble() < (flipRight ? 50 : 65)) {
+    if (lift.getPosition().getValueAsDouble()
+        < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
       pivotGotoPosition(
           flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
     }
