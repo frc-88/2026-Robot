@@ -37,7 +37,7 @@ public class TrajectorySolver extends SubsystemBase {
   public double shootSpeed;
 
   public TrajectorySolver() {
-    
+    SmartDashboard.putData("TrajSolv/Update Inputs", updateTestInputs());
   }
 
   public void setInputs() {
@@ -67,7 +67,6 @@ public class TrajectorySolver extends SubsystemBase {
 
     SmartDashboard.putNumber("TrajSolv/Hood", hoodAngle);
     SmartDashboard.putNumber("TrajSolv/Shoot", shootSpeed);
-    SmartDashboard.putData("TrajSolv/Update Inputs", updateTestInputs());
   }
 
   public void newton() {
