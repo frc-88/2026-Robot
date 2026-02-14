@@ -153,10 +153,8 @@ public class RobotContainer {
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-    SmartDashboard.putData("RunShooterFeeder", feeder.runFeeder());
-    SmartDashboard.putData("StopShooterFeeder", feeder.stopFeeder());
-    SmartDashboard.putData("RunShooter", shooter.runShooter());
-    SmartDashboard.putData("StopShooter", shooter.stopShooter());
+    SmartDashboard.putData("RunFeeder", feeder.runFeeder());
+    SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
     SmartDashboard.putData("RunIntake", intake.runIndexer());
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
@@ -165,14 +163,6 @@ public class RobotContainer {
     SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
     SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
     SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-    SmartDashboard.putData(
-        "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData(
-        "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData(
-        "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
     SmartDashboard.putData(
         "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
     SmartDashboard.putData(
