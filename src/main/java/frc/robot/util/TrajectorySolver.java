@@ -40,6 +40,14 @@ public class TrajectorySolver extends SubsystemBase {
     
   }
 
+  public void setInputs() {
+    robotPosition = new Translation2d(robotPoseX.getValue(), robotPoseY.getValue()); // m
+    robotYaw = new Rotation2d.fromDegrees(robotPoseYaw.getValue()); // rad
+    robotVelocity = new Translation2d(robotVelocityX.getValue(), robotPoseY.getValue()); // m/s
+    robotRotationalVelocity = robotVelocityRot.getValue(); // rad/s
+    targetVelocity = new Translation2d(0,0); // for hub: 0
+  }
+
   public void periodic() {
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
