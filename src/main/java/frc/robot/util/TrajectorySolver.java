@@ -2,8 +2,9 @@ package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class TrajectorySolver {
+public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
   public Translation2d targetPosition = new Translation2d(2.0, 2.0);
   public static Rotation2d quarterRotation = Rotation2d.fromRadians(Math.PI / 2.0);
@@ -27,6 +28,10 @@ public class TrajectorySolver {
 
   public double hoodAngle;
   public double shootSpeed;
+
+  public TrajectorySolver() {
+    
+  }
 
   public void periodic() {
     turretToTargetDistance =
