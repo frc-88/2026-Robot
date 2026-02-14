@@ -39,9 +39,9 @@ public class FieldObject3D {
       allTimes.add(trajectory.get(trajectory.size() - 1).getTime());
       hasSetTime = true;
     }
-    // double time = trajectory.get(trajectory.size() - 1).getTime();
+    double time = trajectory.get(trajectory.size() - 1).getTime();
     posePublisher.set(current.toPose3d());
-    timePub.set(current.getTime());
+    timePub.set(time);
     count++;
     return true;
   }

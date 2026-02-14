@@ -1,9 +1,14 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
-public class TrajectorySolver {
+public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
   public Translation2d targetPosition = new Translation2d(2.0, 2.0);
   public static Rotation2d quarterRotation = Rotation2d.fromRadians(Math.PI / 2.0);
@@ -12,31 +17,57 @@ public class TrajectorySolver {
 
   public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m
   public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
-  public Translation2d robotVelocity = new Translation2d(-0.2,-0.2); // m/s
+  public Translation2d robotVelocity = new Translation2d(-0.2, -0.2); // m/s
   public double robotRotationalVelocity = 0.0; // rad/s
-  public Translation2d targetVelocity = new Translation2d(0,0); // for hub: 0
+  public Translation2d targetVelocity = new Translation2d(0, 0); // for hub: 0
 
   private Translation2d turretToTargetDistance;
   private Translation2d turretToTargetRelativeVelocity;
 
   private boolean hasPreviousTimeOfFlightGuess = false;
   private double timeOfFlight = 0.0; // seconds
-  private Translation2d turretToProjectedTarget; // m; distanceToTarget
+  private Translation2d turretToProjectedTarget = Translation2d.kZero; // m; distanceToTarget
   private double turretToProjectedTargetDistance;
   private int numberOfIterations = 5;
 
   public double hoodAngle;
   public double shootSpeed;
+  Supplier<Pose2d> drivePose1;
+  Supplier<Translation2d> vel1;
+
+  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Translation2d> vel) {
+    drivePose1 = drivePose;
+    vel1 = vel;
+    robotYaw = Rotation2d.kZero;
+    robotToTurret = Translation2d.kZero;
+    targetPosition = Constants.HUB_POSE;
+  }
+
+  public double getAngle() {
+    return hoodAngle;
+  }
+
+  public double getShootSpeed() {
+    return shootSpeed;
+  }
+
+  public double getYaw() {
+    return turretToProjectedTarget.getAngle().getDegrees();
+  }
 
   public void periodic() {
+    robotPosition = drivePose1.get().getTranslation();
+    robotVelocity = vel1.get();
+
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
     turretToTargetRelativeVelocity =
-        robotVelocity.plus(
-            robotToTurret
-                .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
-                .times(robotRotationalVelocity))
-                .minus(targetVelocity);
+        robotVelocity
+            .plus(
+                robotToTurret
+                    .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
+                    .times(robotRotationalVelocity))
+            .minus(targetVelocity);
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
@@ -65,29 +96,42 @@ public class TrajectorySolver {
                               / turretToProjectedTargetDistance));
     }
     if (timeOfFlight > 5) {
-        timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
-        System.out.println("Newton Solution Diverged");
+      timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
+      System.out.println("Newton Solution Diverged");
     }
     turretToProjectedTarget =
         turretToTargetDistance.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
+    System.out.println("BALL");
+    Logger.recordOutput(
+        "Field/ProjectedHub",
+        new Pose2d(turretToProjectedTarget.plus(robotPosition), Rotation2d.kZero));
   }
 
   public double lookupTime(double distance) {
-    return Math.sqrt(distance); // temp
+    return 2.27097
+        - 1.07608 * distance
+        + 0.301204 * (Math.pow(distance, 2.0))
+        - 0.0249606 * (Math.pow(distance, 3.0));
   }
 
   public double lookupTimePrime(double distance) {
-    return 1.0 / (2.0 * Math.sqrt(distance)); // temp
+    return -1.07608 + 0.602408 * distance - 0.0748818 * (Math.pow(distance, 2.0));
   }
 
   public double lookupAngle(double distance) {
-    return distance * 25.0; // very temp
+    return 128.0
+        - 48.9 * distance
+        + 12.7 * (Math.pow(distance, 2.0))
+        - 1.11 * (Math.pow(distance, 3.0));
   }
 
   public double lookupSpeed(double distance) {
-    return distance * 30.0; // temp
+    return 9.7
+        - 2.6 * (distance)
+        + 0.719 * (Math.pow(distance, 2.0))
+        - 0.0514 * (Math.pow(distance, 3.0));
   }
 }

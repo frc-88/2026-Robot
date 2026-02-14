@@ -20,6 +20,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.util.TrajectorySolver;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -35,6 +36,7 @@ public class RobotContainer {
   // public Shooter shooter = new Shooter();
   // public Intake intake = new Intake();
   public Spinner spinner;
+  public TrajectorySolver trajectorySolver;
 
   // Controller
   // private final CommandXboxController controller = new CommandXboxController(0);
@@ -140,14 +142,18 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> joystick.getRawAxis(1),
-            () -> joystick.getRawAxis(0),
-            () -> joystick.getRawAxis(2)));
-    // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+            () -> 0.8 * joystick.getRawAxis(1),
+            () -> 0.8 * joystick.getRawAxis(0),
+            () -> -0.8 * joystick.getRawAxis(4))); // SmartDashboard.putData("RunShooterVoltage",
+    // shooter.runShooterVoltage());
   }
 
   public void disabledInit() {
     // shooter.resetBPS();
+  }
+
+  public void periodic() {
+    trajectorySolver.periodic();
   }
 
   private void configureDriverController() {

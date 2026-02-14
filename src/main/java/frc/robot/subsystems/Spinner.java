@@ -5,12 +5,13 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.FieldObject3D;
 import frc.robot.util.ProjectileSimulator;
-import frc.robot.util.Trajectory;
+import frc.robot.util.TrajectorySolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -29,10 +30,10 @@ public class Spinner extends SubsystemBase {
   Function<Double, Double> pitch;
 
   ProjectileSimulator sim = new ProjectileSimulator();
-  Trajectory trajectory;
+  TrajectorySolver trajectory;
 
   Supplier<Pose2d> drivePose1;
-  Supplier<Pose2d> velocity1;
+  Supplier<Translation2d> velocity1;
 
   private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
@@ -44,10 +45,10 @@ public class Spinner extends SubsystemBase {
   // private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
   //     new MotionMagicPIDPreferenceConstants("SpinnerMotors");
 
-  public Spinner(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity) {
+  public Spinner(Supplier<Pose2d> drivePose, Supplier<Translation2d> velocity) {
     drivePose1 = drivePose;
     velocity1 = velocity;
-    trajectory = new Trajectory(drivePose, velocity, sim);
+    trajectory = new TrajectorySolver(drivePose, velocity);
     // yaw =
     //     () -> {
     //       return drivePose1.get().relativeTo(HUB_POSE).getTranslation().getAngle().getDegrees()
@@ -56,7 +57,7 @@ public class Spinner extends SubsystemBase {
 
     // configureTalons();
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 12; i++) {
       allFuel.add(
           new FieldObject3D(
               String.format("Field/Fuel%d", i), String.format("Field/Fuel%dTime", i)));
@@ -73,25 +74,19 @@ public class Spinner extends SubsystemBase {
         } else if (fuel.hasTrajectory() && timeSinceLastShot <= 2) {
 
         } else {
-          double[] res = trajectory.getSpeedYawAndAngle();
+          double speed = trajectory.getShootSpeed();
+          double angle = trajectory.getAngle();
+          double yaw = trajectory.getYaw();
           fuel.setTrajectory(
-              sim.simulate(
-                  drivePose1.get().getTranslation(),
-                  res[0],
-                  res[1],
-                  res[2],
-                  velocity1.get().getTranslation()));
+              sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
         }
       } else {
         if (!fuel.setPose()) {
-          double[] res = trajectory.getSpeedYawAndAngle();
+          double speed = trajectory.getShootSpeed();
+          double angle = trajectory.getAngle();
+          double yaw = trajectory.getYaw();
           fuel.setTrajectory(
-              sim.simulate(
-                  drivePose1.get().getTranslation(),
-                  res[0],
-                  res[1],
-                  res[2],
-                  velocity1.get().getTranslation()));
+              sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
         }
       }
     }
