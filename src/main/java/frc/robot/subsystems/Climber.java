@@ -206,7 +206,10 @@ public class Climber extends SubsystemBase {
   }
 
   private void flip(boolean flipRight) {
-    pivotGotoPosition(flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
+    if (lift.getPosition().getValueAsDouble() > 15) {
+      pivotGotoPosition(
+          flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
+    }
 
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
 
