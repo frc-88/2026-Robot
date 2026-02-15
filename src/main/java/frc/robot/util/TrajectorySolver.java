@@ -10,9 +10,8 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
-  public Translation2d robotToTurret = new Translation2d(0.3, -3.0 / 4.0 * Math.PI); // m
-  public Translation2d targetPosition = new Translation2d(2.0, 2.0);
-  // TO GO IN CONSTANTS ^^
+  public Translation2d robotToTurret;
+  public Translation2d targetPosition;
 
   public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m
   public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
@@ -41,7 +40,7 @@ public class TrajectorySolver extends SubsystemBase {
     drivePose1 = drivePose;
     vel1 = vel;
     robotYaw = Rotation2d.kZero;
-    robotToTurret = Translation2d.kZero;
+    robotToTurret = Constants.robotToTurret;
     targetPosition = Constants.HUB_POSE;
   }
 

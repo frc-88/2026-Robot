@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.FieldObject3D;
 import frc.robot.util.ProjectileSimulator;
 import frc.robot.util.TrajectorySolver;
@@ -86,7 +87,15 @@ public class Spinner extends SubsystemBase {
           double angle = trajectorySolver.getAngle();
           double yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
-              sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
+              sim.simulate(
+                  drivePose1
+                      .get()
+                      .getTranslation()
+                      .plus(Constants.robotToTurret.rotateBy(drivePose1.get().getRotation())),
+                  speed,
+                  yaw,
+                  angle,
+                  velocity1.get()));
         }
       }
     }
