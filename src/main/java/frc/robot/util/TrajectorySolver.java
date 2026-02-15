@@ -104,14 +104,13 @@ public class TrajectorySolver extends SubsystemBase {
     }
     if (timeOfFlight > 5) {
       timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
-      System.out.println("Newton Solution Diverged");
+      System.out.println("Newton Solution Diverged. TOF: " + timeOfFlight);
     }
     turretToProjectedTarget =
         turretToTargetDistance.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
-    System.out.println("BALL");
     Logger.recordOutput(
         "Field/ProjectedHub",
         new Pose2d(turretToProjectedTarget.plus(robotPosition), Rotation2d.kZero));
