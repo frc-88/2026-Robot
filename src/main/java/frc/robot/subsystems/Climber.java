@@ -5,12 +5,14 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.filter.Debouncer;
@@ -34,6 +36,7 @@ public class Climber extends SubsystemBase {
   private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, CANBus.roboRIO());
   private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, CANBus.roboRIO());
   private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, CANBus.roboRIO());
+  private final Pigeon2 pigeon = new Pigeon2(Constants.CLIMBER_PIGEON, CANBus.roboRIO());
 
   private final MotionMagicPIDPreferenceConstants liftPID =
       new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
@@ -91,6 +94,15 @@ public class Climber extends SubsystemBase {
     configureCANrange();
     configureMotors();
     configureSmartDashboardButtons();
+    configurePigeon();
+  }
+
+  private void configurePigeon() {
+    Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
+    pigeonConfig.MountPose.MountPoseYaw = -180;
+    pigeonConfig.MountPose.MountPosePitch = 90;
+    pigeonConfig.MountPose.MountPoseRoll = 0;
+    pigeon.getConfigurator().apply(pigeonConfig);
   }
 
   private void configureCANrange() {
