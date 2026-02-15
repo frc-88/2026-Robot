@@ -294,9 +294,10 @@ public class Drive extends SubsystemBase {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
-  public Translation2d getChassisSpeedsFieldRelative() {
+  public Pose2d getChassisSpeedsFieldRelative() {
     ChassisSpeeds res = ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), rawGyroRotation);
-    return new Translation2d(res.vxMetersPerSecond, res.vyMetersPerSecond);
+    return new Pose2d(
+        res.vxMetersPerSecond, res.vyMetersPerSecond, new Rotation2d(res.omegaRadiansPerSecond));
   }
 
   /** Returns the position of each module in radians. */

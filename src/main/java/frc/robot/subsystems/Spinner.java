@@ -5,7 +5,6 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,7 +33,7 @@ public class Spinner extends SubsystemBase {
   TrajectorySolver trajectorySolver;
 
   Supplier<Pose2d> drivePose1;
-  Supplier<Translation2d> velocity1;
+  Supplier<Pose2d> velocity1;
 
   private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
@@ -46,7 +45,7 @@ public class Spinner extends SubsystemBase {
   // private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
   //     new MotionMagicPIDPreferenceConstants("SpinnerMotors");
 
-  public Spinner(Supplier<Pose2d> drivePose, Supplier<Translation2d> velocity) {
+  public Spinner(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity) {
     drivePose1 = drivePose;
     velocity1 = velocity;
     trajectorySolver = new TrajectorySolver(drivePose, velocity);
@@ -79,7 +78,18 @@ public class Spinner extends SubsystemBase {
           double angle = trajectorySolver.getAngle();
           double yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
-              sim.simulate(drivePose1.get().getTranslation(), speed, yaw, angle, velocity1.get()));
+              sim.simulate(
+                  drivePose1.get().getTranslation(),
+                  speed,
+                  yaw,
+                  angle,
+                  velocity1
+                      .get()
+                      .getTranslation()
+                      .plus(
+                          Constants.robotToTurret
+                              .rotateBy(drivePose1.get().getRotation().plus(Rotation2d.kCCW_90deg))
+                              .times(velocity1.get().getRotation().getRadians()))));
         }
       } else {
         if (!fuel.setPose()) {
@@ -95,7 +105,13 @@ public class Spinner extends SubsystemBase {
                   speed,
                   yaw,
                   angle,
-                  velocity1.get()));
+                  velocity1
+                      .get()
+                      .getTranslation()
+                      .plus(
+                          (Constants.robotToTurret.rotateBy(
+                                  drivePose1.get().getRotation().plus(Rotation2d.kCCW_90deg)))
+                              .times(velocity1.get().getRotation().getRadians()))));
         }
       }
     }

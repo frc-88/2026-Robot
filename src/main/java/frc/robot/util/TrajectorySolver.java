@@ -34,9 +34,9 @@ public class TrajectorySolver extends SubsystemBase {
   public double hoodAngle;
   public double shootSpeed;
   Supplier<Pose2d> drivePose1;
-  Supplier<Translation2d> vel1;
+  Supplier<Pose2d> vel1;
 
-  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Translation2d> vel) {
+  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> vel) {
     drivePose1 = drivePose;
     vel1 = vel;
     robotYaw = Rotation2d.kZero;
@@ -60,7 +60,9 @@ public class TrajectorySolver extends SubsystemBase {
 
   public void periodic() {
     robotPosition = drivePose1.get().getTranslation();
-    robotVelocity = vel1.get();
+    robotVelocity = vel1.get().getTranslation();
+    robotYaw = drivePose1.get().getRotation();
+    robotRotationalVelocity = vel1.get().getRotation().getRadians();
 
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));

@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -54,5 +55,6 @@ public final class Constants {
 
   public static Translation2d HUB_POSE =
       new Translation2d(Units.inchesToMeters(188.178500), Units.inchesToMeters(158.955000));
-  public static Translation2d robotToTurret = new Translation2d(0.1, -3.0 / 4.0 * Math.PI); // m
+  public static Translation2d robotToTurret =
+      new Translation2d(0.3, Rotation2d.kCW_90deg); // 6.745, -5.75
 }
