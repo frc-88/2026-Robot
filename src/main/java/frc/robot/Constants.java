@@ -56,5 +56,7 @@ public final class Constants {
   public static Translation2d HUB_POSE =
       new Translation2d(Units.inchesToMeters(188.178500), Units.inchesToMeters(158.955000));
   public static Translation2d robotToTurret =
-      new Translation2d(0.3, Rotation2d.kCW_90deg); // 6.745, -5.75
+      new Translation2d(
+          Units.inchesToMeters(Math.hypot(6.745, 5.75)),
+          Rotation2d.fromDegrees(-30.0)); // 6.745, -5.75
 }

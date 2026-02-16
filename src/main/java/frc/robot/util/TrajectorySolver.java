@@ -24,6 +24,7 @@ public class TrajectorySolver extends SubsystemBase {
 
   private Translation2d turretToTargetDistance;
   private Translation2d turretToTargetRelativeVelocity;
+  private Translation2d projectedhub = Translation2d.kZero;
 
   private boolean hasPreviousTimeOfFlightGuess = false;
   private double timeOfFlight = 0.0; // seconds
@@ -111,10 +112,12 @@ public class TrajectorySolver extends SubsystemBase {
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
-    System.out.println("BALL");
-    Logger.recordOutput(
-        "Field/ProjectedHub",
-        new Pose2d(turretToProjectedTarget.plus(robotPosition), Rotation2d.kZero));
+    projectedhub = turretToProjectedTarget.plus(robotPosition);
+    Logger.recordOutput("Field/ProjectedHub", new Pose2d(projectedhub, Rotation2d.kZero));
+  }
+
+  public Translation2d getProjectedHub() {
+    return turretToProjectedTarget;
   }
 
   public double lookupTime(double distance) {

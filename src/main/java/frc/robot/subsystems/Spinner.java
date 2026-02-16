@@ -4,7 +4,10 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,6 +21,7 @@ import java.util.Random;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Spinner extends SubsystemBase {
   Pose2d HUB_POSE = new Pose2d(4.0, 4.1, new Rotation2d());
@@ -25,6 +29,7 @@ public class Spinner extends SubsystemBase {
   private List<FieldObject3D> allFuel = new ArrayList<>();
   // private boolean justShot;
   private double timeSinceLastShot = 0.0;
+  double yaw = 0.0;
   // DoubleSupplier speed = () -> 8.5 + rand.nextGaussian() * 0.3;
   // DoubleSupplier yaw;
   Function<Double, Double> pitch;
@@ -76,7 +81,7 @@ public class Spinner extends SubsystemBase {
         } else {
           double speed = trajectorySolver.getShootSpeed();
           double angle = trajectorySolver.getAngle();
-          double yaw = trajectorySolver.getYaw();
+          yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
               sim.simulate(
                   drivePose1.get().getTranslation(),
@@ -95,7 +100,7 @@ public class Spinner extends SubsystemBase {
         if (!fuel.setPose()) {
           double speed = trajectorySolver.getShootSpeed();
           double angle = trajectorySolver.getAngle();
-          double yaw = trajectorySolver.getYaw();
+          yaw = trajectorySolver.getYaw();
           fuel.setTrajectory(
               sim.simulate(
                   drivePose1
@@ -116,6 +121,18 @@ public class Spinner extends SubsystemBase {
       }
     }
     timeSinceLastShot++;
+    Logger.recordOutput(
+        "Field/TurretPose",
+        new Pose3d(
+            Constants.robotToTurret.getX(),
+            Constants.robotToTurret.getY(),
+            Units.inchesToMeters(22.0),
+            new Rotation3d(
+                0.0,
+                0.0,
+                trajectorySolver.getProjectedHub().getAngle().getRadians()
+                    - drivePose1.get().getRotation().getRadians()
+                    + Units.degreesToRadians(215.0))));
   }
 
   // private void configureTalons() {
