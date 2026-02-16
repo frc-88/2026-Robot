@@ -37,6 +37,7 @@ public class Climber extends SubsystemBase {
   private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, CANBus.roboRIO());
   private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, CANBus.roboRIO());
   private final Pigeon2 pigeon = new Pigeon2(Constants.CLIMBER_PIGEON, CANBus.roboRIO());
+  // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 
   private final MotionMagicPIDPreferenceConstants liftPID =
       new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
@@ -206,7 +207,7 @@ public class Climber extends SubsystemBase {
   }
 
   private void pivotGotoPosition(double position) {
-    pivot.setControl(pivotMotionMagic.withPosition(position));
+    pivot.setControl(pivotMotionMagic.withPosition(position).withFeedForward(3.0)); // * sin pitch
   }
 
   private void setLiftVoltage(Voltage volts) {

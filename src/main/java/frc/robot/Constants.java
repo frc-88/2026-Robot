@@ -56,6 +56,7 @@ public final class Constants {
   public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);
 
   // Drive
+  public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
 
 }
