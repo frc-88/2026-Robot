@@ -220,10 +220,6 @@ public class Turret extends SubsystemBase {
     return m_tracking;
   }
 
-  public boolean isSafeForClimber() {
-    return Math.abs(getPosition()) % 180 < 10;
-  }
-
   private double getPosition() {
     return m_turret.getPosition().getValueAsDouble();
   }
