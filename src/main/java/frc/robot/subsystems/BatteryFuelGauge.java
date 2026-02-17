@@ -52,12 +52,16 @@ public class BatteryFuelGauge extends SubsystemBase {
         "Battery Gauge/Rated Capacity (Ah)", battFuelGauge.getRatedCapacityAh());
     SmartDashboard.putNumber("Battery Gauge/Cycles", battFuelGauge.getNumCycles());
     SmartDashboard.putNumber("Battery Gauge/Age (Days)", battFuelGauge.getBatteryAgeDays());
+
+    updateDashboardNickname();
+    updateDashboardManufacturer();
   }
 
   public void
       updateDashboardNickname() { // Get the nickname from the battery gauge and update the display
     // on the smart dashboard
     SmartDashboard.putString("Battery Gauge/Nickname", battFuelGauge.getNickname());
+    // System.out.println(battFuelGauge.getNickname());
   }
 
   public void updateDashboardManufacturer() {
@@ -77,6 +81,7 @@ public class BatteryFuelGauge extends SubsystemBase {
         break;
     }
     SmartDashboard.putString("Battery Gauge/Manufacturer", batteryManufacturerString);
+    // System.out.println(batteryManufacturerString);
   }
 
   public void saveBatteryNickname() {
@@ -89,15 +94,16 @@ public class BatteryFuelGauge extends SubsystemBase {
   public void saveBatteryManufacturer() {
     // Function that saves the battery manufacturer to the battery gauge. This does NOT return a
     // command.
+    // System.out.println(batteryManufacturer.getSelected());
     battFuelGauge.setManufacturer(batteryManufacturer.getSelected());
     updateDashboardManufacturer();
   }
 
   public Command setBatteryNickname() {
-    return new InstantCommand(() -> saveBatteryNickname());
+    return new InstantCommand(() -> saveBatteryNickname()).ignoringDisable(true);
   }
 
   public Command setBatteryManufacturer() {
-    return new InstantCommand(() -> saveBatteryManufacturer());
+    return new InstantCommand(() -> saveBatteryManufacturer()).ignoringDisable(true);
   }
 }
