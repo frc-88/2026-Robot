@@ -33,6 +33,7 @@ public class Shooter extends SubsystemBase {
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
   private DigitalInput feederBeamBreak = new DigitalInput(0);
   private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
+  @SuppressWarnings("unused")
   private boolean boosted = false;
   // private Trigger boostStarted = new Trigger(() -> boosted);
   private Timer timeSinceBallLastSeen = new Timer();
@@ -42,6 +43,7 @@ public class Shooter extends SubsystemBase {
   private int ballsCount;
   private double earliestBallTime = 0;
   private double lastBallTime;
+  @SuppressWarnings("unused")
   private double ballsPerSecond;
 
   // Shooter
