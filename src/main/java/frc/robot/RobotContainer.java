@@ -7,36 +7,22 @@
 
 package frc.robot;
 
-import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
-
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Spinner;
-import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.Batman;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -49,14 +35,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final Drive drive;
-  private final Turret turret;
-  public Feeder feeder = new Feeder();
-  public Shooter shooter = new Shooter();
-  public Intake intake = new Intake();
-  public Spinner spinner = new Spinner();
-  public TrajectorySolver trajectorySolver;
-  public Batman batman = new Batman();
-  public final Vision vision;
+  // private final Turret turret;
+  // public Feeder feeder = new Feeder();
+  // public Shooter shooter = new Shooter();
+  // public Intake intake = new Intake();
+  // public Spinner spinner = new Spinner();
+  // public TrajectorySolver trajectorySolver;
+  // public Batman batman = new Batman();
+  // public final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -87,11 +73,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement, batman,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
-        turret = new Turret(gyro);
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         batman,
+        //         new VisionIOLimelight(camera0Name, drive::getRotation));
+        // turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -104,11 +91,12 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        turret = new Turret(gyro);
-        vision = // TODO: this is just to get it to compile
-            new Vision(
-                drive::addVisionMeasurement, batman,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
+        // turret = new Turret(gyro);
+        // vision = // TODO: this is just to get it to compile
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         batman,
+        //         new VisionIOLimelight(camera0Name, drive::getRotation));
         break;
 
       default:
@@ -117,8 +105,8 @@ public class RobotContainer {
         drive =
             new Drive(
                 gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-        turret = new Turret(gyro);
-        vision = new Vision(drive::addVisionMeasurement, batman, new VisionIO() {});
+        // turret = new Turret(gyro);
+        // vision = new Vision(drive::addVisionMeasurement, batman, new VisionIO() {});
         break;
     }
 
@@ -149,28 +137,28 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
-    if (Util.logif()) {
-      SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-      SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
-      SmartDashboard.putData("RunIntake", intake.runIndexer());
-      SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-      SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
-      SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
-      SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
-    }
+    // if (Util.logif()) {
+    //   SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
+    //   SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
+    //   SmartDashboard.putData("RunFeeder", feeder.runFeeder());
+    //   SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
+    //   SmartDashboard.putData("RunIntake", intake.runIndexer());
+    //   SmartDashboard.putData("StopIntake", intake.stopIntake());
+    //   SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+    //   SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+    //   SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
+    //   SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
+    //   SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
+    //   SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
+    //   SmartDashboard.putData(
+    //       "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
+    //   SmartDashboard.putData(
+    //       "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
+    //   SmartDashboard.putData(
+    //       "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
+    //   SmartDashboard.putData(
+    //       "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+    // }
   }
 
   private void configureDefaultCommands() {
@@ -192,7 +180,7 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    trajectorySolver.periodic();
+    // trajectorySolver.periodic();
   }
 
   private void configureDriverController() {
