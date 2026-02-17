@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Voltage;
@@ -36,7 +37,8 @@ public class Climber extends SubsystemBase {
   private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, CANBus.roboRIO());
   private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, CANBus.roboRIO());
   private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, CANBus.roboRIO());
-  private final Pigeon2 pigeon = new Pigeon2(Constants.CLIMBER_PIGEON, CANBus.roboRIO());
+  private final Pigeon2 pigeon = new Pigeon2(0, CANBus.roboRIO());
+  // PowerDistribution pdh = new PowerDistribution();
   // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 
   private final MotionMagicPIDPreferenceConstants liftPID =
@@ -65,7 +67,8 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 0.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
-  private final MotionMagicVoltage pivotMotionMagic = new MotionMagicVoltage(0);
+  private final MotionMagicVoltage pivotMotionMagic =
+      new MotionMagicVoltage(0).withFeedForward(3.0);
   private final DynamicMotionMagicVoltage liftMotionMagicSlow =
       new DynamicMotionMagicVoltage(0, 0, 0);
   private final VoltageOut liftVoltage = new VoltageOut(0.0);
@@ -104,8 +107,8 @@ public class Climber extends SubsystemBase {
 
   private void configurePigeon() {
     Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
-    pigeonConfig.MountPose.MountPoseYaw = -180;
-    pigeonConfig.MountPose.MountPosePitch = 90;
+    pigeonConfig.MountPose.MountPoseYaw = -90; // -180;
+    pigeonConfig.MountPose.MountPosePitch = 0; // 90;
     pigeonConfig.MountPose.MountPoseRoll = 0;
     pigeon.getConfigurator().apply(pigeonConfig);
   }
@@ -129,6 +132,8 @@ public class Climber extends SubsystemBase {
     liftConfig.Slot0.kS = liftPID.getKS().getValue();
     liftConfig.MotionMagic.MotionMagicCruiseVelocity = liftPID.getMaxVelocity().getValue();
     liftConfig.MotionMagic.MotionMagicAcceleration = liftPID.getMaxAcceleration().getValue();
+    liftConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+    liftConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
     liftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO
     lift.getConfigurator().apply(liftConfig);
 
@@ -139,14 +144,25 @@ public class Climber extends SubsystemBase {
     pivotConfig.Slot0.kV = pivotPID.getKV().getValue();
     pivotConfig.Slot0.kS = pivotPID.getKS().getValue();
     pivotConfig.Slot0.kA = pivotPID.getKA().getValue();
+    // pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    // pivotConfig.Slot0.kG = 3.0;
+    // pivotConfig.Slot0.GravityArmPositionOffset = -0.25;
+    // pivotConfig.Feedback.SensorToMechanismRatio =
+    // Constants.CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS;
+    pivotConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+    pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
     pivotConfig.MotionMagic.MotionMagicCruiseVelocity = pivotPID.getMaxVelocity().getValue();
     pivotConfig.MotionMagic.MotionMagicAcceleration = pivotPID.getMaxAcceleration().getValue();
     pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO
+
     pivot.getConfigurator().apply(pivotConfig);
+    pivot.setNeutralMode(NeutralModeValue.Brake);
+    lift.setNeutralMode(NeutralModeValue.Brake);
   }
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
+    // SmartDashboard.putData("Climber/FullSend", fullSend());
     SmartDashboard.putData("Climber/Flip Left", leftFlip());
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Go Grip", gotoGrip());
@@ -159,7 +175,8 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData(
         "Climber/Pivot/Goto Target", pivotGoto(() -> pivotTestTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Pivot/Zero", new InstantCommand(() -> pivot.setPosition(0.0), this));
+        "Climber/Pivot/Zero",
+        new InstantCommand(() -> pivot.setPosition(0.0), this).ignoringDisable(true));
     SmartDashboard.putData(
         "Climber/Lift/Zero", new InstantCommand(() -> lift.setPosition(0.0), this));
     SmartDashboard.putData(
@@ -202,12 +219,29 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  private void stop() {
+    lift.setControl(new DutyCycleOut(0));
+    pivot.setControl(new DutyCycleOut(0));
+  }
+
   private void liftGotoPosition(double position) {
     lift.setControl(liftMotionMagic.withPosition(position));
   }
 
   private void pivotGotoPosition(double position) {
-    pivot.setControl(pivotMotionMagic.withPosition(position).withFeedForward(3.0)); // * sin pitch
+    pivot.setControl(pivotMotionMagic.withPosition(position)); // * sin
+    // pitch
+    // pivot.setControl(new DutyCycleOut(1.0));
+  }
+
+  private void pivotGotoPositionMotion() {
+    pivot.setControl(
+        pivotMotionMagic.withPosition(
+            Math.abs(
+                pivot.getPosition().getValueAsDouble()
+                    - (Math.signum(pigeon.getRoll().getValueAsDouble())
+                        * (((180.0 - Math.abs(pigeon.getRoll().getValueAsDouble())) / 360.0)
+                            * 592)))));
   }
 
   private void setLiftVoltage(Voltage volts) {
@@ -219,10 +253,25 @@ public class Climber extends SubsystemBase {
   }
 
   private void setCalibrate() {
-    lift.setControl(new DutyCycleOut(-0.04));
+    lift.setControl(new DutyCycleOut(-0.08));
   }
 
   private void flip(boolean flipRight) {
+    if (lift.getPosition().getValueAsDouble()
+        < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
+      pivotGotoPositionMotion();
+    }
+
+    double position = Math.abs(pivot.getPosition().getValueAsDouble());
+
+    if (position > pivotSwitchTarget.getValue()) {
+      liftGotoPosition(liftGripTarget.getValue());
+    } else {
+      liftGotoPosition(liftTuckTarget.getValue());
+    }
+  }
+
+  private void flipMotion(boolean flipRight) {
     if (lift.getPosition().getValueAsDouble()
         < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
       pivotGotoPosition(
@@ -250,6 +299,13 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber/Pivot/Velocity", pivot.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Climber/Pivot/Voltage", pivot.getMotorVoltage().getValueAsDouble());
     SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Climber/TargetRotations",
+        Math.abs(
+            pivot.getPosition().getValueAsDouble()
+                - (Math.signum(pigeon.getRoll().getValueAsDouble())
+                    * (((180.0 - Math.abs(pigeon.getRoll().getValueAsDouble())) / 360.0) * 592))));
+    SmartDashboard.putNumber("Climber/PigeonRoll", pigeon.getRoll().getValueAsDouble());
   }
 
   public Command liftGoto(DoubleSupplier target) {
@@ -279,7 +335,7 @@ public class Climber extends SubsystemBase {
   public Command calibrate() {
     return new SequentialCommandGroup(
             new RunCommand(() -> setCalibrate(), this)
-                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 15.0),
+                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 25.0),
             new InstantCommand(() -> lift.setPosition(0.0), this))
         .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
@@ -302,5 +358,9 @@ public class Climber extends SubsystemBase {
 
   public Command leftFlip() {
     return new RunCommand(() -> flip(false), this);
+  }
+
+  public Command stopall() {
+    return new RunCommand((() -> stop()), this);
   }
 }
