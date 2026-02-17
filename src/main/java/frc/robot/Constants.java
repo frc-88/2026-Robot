@@ -32,6 +32,13 @@ public final class Constants {
     REPLAY
   }
 
+  public static enum ModeCode {
+    COMP,
+    DEVELOPMENT
+  }
+
+  public static ModeCode MODE = ModeCode.DEVELOPMENT;
+
   // Intake
   public static final int INTAKE_MAIN = 2;
 

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIO.GyroIOInputs;
+import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 
@@ -63,7 +64,6 @@ public class Turret extends SubsystemBase {
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
     p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
 
-    // initialize Falcon to correct position when we wake up based on CANcoder absolute position
     sync();
   }
 
@@ -95,7 +95,7 @@ public class Turret extends SubsystemBase {
   public void sync() {
     if (isEncoderConnected()) {
       m_turret.setPosition(
-          cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble()));
+          cancoderPostionToKrakenPosition(m_cancoder.getAbsolutePosition().getValueAsDouble()));
     } else {
       m_turret.setPosition(0.0);
     }
@@ -199,7 +199,7 @@ public class Turret extends SubsystemBase {
     return Math.abs(
             getFacing()
                 - turretEncoderPositionToFacing(
-                    cancoderPostionToFalconPosition(
+                    cancoderPostionToKrakenPosition(
                         m_cancoder.getAbsolutePosition().getValueAsDouble())))
         < p_syncThreshold.getValue();
   }
@@ -249,7 +249,7 @@ public class Turret extends SubsystemBase {
             > turretFacingToEncoderPosition(p_reverseLimit.getValue() + p_limitBuffer.getValue()));
   }
 
-  private double cancoderPostionToFalconPosition(double position) {
+  private double cancoderPostionToKrakenPosition(double position) {
     double normalPosition = (position - p_zeroPosition.getValue());
 
     // if (normalPosition > 180) { normalPosition -= 360; }
@@ -269,18 +269,21 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber(
-        "Turret/CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Turret/CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Turret/CANCoder Turret Facing",
-        turretEncoderPositionToFacing(
-            cancoderPostionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble())));
-    SmartDashboard.putNumber("Turret/Position", getPosition());
-    SmartDashboard.putNumber("Turret/Facing", getFacing());
-    SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
-    SmartDashboard.putBoolean("Turret/Tracking", isTracking());
-    SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
+    if (Util.logif()) {
+      SmartDashboard.putNumber(
+          "Turret/CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Turret/CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Turret/CANCoder Turret Facing",
+          turretEncoderPositionToFacing(
+              cancoderPostionToKrakenPosition(
+                  m_cancoder.getAbsolutePosition().getValueAsDouble())));
+      SmartDashboard.putNumber("Turret/Position", getPosition());
+      SmartDashboard.putNumber("Turret/Facing", getFacing());
+      SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
+      SmartDashboard.putBoolean("Turret/Tracking", isTracking());
+      SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
+    }
   }
 }

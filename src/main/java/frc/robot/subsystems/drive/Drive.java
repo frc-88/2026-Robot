@@ -43,6 +43,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.Util;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -168,8 +169,10 @@ public class Drive extends SubsystemBase {
 
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+      if (Util.logif()) {
+        Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+      }
     }
 
     // Update odometry
@@ -220,8 +223,10 @@ public class Drive extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    if (Util.logif()) {
+      Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+      Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    }
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
@@ -229,7 +234,9 @@ public class Drive extends SubsystemBase {
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    if (Util.logif()) {
+      Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
