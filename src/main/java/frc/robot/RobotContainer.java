@@ -11,22 +11,30 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Spinner;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.util.TrajectorySolver;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -41,19 +49,30 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
+
   private final Drive drive;
+  private final Turret turret;
+  public Feeder feeder = new Feeder();
+  public Shooter shooter = new Shooter();
+  public Intake intake = new Intake();
+  public Spinner spinner = new Spinner();
+  public TrajectorySolver trajectorySolver;
   public Batman batman = new Batman();
   public final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
+  private Joystick joystick = new Joystick(0);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    GyroIO gyro;
+
+    //TODO Disable diagnostic server if in COMP mode?
     if (!Util.logif()) {
       Unmanaged.setPhoenixDiagnosticsStartTime(-1);
     }
@@ -62,9 +81,10 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
+        gyro = new GyroIOPigeon2();
         drive =
             new Drive(
-                new GyroIOPigeon2(),
+                gyro,
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
@@ -72,35 +92,20 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
-        // The ModuleIOTalonFXS implementation provides an example implementation for
-        // TalonFXS controller connected to a CANdi with a PWM encoder. The
-        // implementations
-        // of ModuleIOTalonFX, ModuleIOTalonFXS, and ModuleIOSpark (from the Spark
-        // swerve
-        // template) can be freely intermixed to support alternative hardware
-        // arrangements.
-        // Please see the AdvantageKit template documentation for more information:
-        // https://docs.advantagekit.org/getting-started/template-projects/talonfx-swerve-template#custom-module-implementations
-        //
-        // drive =
-        // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
+                new VisionIOLimelight(camera0Name, drive::getRotation));        turret = new Turret(gyro);
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        gyro = new GyroIO() {};
         drive =
             new Drive(
-                new GyroIO() {},
+                gyro,
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        turret = new Turret(gyro);
         vision = // TODO: this is just to get it to compile
             new Vision(
                 drive::addVisionMeasurement,
@@ -109,16 +114,16 @@ public class RobotContainer {
 
       default:
         // Replayed robot, disable IO implementations
+        gyro = new GyroIO() {};
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+        turret = new Turret(gyro);
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         break;
     }
+
+    //spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -139,27 +144,57 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Configure the button bindings
-    configureButtonBindings();
+    configureSmartDashboardButtons();
+    configureDefaultCommands();
+    configureDriverController();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // SmartDashboard.putData("QuestReset", Batman.resetQuestPose(vision::getPose));
-    // Default command, normal field-relative drive
+  private void configureSmartDashboardButtons() {
+    if(Util.logif()) {    
+      SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
+      SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
+      SmartDashboard.putData("RunFeeder", feeder.runFeeder());
+      SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
+      SmartDashboard.putData("RunIntake", intake.runIndexer());
+      SmartDashboard.putData("StopIntake", intake.stopIntake());
+      SmartDashboard.putData("RunSpinner", spinner.runSpinner());
+      SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
+      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
+      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
+      SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
+      SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
+      SmartDashboard.putData(
+          "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
+      SmartDashboard.putData(
+          "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
+      SmartDashboard.putData("Feeder/SysId/Dynamic Forward",
+      feeder.sysIdDynamic(Direction.kForward));
+      SmartDashboard.putData("Feeder/SysId/Dynamic Reverse",
+      feeder.sysIdDynamic(Direction.kReverse));}  
+  }
+
+  private void configureDefaultCommands() {
+    spinner.setDefaultCommand(spinner.stopSpinner());
+    intake.setDefaultCommand(intake.stopIntake());
+    feeder.setDefaultCommand(feeder.stopFeeder());
+    shooter.setDefaultCommand(shooter.stopShooter());
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> 0.8 * joystick.getRawAxis(1),
+            () -> 0.8 * joystick.getRawAxis(0),
+            () -> -0.8 * joystick.getRawAxis(4)));
+  }
 
-    // Lock to 0° when A button is held
+  public void disabledInit() {
+    // shooter.resetBPS();
+  }
+
+  public void periodic() {
+    trajectorySolver.periodic();
+  }
+
+  private void configureDriverController() {
     controller
         .a()
         .whileTrue(
@@ -171,8 +206,6 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // Reset gyro to 0° when B button is pressed
     controller
         .b()
         .onTrue(
@@ -182,11 +215,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-  }
-
-  public void periodic() {
-    batman.drivePose = drive.getPose(); // this may not be estimator
-    batman.visionPose = vision.getPose();
   }
 
   // /**
