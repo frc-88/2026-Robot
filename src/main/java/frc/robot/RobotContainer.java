@@ -8,8 +8,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -44,9 +44,9 @@ public class RobotContainer {
   public TrajectorySolver trajectorySolver;
 
   // Controller
-  // private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(0);
 
-  private Joystick joystick = new Joystick(0);
+  // private Joystick joystick = new Joystick(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -151,9 +151,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> 0.8 * joystick.getRawAxis(1),
-            () -> 0.8 * joystick.getRawAxis(0),
-            () -> -0.8 * joystick.getRawAxis(4))); // SmartDashboard.putData("RunShooterVoltage",
+            () -> controller.getLeftX(),
+            () -> controller.getLeftY(),
+            () -> controller.getRightX())); // SmartDashboard.putData("RunShooterVoltage",
     // shooter.runShooterVoltage());
   }
 

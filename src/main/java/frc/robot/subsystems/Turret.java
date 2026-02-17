@@ -29,7 +29,7 @@ public class Turret extends SubsystemBase {
 
   private GyroIO m_gyro;
 
-  private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(null);
+  private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
   private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
   private VoltageOut voltageReq = new VoltageOut(0);
 
