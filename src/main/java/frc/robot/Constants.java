@@ -33,7 +33,7 @@ public final class Constants {
   }
 
   public static enum ModeCode {
-    COMP, 
+    COMP,
     DEVELOPMENT
   }
 

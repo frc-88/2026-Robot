@@ -11,7 +11,6 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
@@ -34,11 +33,11 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.util.TrajectorySolver;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -72,7 +71,7 @@ public class RobotContainer {
   public RobotContainer() {
     GyroIO gyro;
 
-    //TODO Disable diagnostic server if in COMP mode?
+    // TODO Disable diagnostic server if in COMP mode?
     if (!Util.logif()) {
       Unmanaged.setPhoenixDiagnosticsStartTime(-1);
     }
@@ -92,7 +91,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation));        turret = new Turret(gyro);
+                new VisionIOLimelight(camera0Name, drive::getRotation));
+        turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -123,7 +123,7 @@ public class RobotContainer {
         break;
     }
 
-    //spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    // spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -150,7 +150,7 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
-    if(Util.logif()) {    
+    if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunFeeder", feeder.runFeeder());
@@ -167,10 +167,11 @@ public class RobotContainer {
           "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
       SmartDashboard.putData(
           "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData("Feeder/SysId/Dynamic Forward",
-      feeder.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData("Feeder/SysId/Dynamic Reverse",
-      feeder.sysIdDynamic(Direction.kReverse));}  
+      SmartDashboard.putData(
+          "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
+      SmartDashboard.putData(
+          "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+    }
   }
 
   private void configureDefaultCommands() {

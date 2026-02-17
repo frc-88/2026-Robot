@@ -91,5 +91,4 @@ public class Simulation extends SubsystemBase {
     }
     timeSinceLastShot++;
   }
-
 }
