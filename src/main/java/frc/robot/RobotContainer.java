@@ -94,7 +94,7 @@ public class RobotContainer {
         break;
     }
 
-    //spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    // spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -144,7 +144,7 @@ public class RobotContainer {
   }
 
   private void configureDefaultCommands() {
-    //spinner.setDefaultCommand(spinner.stopSpinner());
+    // spinner.setDefaultCommand(spinner.stopSpinner());
     // intake.setDefaultCommand(intake.stopIntake());
     // feeder.setDefaultCommand(feeder.stopFeeder());
     // shooter.setDefaultCommand(shooter.stopShooter());

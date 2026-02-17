@@ -14,7 +14,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 public class Intake extends SubsystemBase {
 
   private final TalonFX intake = new TalonFX(Constants.INTAKE_MAIN, CANBus.roboRIO());
- // private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
+  // private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
   private DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
