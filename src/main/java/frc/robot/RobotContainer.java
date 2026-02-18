@@ -22,7 +22,7 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
-//import frc.robot.subsystems.Turret;
+// import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -40,7 +40,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final Drive drive;
-  //private final Turret turret;
+  // private final Turret turret;
   public Feeder feeder = new Feeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
@@ -69,7 +69,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        //turret = new Turret(gyro);
+        // turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -82,7 +82,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        //turret = new Turret(gyro);
+        // turret = new Turret(gyro);
         break;
 
       default:
@@ -91,7 +91,7 @@ public class RobotContainer {
         drive =
             new Drive(
                 gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-        //turret = new Turret(gyro);
+        // turret = new Turret(gyro);
         break;
     }
 
