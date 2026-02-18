@@ -56,7 +56,7 @@ public final class Constants {
 
   // HOOD Milk
   public static int HOOD = 16;
-  public static double HOOD_ROT_TO_ANGLE = (0.0);
+  public static double MINION_ROT_TO_ANGLE = (1.0 / (287.0 / 54.0)) * 360.0;
 
   public static Translation2d robotToTurret =
       // new Translation2d(
