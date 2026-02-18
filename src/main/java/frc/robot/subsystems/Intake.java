@@ -43,7 +43,7 @@ public class Intake extends SubsystemBase {
     intake.stopMotor();
   }
 
-  public Command runIndexer() {
+  public Command runIntake() {
     return new RunCommand(() -> setSpeed(speed.getValue()), this);
   }
 

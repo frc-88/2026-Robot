@@ -13,12 +13,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
@@ -45,6 +47,7 @@ public class RobotContainer {
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
+  public Hood hood = new Hood();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -127,7 +130,7 @@ public class RobotContainer {
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
     SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
-    SmartDashboard.putData("RunIntake", intake.runIndexer());
+    SmartDashboard.putData("RunIntake", intake.runIntake());
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
     SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
@@ -156,8 +159,15 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
+    hood.setDefaultCommand(hood.stopHood());
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> -controller.getRightX()));
     drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        DriveCommands.rotateAroundTurret(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
@@ -181,7 +191,20 @@ public class RobotContainer {
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    controller
+        .x()
+        .onTrue(
+            intake
+                .stopIntake()
+                .alongWith(
+                    DriveCommands.rotateAroundTurret(
+                        drive,
+                        () -> -controller.getLeftY(),
+                        () -> -controller.getLeftX(),
+                        () -> -controller.getRightX()))
+                .alongWith(shooter.stopShooter())
+                .alongWith(spinner.stopSpinner())
+                .alongWith(feeder.stopFeeder()));
 
     // Reset gyro to 0° when B button is pressed
     controller
@@ -193,6 +216,20 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    controller
+        .rightTrigger()
+        .onTrue(
+            shooter
+                .runShooter()
+                .alongWith(feeder.runFeeder())
+                .alongWith(intake.runIntake())
+                .alongWith(spinner.runSpinner()))
+        .onFalse(new InstantCommand(() -> {}));
+  }
+
+  public Command driveDefault() {
+    return DriveCommands.joystickDriveAtAngle(
+        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.kZero);
   }
 
   /**

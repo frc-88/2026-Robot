@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -52,4 +54,13 @@ public final class Constants {
   // Drive
   // See generated/TunerConstants.java
 
+  // HOOD Milk
+  public static int HOOD = 16;
+  public static double HOOD_ROT_TO_ANGLE = (0.0);
+
+  public static Translation2d robotToTurret =
+      // new Translation2d(
+      //     Units.inchesToMeters(Math.hypot(6.745, 5.75)),
+      //     Rotation2d.fromDegrees(-30.0)); // 6.745, -5.75
+      new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
 }
