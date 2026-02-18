@@ -234,7 +234,7 @@ public class Climber extends SubsystemBase {
     // pivot.setControl(new DutyCycleOut(1.0));
   }
 
-  private void pivotGotoPositionMotion() {
+  private void pivotGotoPositionMotion(boolean flipRight) {
     pivot.setControl(
         pivotMotionMagic.withPosition(
             Math.abs(
@@ -259,7 +259,7 @@ public class Climber extends SubsystemBase {
   private void flip(boolean flipRight) {
     if (lift.getPosition().getValueAsDouble()
         < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
-      pivotGotoPositionMotion();
+      pivotGotoPositionMotion(flipRight);
     }
 
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
@@ -357,7 +357,12 @@ public class Climber extends SubsystemBase {
   }
 
   public Command leftFlip() {
-    return new RunCommand(() -> flip(false), this);
+    return new RunCommand(() -> flipMotion(false), this)
+        .until(
+            () ->
+                Math.abs(pivot.getPosition().getValueAsDouble() - pivotLeftFlipTarget.getValue())
+                    < 10.0)
+        .andThen(new RunCommand(() -> flip(false), this));
   }
 
   public Command stopall() {
