@@ -22,7 +22,7 @@ public class Spinner extends SubsystemBase {
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 0.0);
 
   private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
-      new MotionMagicPIDPreferenceConstants("SpinnerMotors");
+      new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors");
 
   public Spinner() {
     configureTalons();
