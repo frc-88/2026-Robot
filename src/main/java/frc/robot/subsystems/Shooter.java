@@ -122,8 +122,11 @@ public class Shooter extends SubsystemBase {
   }
 
   private void setShooterSpeed(DoubleSupplier speed) {
-    shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
-    //         .withUpdateFreqHz(1000.0));
+    shooterMain.setControl(
+        requestShooter
+            .withVelocity(speed.getAsDouble())
+            .withFeedForward(0.0)
+            .withUpdateFreqHz(1000.0));
   }
   //   DoubleSupplier speed,
   //   DoubleSupplier FeedForwardIncrease,
