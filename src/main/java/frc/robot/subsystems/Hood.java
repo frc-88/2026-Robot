@@ -51,7 +51,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command stopHood() {
-    return new RunCommand(() -> stopHoodMotor());
+    return new RunCommand(() -> stopHoodMotor(), this);
   }
 
   public Command calibrate() {
