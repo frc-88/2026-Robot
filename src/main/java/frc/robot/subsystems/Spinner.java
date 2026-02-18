@@ -9,12 +9,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Spinner extends SubsystemBase {
-  private final TalonFX spinner = new TalonFX(6, CANBus.roboRIO());
+  private final TalonFX spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
   private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
   // private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
@@ -22,7 +23,7 @@ public class Spinner extends SubsystemBase {
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 0.0);
 
   private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
-      new MotionMagicPIDPreferenceConstants("SpinnerMotors");
+      new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors");
 
   public Spinner() {
     configureTalons();
@@ -41,7 +42,7 @@ public class Spinner extends SubsystemBase {
     spinnerConfig.Slot0.kD = spinnerConfigConstants.getKD().getValue();
     spinnerConfig.Slot0.kV = spinnerConfigConstants.getKV().getValue();
     spinnerConfig.Slot0.kS = spinnerConfigConstants.getKS().getValue();
-    spinnerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     spinner.getConfigurator().apply(spinnerConfig);
   }
 
