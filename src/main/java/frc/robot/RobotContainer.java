@@ -8,8 +8,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -39,10 +39,10 @@ public class RobotContainer {
   public TrajectorySolver trajectorySolver;
 
   // Controller
-  // private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(0);
 
-  private Joystick joystick0 = new Joystick(0);
-  private Joystick joystick1 = new Joystick(1);
+  // private Joystick joystick0 = new Joystick(0);
+  // private Joystick joystick1 = new Joystick(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -141,11 +141,11 @@ public class RobotContainer {
     // feeder.setDefaultCommand(feeder.stopFeeder());
     // shooter.setDefaultCommand(shooter.stopShooter());
     drive.setDefaultCommand(
-        DriveCommands.rotateAroundTurret(
+        DriveCommands.joystickDrive(
             drive,
-            () -> 0.8 * joystick0.getRawAxis(1),
-            () -> 0.8 * joystick0.getRawAxis(0),
-            () -> -0.8 * joystick1.getRawAxis(0))); // SmartDashboard.putData("RunShooterVoltage",
+            () -> 0.8 * controller.getLeftY(),
+            () -> 0.8 * controller.getLeftX(),
+            () -> -0.8 * controller.getRightX())); // SmartDashboard.putData("RunShooterVoltage",
     // shooter.runShooterVoltage());
   }
 
