@@ -45,9 +45,9 @@ public final class Constants {
   // Turret
   public static final int TURRET_MOTOR_ID = 6;
   public static final int TURRET_CANCODER_ID = 8;
-  public static final int TURRET_CANCODER_GEAR_RATIO = 0;
-  public static final int TURRET_GEAR_RATIO = 0;
-  public static final double TURRET_COUNTS_PER_REV = 0;
+  public static final int TURRET_CANCODER_GEAR_RATIO = 1;
+  public static final int TURRET_GEAR_RATIO = 1;
+  public static final double TURRET_COUNTS_PER_REV = 1;
 
   // Drive
   // See generated/TunerConstants.java

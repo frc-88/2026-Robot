@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -79,6 +80,8 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue();
     shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
+
+    shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     shooterMain.getConfigurator().apply(shooterConfig);
 
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
