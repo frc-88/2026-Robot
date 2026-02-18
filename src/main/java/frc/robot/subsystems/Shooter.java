@@ -121,47 +121,49 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Boosted", boosted);
   }
 
-  private void setShooterSpeed(
-      DoubleSupplier speed,
-      DoubleSupplier FeedForwardIncrease,
-      DoubleSupplier Delay,
-      DoubleSupplier Duration) {
-    if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
-      shooterMain.setControl(
-          requestShooter
-              .withVelocity(speed.getAsDouble())
-              .withFeedForward(0.0)
-              .withUpdateFreqHz(1000.0));
-      boosted = false;
-    } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
-        || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
-      shooterMain.setControl(
-          requestShooter
-              .withVelocity(speed.getAsDouble())
-              .withFeedForward(0.0)
-              .withUpdateFreqHz(1000.0)); // normal or delay time
-      boosted = false;
-    } else { // in boost duration
-      // double boost = FeedForwardIncrease.getAsDouble() *
-      //   ((increaseDuration.getValue() + increaseDelay.getValue() -
-      // timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
-      double boost =
-          FeedForwardIncrease.getAsDouble()
-              / 3
-              * (speed.getAsDouble()
-                  - shooterMain
-                      .getVelocity()
-                      .getValueAsDouble()); // * Math.pow(speed.getAsDouble() -
-      // shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
-      shooterMain.setControl(
-          requestShooter
-              .withVelocity(speed.getAsDouble())
-              .withFeedForward(boost)
-              .withUpdateFreqHz(1000.0));
-      boosted = true;
-    } // this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) &&
-    // (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
+  private void setShooterSpeed(DoubleSupplier speed) {
+    shooterMain.setControl(requestShooter.withVelocity(speed.getAsDouble()).withFeedForward(0.0));
+    //         .withUpdateFreqHz(1000.0));
   }
+  //   DoubleSupplier speed,
+  //   DoubleSupplier FeedForwardIncrease,
+  //   DoubleSupplier Delay,
+  //   DoubleSupplier Duration) {
+  // if (shooterMain.getVelocity().getValueAsDouble() >= (speed.getAsDouble())) { // normal
+  //   shooterMain.setControl(
+  //       requestShooter
+  //           .withVelocity(speed.getAsDouble())
+  //           .withFeedForward(0.0)
+  //           .withUpdateFreqHz(1000.0));
+  //   boosted = false;
+  // } else if ((timeSinceBallLastSeen.get() > (Duration.getAsDouble() + Delay.getAsDouble()))
+  //     || (timeSinceBallLastSeen.get() < Delay.getAsDouble())) {
+  //   shooterMain.setControl(
+  //       requestShooter
+  //           .withVelocity(speed.getAsDouble())
+  //           .withFeedForward(0.0)
+  //           .withUpdateFreqHz(1000.0)); // normal or delay time
+  //   boosted = false;
+  // } else { // in boost duration
+  //   // double boost = FeedForwardIncrease.getAsDouble() *
+  //   //   ((increaseDuration.getValue() + increaseDelay.getValue() -
+  //   // timeSinceBallLastSeen.get())/(2 * increaseDuration.getValue()));
+  //   double boost =
+  //       FeedForwardIncrease.getAsDouble()
+  //           / 3
+  //           * (speed.getAsDouble()
+  //               - shooterMain
+  //                   .getVelocity()
+  //                   .getValueAsDouble()); // * Math.pow(speed.getAsDouble() -
+  //   // shooterMain.getVelocity().getValueAsDouble(), 2.0)/(3.0);
+  //   shooterMain.setControl(
+  //       requestShooter
+  //           .withVelocity(speed.getAsDouble())
+  //           .withFeedForward(boost)
+  //           .withUpdateFreqHz(1000.0));
+  //   boosted = true;
+  // } // this runs if ((timeSinceBallLastSeen.get() > increaseDelay.getValue()) &&
+  // // (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
 
   private void setShooterVoltage(DoubleSupplier voltage) {
     shooterMain.setControl(voltagerequest.withOutput(voltage.getAsDouble()));
@@ -200,12 +202,10 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooter() {
     return new RunCommand(
-        () ->
-            setShooterSpeed(
-                () -> shootSpeed.getValue(),
-                () -> increaseFeedForward.getValue(),
-                () -> increaseDelay.getValue(),
-                () -> increaseDuration.getValue()),
+        () -> setShooterSpeed(() -> shootSpeed.getValue()),
+        // () -> increaseFeedForward.getValue(),
+        // () -> increaseDelay.getValue(),
+        // () -> increaseDuration.getValue()),
         this);
   }
 
