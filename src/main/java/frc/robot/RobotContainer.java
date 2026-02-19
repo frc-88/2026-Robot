@@ -228,12 +228,7 @@ public class RobotContainer {
         .onTrue(
             intake
                 .stopIntake()
-                .alongWith(
-                    DriveCommands.rotateAroundTurret(
-                        drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
-                        () -> -controller.getRightX()))
+                .alongWith(driveRotateAroundTurret())
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
@@ -255,24 +250,25 @@ public class RobotContainer {
                 .runShooter()
                 .alongWith(feeder.runFeeder())
                 .alongWith(intake.runIntake())
-                .alongWith(spinner.runSpinner()))
+                .alongWith(spinner.runSpinner())
+                .alongWith(driveRotateAroundTurret()))
         .onFalse(
             intake
                 .stopIntake()
-                .alongWith(
-                    DriveCommands.rotateAroundTurret(
-                        drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
-                        () -> -controller.getRightX()))
+                .alongWith(driveRotateAroundTurret())
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
   }
 
   public Command driveDefault() {
-    return DriveCommands.joystickDriveAtAngle(
-        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.kZero);
+    return DriveCommands.joystickDrive(
+        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+  }
+
+  public Command driveRotateAroundTurret() {
+    return DriveCommands.rotateAroundTurret(
+        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
   }
 
   // /**
