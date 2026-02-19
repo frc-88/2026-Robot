@@ -127,8 +127,9 @@ public class RobotContainer {
         // turret = new Turret(gyro);
         break;
     }
-    turret = new Turret(drive::getYaw, drive::getRate);
+
     trajectorySolver = new TrajectorySolver(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -155,7 +156,7 @@ public class RobotContainer {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-    SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory());
+    SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory().ignoringDisable(true));
     SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
     SmartDashboard.putData("SetPositionTurretField", turret.setPositionField());
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
@@ -259,16 +260,23 @@ public class RobotContainer {
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
+    controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }
 
   public Command driveDefault() {
     return DriveCommands.joystickDrive(
-        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX());
   }
 
   public Command driveRotateAroundTurret() {
     return DriveCommands.rotateAroundTurret(
-        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX());
   }
 
   // /**

@@ -83,11 +83,16 @@ public class TrajectorySolver extends SubsystemBase {
       Logger.recordOutput("Field/distance", turretToProjectedTarget.getNorm());
       Logger.recordOutput(
           "Field/ProjectedHub",
-          new Pose2d(turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), Rotation2d.kZero));
+          new Pose2d(
+              turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
+              Rotation2d.kZero));
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
       shootSpeed = lookupSpeed(turretToTargetDistance.getNorm());
     }
+    Logger.recordOutput(
+        "Field/TurretPosition",
+        new Pose2d(robotPosition.plus(robotToTurret.rotateBy(robotYaw)), Rotation2d.kZero));
   }
 
   public void newton() {

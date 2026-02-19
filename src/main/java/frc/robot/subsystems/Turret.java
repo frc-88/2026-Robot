@@ -13,11 +13,11 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,19 +29,20 @@ import java.util.function.Supplier;
 /** insert new haiku here */
 public class Turret extends SubsystemBase {
   private TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());
-  private CANcoder m_cancoder1 = new CANcoder(Constants.TURRET_CANCODER_ID1, CANBus.roboRIO());
-  private CANcoder m_cancoder2 = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
+  private CANcoder m_cancoder66 = new CANcoder(Constants.TURRET_CANCODER_ID1, CANBus.roboRIO());
+  private CANcoder m_cancoder50 = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
   Supplier<Rotation2d> m_yaw;
   DoubleSupplier m_rate;
+
+  DoubleSupplier m_hub;
 
   private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
   private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
   private VoltageOut voltageReq = new VoltageOut(0);
 
   // Preferences
-  private DoublePreferenceConstant p_zeroPosition =
-      new DoublePreferenceConstant("Turret/Zero", 0.0);
+  private DoublePreferenceConstant p_proportion = new DoublePreferenceConstant("Turret/Zero", 0.0);
   private DoublePreferenceConstant p_limitBuffer =
       new DoublePreferenceConstant("Turret/Limit Buffer", 0.0);
   private DoublePreferenceConstant p_syncThreshold =
@@ -60,9 +61,10 @@ public class Turret extends SubsystemBase {
   private double m_defaultFacing = 0.;
   private double m_target = 0;
 
-  public Turret(Supplier<Rotation2d> yaw, DoubleSupplier rate) {
+  public Turret(Supplier<Rotation2d> yaw, DoubleSupplier rate, DoubleSupplier hub) {
     m_yaw = yaw;
     m_rate = rate;
+    m_hub = hub;
 
     configureMotors();
     configureCANCoder();
@@ -97,25 +99,25 @@ public class Turret extends SubsystemBase {
   private void configureCANCoder() {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
-    m_cancoder1.getConfigurator().apply(config);
-    m_cancoder2.getConfigurator().apply(config);
+    m_cancoder66.getConfigurator().apply(config);
+    m_cancoder50.getConfigurator().apply(config);
   }
 
   public void sync() {
     if (isEncoderConnected()) {
-      m_turret.setPosition(
-          cancoderPositionToFalconPosition(m_cancoder1.getAbsolutePosition().getValueAsDouble()));
+      m_turret.setPosition(turretFacingToEncoderPosition(getAbsoluteAngleOfTurret()));
     } else {
       m_turret.setPosition(0.0);
     }
   }
 
-  public void calibrate() {
+  public void calibrateEncoders() {
     // This is only necessary if the CANcoder is moved or adjusted.
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    p_zeroPosition.setValue(m_cancoder1.getAbsolutePosition().getValueAsDouble());
+    m_cancoder50.setPosition(0.0);
+    m_cancoder66.setPosition(0.0);
     sync();
   }
 
@@ -124,10 +126,10 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isEncoderConnected() {
-    if (m_cancoder1.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Red
-        || m_cancoder1.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Invalid) {
-      return false;
-    }
+    // if (m_cancoder66.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Red
+    //     || m_cancoder66.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Invalid) {
+    //   return false;
+    // }
     return true;
   }
 
@@ -209,11 +211,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isSynchronized() {
-    return Math.abs(
-            getFacing()
-                - turretEncoderPositionToFacing(
-                    cancoderPositionToFalconPosition(
-                        m_cancoder1.getAbsolutePosition().getValueAsDouble())))
+    return Math.abs(getFacing() - turretFacingToEncoderPosition(getAbsoluteAngleOfTurret()))
         < p_syncThreshold.getValue();
   }
 
@@ -264,14 +262,10 @@ public class Turret extends SubsystemBase {
             > turretFacingToEncoderPosition(p_reverseLimit.getValue() + p_limitBuffer.getValue()));
   }
 
-  private double cancoderPositionToFalconPosition(double position) {
-    double normalPosition = (position - p_zeroPosition.getValue());
-
-    // if (normalPosition > 180) { normalPosition -= 360; }
-    // if (normalPosition < -180) { normalPosition += 360; }
-
-    return turretFacingToEncoderPosition(
-        normalPosition * (Constants.TURRET_CANCODER_GEAR_RATIO / Constants.TURRET_GEAR_RATIO));
+  private double getAbsoluteAngleOfTurret() {
+    return (m_cancoder66.getPosition().getValueAsDouble()
+            - m_cancoder50.getPosition().getValueAsDouble())
+        * p_proportion.getValue();
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
@@ -283,7 +277,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command calibrateFactory() {
-    return new RunCommand(() -> calibrateZero(), this);
+    return new InstantCommand(() -> calibrateEncoders(), this);
   }
 
   public Command setPosition() {
@@ -291,24 +285,25 @@ public class Turret extends SubsystemBase {
   }
 
   public Command setPositionField() {
-    return new RunCommand(() -> goToFacing(p_pose.getValue() - getYaw()), this);
+    return new RunCommand(() -> goToFacing(m_hub.getAsDouble() - getYaw() + 180.0), this);
   }
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Turret/Talon Absolute", m_turret.getPosition().getValueAsDouble());
     SmartDashboard.putNumber(
-        "Turret/CANCoder Absolute", m_cancoder1.getAbsolutePosition().getValueAsDouble());
+        "Turret/CANCoder Position", m_cancoder66.getPosition().getValueAsDouble());
     SmartDashboard.putNumber(
-        "Turret/CANCoder Position", m_cancoder1.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Turret/CANCoder Turret Facing",
-        turretEncoderPositionToFacing(
-            cancoderPositionToFalconPosition(
-                m_cancoder1.getAbsolutePosition().getValueAsDouble())));
+        "Turret/Difference",
+        (m_cancoder66.getPosition().getValueAsDouble()
+                - m_cancoder50.getPosition().getValueAsDouble())
+            * p_proportion.getValue());
     SmartDashboard.putNumber("Turret/Position", getPosition());
     SmartDashboard.putNumber("Turret/Facing", getFacing());
     SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
     SmartDashboard.putBoolean("Turret/Tracking", isTracking());
     SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
+    SmartDashboard.putNumber("Turret/Cancoder66", m_cancoder66.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Turret/Cancoder50", m_cancoder50.getPosition().getValueAsDouble());
   }
 }

@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj.PWM;
@@ -16,7 +15,6 @@ public class Intake extends SubsystemBase {
 
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_MAIN, CANBus.roboRIO());
   private PWM intakeSpinner = new PWM(0);
-  private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
   private DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
 
