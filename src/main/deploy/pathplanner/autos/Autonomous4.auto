@@ -27,6 +27,18 @@
           "data": {
             "name": "Stop Shooter"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
+          }
         }
       ]
     }

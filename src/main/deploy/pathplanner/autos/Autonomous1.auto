@@ -97,6 +97,18 @@
           "data": {
             "pathName": "Auto1_03TowerFrontToTowerSide"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
+          }
         }
       ]
     }

@@ -97,6 +97,18 @@
           "data": {
             "pathName": "Auto2_03Rotate"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
+          }
         }
       ]
     }

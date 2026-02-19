@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.0726504079411534,
-        "y": 2.2528929388496306
+        "x": 1.0615528171839335,
+        "y": 2.4557645983749556
       },
       "prevControl": {
-        "x": 1.3677546378146395,
-        "y": 2.0408876850256754
+        "x": 1.3566570470574195,
+        "y": 2.2437593445510005
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Tower Right Approach"
     }
   ],
   "rotationTargets": [],
