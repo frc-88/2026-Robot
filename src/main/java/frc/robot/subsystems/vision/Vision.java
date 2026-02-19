@@ -149,7 +149,7 @@ public class Vision extends SubsystemBase {
           currentPose = observation.pose();
         }
         // Send vision observation also to batman
-        batman.checkPose(observation.pose().toPose2d(), linearStdDev, angularStdDev);
+        // batman.checkPose(observation.pose().toPose2d(), linearStdDev, angularStdDev);
 
         consumer.accept(
             observation.pose().toPose2d(),

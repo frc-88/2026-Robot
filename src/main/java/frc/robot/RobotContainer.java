@@ -37,7 +37,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
@@ -95,7 +94,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        //turret = new Turret(gyro);
+        // turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -128,12 +127,9 @@ public class RobotContainer {
         // turret = new Turret(gyro);
         break;
     }
-    turret = new Turret(gyro);
-    
+    turret = new Turret(drive::getYaw, drive::getRate);
+    trajectorySolver = new TrajectorySolver(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
-    // spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
-
-    // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -161,6 +157,7 @@ public class RobotContainer {
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
     SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory());
     SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
+    SmartDashboard.putData("SetPositionTurretField", turret.setPositionField());
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
     SmartDashboard.putData("RunFeeder", feeder.runFeeder());
     SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
@@ -213,10 +210,6 @@ public class RobotContainer {
 
   public void disabledInit() {
     // shooter.resetBPS();
-  }
-
-  public void periodic() {
-    trajectorySolver.periodic();
   }
 
   private void configureDriverController() {

@@ -91,6 +91,7 @@ public class Drive extends SubsystemBase {
   private SwerveDriveKinematics kinematicsTurret =
       new SwerveDriveKinematics(getModuleTranslationsAroundTurret());
   private Rotation2d rawGyroRotation = Rotation2d.kZero;
+  private double gyroRate = 0.0;
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -152,6 +153,14 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
+  public Rotation2d getYaw() {
+    return rawGyroRotation;
+  }
+
+  public double getRate() {
+    return gyroRate;
+  }
+
   @Override
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
@@ -199,6 +208,7 @@ public class Drive extends SubsystemBase {
       if (gyroInputs.connected) {
         // Use the real gyro angle
         rawGyroRotation = gyroInputs.odometryYawPositions[i];
+        gyroRate = gyroInputs.yawVelocityRadPerSec;
       } else {
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);

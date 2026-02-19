@@ -239,7 +239,7 @@ public class Shooter extends SubsystemBase {
   // }
 
   public Command stopShooter() {
-    return setVelocity(0.0);
+    return new RunCommand(() -> shooterMain.stopMotor(), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -257,5 +257,4 @@ public class Shooter extends SubsystemBase {
   public InstantCommand setAngle(double angle) {
     return new InstantCommand(() -> targetAngle = angle);
   }
-
 }

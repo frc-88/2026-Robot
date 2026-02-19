@@ -58,26 +58,32 @@ public class TrajectorySolver extends SubsystemBase {
     return turretToProjectedTarget.getAngle().getDegrees();
   }
 
+  @Override
   public void periodic() {
     robotPosition = drivePose1.get().getTranslation();
     robotVelocity = vel1.get().getTranslation();
     robotYaw = drivePose1.get().getRotation();
-    robotRotationalVelocity = vel1.get().getRotation().getRadians();
+    // TODO Do this
+    // robotRotationalVelocity = vel1.get().getRotation().getRadians();
 
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
     turretToTargetRelativeVelocity =
         robotVelocity
-            .plus(
-                robotToTurret
-                    .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
-                    .times(robotRotationalVelocity))
+            // .plus(
+            //     robotToTurret
+            //         .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
+            //         .times(robotRotationalVelocity))
             .minus(targetVelocity);
+    // TODO tune this
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
       turretToProjectedTarget = turretToTargetDistance;
       Logger.recordOutput("Field/distance", turretToProjectedTarget.getNorm());
+      Logger.recordOutput(
+          "Field/ProjectedHub",
+          new Pose2d(turretToProjectedTarget.plus(robotPosition), Rotation2d.kZero));
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
       shootSpeed = lookupSpeed(turretToTargetDistance.getNorm());

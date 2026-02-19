@@ -15,22 +15,25 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIO.GyroIOInputs;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /** insert new haiku here */
 public class Turret extends SubsystemBase {
   private TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());
-  private CANcoder m_cancoder = new CANcoder(Constants.TURRET_CANCODER_ID, CANBus.roboRIO());
+  private CANcoder m_cancoder1 = new CANcoder(Constants.TURRET_CANCODER_ID1, CANBus.roboRIO());
+  private CANcoder m_cancoder2 = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
-  private GyroIO m_gyro;
+  Supplier<Rotation2d> m_yaw;
+  DoubleSupplier m_rate;
 
   private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
   private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
@@ -57,8 +60,9 @@ public class Turret extends SubsystemBase {
   private double m_defaultFacing = 0.;
   private double m_target = 0;
 
-  public Turret(GyroIO gyro) {
-    m_gyro = gyro;
+  public Turret(Supplier<Rotation2d> yaw, DoubleSupplier rate) {
+    m_yaw = yaw;
+    m_rate = rate;
 
     configureMotors();
     configureCANCoder();
@@ -93,13 +97,14 @@ public class Turret extends SubsystemBase {
   private void configureCANCoder() {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
-    m_cancoder.getConfigurator().apply(config);
+    m_cancoder1.getConfigurator().apply(config);
+    m_cancoder2.getConfigurator().apply(config);
   }
 
   public void sync() {
     if (isEncoderConnected()) {
       m_turret.setPosition(
-          cancoderPositionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble()));
+          cancoderPositionToFalconPosition(m_cancoder1.getAbsolutePosition().getValueAsDouble()));
     } else {
       m_turret.setPosition(0.0);
     }
@@ -110,7 +115,7 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    p_zeroPosition.setValue(m_cancoder.getAbsolutePosition().getValueAsDouble());
+    p_zeroPosition.setValue(m_cancoder1.getAbsolutePosition().getValueAsDouble());
     sync();
   }
 
@@ -119,8 +124,8 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isEncoderConnected() {
-    if (m_cancoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Red
-        || m_cancoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Invalid) {
+    if (m_cancoder1.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Red
+        || m_cancoder1.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Invalid) {
       return false;
     }
     return true;
@@ -208,7 +213,7 @@ public class Turret extends SubsystemBase {
             getFacing()
                 - turretEncoderPositionToFacing(
                     cancoderPositionToFalconPosition(
-                        m_cancoder.getAbsolutePosition().getValueAsDouble())))
+                        m_cancoder1.getAbsolutePosition().getValueAsDouble())))
         < p_syncThreshold.getValue();
   }
 
@@ -234,8 +239,6 @@ public class Turret extends SubsystemBase {
 
   private void goToPosition(double position, boolean spinCompensation) {
     if (spinCompensation) {
-      GyroIOInputs gyroInputs = new GyroIOInputs();
-      m_gyro.updateInputs(gyroInputs);
       m_turret.setControl(
           motionMagicReq
               .withPosition(position)
@@ -243,11 +246,15 @@ public class Turret extends SubsystemBase {
                   5
                       * 0.1
                       * p_turretPID.getKV().getValue()
-                      * turretFacingToEncoderPosition(gyroInputs.yawVelocityRadPerSec)
+                      * turretFacingToEncoderPosition(m_rate.getAsDouble())
                       / 1023.0));
     } else {
       m_turret.setControl(motionMagicReq.withPosition(position));
     }
+  }
+
+  public double getYaw() {
+    return m_yaw.get().getDegrees();
   }
 
   private boolean isPositionSafe(double position) {
@@ -283,16 +290,21 @@ public class Turret extends SubsystemBase {
     return new RunCommand(() -> goToFacing(p_pose.getValue()), this);
   }
 
+  public Command setPositionField() {
+    return new RunCommand(() -> goToFacing(p_pose.getValue() - getYaw()), this);
+  }
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber(
-        "Turret/CANCoder Absolute", m_cancoder.getAbsolutePosition().getValueAsDouble());
+        "Turret/CANCoder Absolute", m_cancoder1.getAbsolutePosition().getValueAsDouble());
     SmartDashboard.putNumber(
-        "Turret/CANCoder Position", m_cancoder.getPosition().getValueAsDouble());
+        "Turret/CANCoder Position", m_cancoder1.getPosition().getValueAsDouble());
     SmartDashboard.putNumber(
         "Turret/CANCoder Turret Facing",
         turretEncoderPositionToFacing(
-            cancoderPositionToFalconPosition(m_cancoder.getAbsolutePosition().getValueAsDouble())));
+            cancoderPositionToFalconPosition(
+                m_cancoder1.getAbsolutePosition().getValueAsDouble())));
     SmartDashboard.putNumber("Turret/Position", getPosition());
     SmartDashboard.putNumber("Turret/Facing", getFacing());
     SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
