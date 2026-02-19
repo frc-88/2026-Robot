@@ -59,8 +59,7 @@ public class Hood extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber(
         "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
-
-      }
+  }
 
   private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
     return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);

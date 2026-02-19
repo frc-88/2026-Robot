@@ -23,6 +23,7 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
+import frc.robot.subsystems.Turret;
 // import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -47,6 +48,7 @@ public class RobotContainer {
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
   public Hood hood = new Hood();
+  public Turret turret;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -96,6 +98,7 @@ public class RobotContainer {
         // turret = new Turret(gyro);
         break;
     }
+    turret = new Turret(gyro);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -123,6 +126,8 @@ public class RobotContainer {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
+    SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory());
+    SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
     SmartDashboard.putData("RunFeeder", feeder.runFeeder());
     SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
