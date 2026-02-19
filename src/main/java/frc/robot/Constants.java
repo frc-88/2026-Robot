@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -72,6 +73,6 @@ public final class Constants {
       //     Units.inchesToMeters(Math.hypot(6.745, 5.75)),
       //     Rotation2d.fromDegrees(-30.0)); // 6.745, -5.75
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
-  public static Translation2d HUB = new Translation2d();
+  public static Translation2d HUB = new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
       
 }
