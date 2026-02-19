@@ -64,7 +64,7 @@ public class TrajectorySolver extends SubsystemBase {
     robotVelocity = vel1.get().getTranslation();
     robotYaw = drivePose1.get().getRotation();
     // TODO Do this
-    // robotRotationalVelocity = vel1.get().getRotation().getRadians();
+    robotRotationalVelocity = 0; //vel1.get().getRotation().getRadians();
 
     turretToTargetDistance =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
@@ -84,7 +84,7 @@ public class TrajectorySolver extends SubsystemBase {
       Logger.recordOutput(
           "Field/ProjectedHub",
           new Pose2d(
-              turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
+              turretToProjectedTarget,//.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
               Rotation2d.kZero));
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
@@ -124,7 +124,8 @@ public class TrajectorySolver extends SubsystemBase {
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
     Logger.recordOutput(
         "Field/ProjectedHub",
-        new Pose2d(turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), Rotation2d.kZero));
+        new Pose2d(turretToProjectedTarget, //.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), 
+        Rotation2d.kZero));
   }
 
   public double lookupTime(double distance) {
