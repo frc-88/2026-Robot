@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Spinner;
+import frc.robot.subsystems.Simulation;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -35,7 +35,7 @@ public class RobotContainer {
   // public Feeder feeder = new Feeder();
   // public Shooter shooter = new Shooter();
   // public Intake intake = new Intake();
-  public Spinner spinner;
+  public Simulation spinner;
   public TrajectorySolver trajectorySolver;
 
   // Controller
@@ -86,7 +86,7 @@ public class RobotContainer {
         break;
     }
 
-    spinner = new Spinner(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

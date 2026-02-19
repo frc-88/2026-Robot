@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Spinner extends SubsystemBase {
+public class Simulation extends SubsystemBase {
   Pose2d HUB_POSE = new Pose2d(4.0, 4.1, new Rotation2d());
   Random rand = new Random();
   private List<FieldObject3D> allFuel = new ArrayList<>();
@@ -50,7 +50,7 @@ public class Spinner extends SubsystemBase {
   // private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
   //     new MotionMagicPIDPreferenceConstants("SpinnerMotors");
 
-  public Spinner(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity) {
+  public Simulation(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity) {
     drivePose1 = drivePose;
     velocity1 = velocity;
     trajectorySolver = new TrajectorySolver(drivePose, velocity);
