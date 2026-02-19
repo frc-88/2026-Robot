@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -129,9 +128,7 @@ public class RobotContainer {
         // turret = new Turret(gyro);
         break;
     }
-
     turret = new Turret(gyro);
-
     
 
     // spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
@@ -162,6 +159,8 @@ public class RobotContainer {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
+    SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory());
+    SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
     SmartDashboard.putData("RunFeeder", feeder.runFeeder());
     SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
@@ -264,7 +263,18 @@ public class RobotContainer {
                 .alongWith(feeder.runFeeder())
                 .alongWith(intake.runIntake())
                 .alongWith(spinner.runSpinner()))
-        .onFalse(new InstantCommand(() -> {}));
+        .onFalse(
+            intake
+                .stopIntake()
+                .alongWith(
+                    DriveCommands.rotateAroundTurret(
+                        drive,
+                        () -> -controller.getLeftY(),
+                        () -> -controller.getLeftX(),
+                        () -> -controller.getRightX()))
+                .alongWith(shooter.stopShooter())
+                .alongWith(spinner.stopSpinner())
+                .alongWith(feeder.stopFeeder()));
   }
 
   public Command driveDefault() {

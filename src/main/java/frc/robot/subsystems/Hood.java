@@ -9,9 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
@@ -24,6 +22,7 @@ public class Hood extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
   private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   public Hood() {
     configureMinion();
@@ -41,6 +40,13 @@ public class Hood extends SubsystemBase {
     hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        hoodAngleDegreesToRotationsOfMinion(34.5);
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        hoodAngleDegreesToRotationsOfMinion(13.5);
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
         hoodConfigConstants.getMaxVelocity().getValue();
     hoodConfig.MotionMagic.MotionMagicAcceleration =
@@ -51,17 +57,37 @@ public class Hood extends SubsystemBase {
   private void configureSmartDashboardButtons() {
     // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
     SmartDashboard.putData("Hood/Calibrate", calibrate());
-    SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putData("Hood/SetPosition", setPositionThing());
     SmartDashboard.putData("Hood/GoToZero", goToZero());
   }
 
+  public void periodic() {
+    SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
+    SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Hood/CurrentAngle",
+        minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
+  }
+
+  private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
+    return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+  }
+
+  private double minionRotationsToHoodAngleDegrees(double minionRotations) { // inverse of ^^
+    return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
+  }
+
   private void setPosition(double angle) {
-    hood.setControl(request.withPosition(angle / Constants.MINION_ROT_TO_ANGLE));
+    hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
   }
 
   private void setCalibrate() {
-    hood.setControl(new DutyCycleOut(0.16));
+    hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
+    if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
+      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+    }
   }
 
   private void stopHoodMotor() {
@@ -73,10 +99,8 @@ public class Hood extends SubsystemBase {
   }
 
   public Command calibrate() {
-    return new SequentialCommandGroup(
-            new RunCommand(() -> setCalibrate(), this)
-                .until(() -> hood.getStatorCurrent().getValueAsDouble() > 15.0),
-            new InstantCommand(() -> hood.setPosition(34.5 / Constants.MINION_ROT_TO_ANGLE), this))
+    return new RunCommand(() -> setCalibrate(), this)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0)
         .andThen(stopHood());
   }
 
