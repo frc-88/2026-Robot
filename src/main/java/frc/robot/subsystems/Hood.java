@@ -22,6 +22,7 @@ public class Hood extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
   private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   public Hood() {
     configureMinion();
@@ -38,6 +39,13 @@ public class Hood extends SubsystemBase {
     hoodConfig.Slot0.kS = hoodConfigConstants.getKS().getValue();
     hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
+
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        hoodAngleDegreesToRotationsOfMinion(34.5);
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        hoodAngleDegreesToRotationsOfMinion(13.5);
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
         hoodConfigConstants.getMaxVelocity().getValue();
@@ -76,7 +84,7 @@ public class Hood extends SubsystemBase {
   }
 
   private void setCalibrate() {
-    hood.setControl(new DutyCycleOut(-0.16));
+    hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
     }
