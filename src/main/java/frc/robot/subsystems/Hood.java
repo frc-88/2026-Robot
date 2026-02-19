@@ -56,12 +56,22 @@ public class Hood extends SubsystemBase {
     SmartDashboard.putData("Hood/GoToZero", goToZero());
   }
 
+  public void periodic() {
+    SmartDashboard.putNumber(
+        "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
+
+      }
+
+  private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
+    return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+  }
+
   private void setPosition(double angle) {
-    hood.setControl(request.withPosition(angle / Constants.MINION_ROT_TO_ANGLE));
+    hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
   }
 
   private void setCalibrate() {
-    hood.setControl(new DutyCycleOut(0.16));
+    hood.setControl(new DutyCycleOut(-0.16));
   }
 
   private void stopHoodMotor() {
@@ -75,8 +85,9 @@ public class Hood extends SubsystemBase {
   public Command calibrate() {
     return new SequentialCommandGroup(
             new RunCommand(() -> setCalibrate(), this)
-                .until(() -> hood.getStatorCurrent().getValueAsDouble() > 15.0),
-            new InstantCommand(() -> hood.setPosition(34.5 / Constants.MINION_ROT_TO_ANGLE), this))
+                .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0),
+            new InstantCommand(
+                () -> hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5)), this))
         .andThen(stopHood());
   }
 
