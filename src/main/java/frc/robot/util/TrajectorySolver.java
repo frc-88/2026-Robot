@@ -124,7 +124,7 @@ public class TrajectorySolver extends SubsystemBase {
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
     Logger.recordOutput(
         "Field/ProjectedHub",
-        new Pose2d(turretToProjectedTarget.plus(robotPosition), Rotation2d.kZero));
+        new Pose2d(turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), Rotation2d.kZero));
   }
 
   public double lookupTime(double distance) {
