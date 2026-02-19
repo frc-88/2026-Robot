@@ -61,13 +61,13 @@ public class TrajectorySolver extends SubsystemBase {
   @Override
   public void periodic() {
     robotPosition = drivePose1.get().getTranslation();
-    robotVelocity = vel1.get().getTranslation();
+    robotVelocity = vel1.get().getTranslation(); // TODO: make this turret velocity
     robotYaw = drivePose1.get().getRotation();
     // TODO Do this
-    robotRotationalVelocity = 0; //vel1.get().getRotation().getRadians();
+    robotRotationalVelocity = 0; // vel1.get().getRotation().getRadians();
 
     turretToCurrentTarget =
-        targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
+        targetPosition.minus(robotPosition.plus(robotToTurret.rotateBy(robotYaw)));
     turretToTargetRelativeVelocity =
         robotVelocity
             // .plus(
@@ -75,23 +75,25 @@ public class TrajectorySolver extends SubsystemBase {
             //         .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
             //         .times(robotRotationalVelocity))
             .minus(targetVelocity);
+    Logger.recordOutput(
+        "Trajectory/TurretToTargetRelativeVelocity", turretToTargetRelativeVelocity);
     // TODO tune this
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
-      Logger.recordOutput("Field/distance", turretToProjectedTarget.getNorm());
+      Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
       Logger.recordOutput(
-          "Field/ProjectedHub",
+          "Trajectory/ProjectedHub",
           new Pose2d(
-              turretToProjectedTarget,//.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
+              turretToProjectedTarget.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
               Rotation2d.kZero));
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
     Logger.recordOutput(
-        "Field/TurretPosition",
+        "Trajectory/TurretPosition",
         new Pose2d(robotPosition.plus(robotToTurret.rotateBy(robotYaw)), Rotation2d.kZero));
   }
 
@@ -123,9 +125,10 @@ public class TrajectorySolver extends SubsystemBase {
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
     Logger.recordOutput(
-        "Field/ProjectedHub",
-        new Pose2d(turretToProjectedTarget, //.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), 
-        Rotation2d.kZero));
+        "Trajectory/ProjectedHub",
+        new Pose2d(
+            turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
+            Rotation2d.kZero));
   }
 
   public double lookupTime(double distance) {
