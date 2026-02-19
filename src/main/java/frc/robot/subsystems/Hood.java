@@ -9,9 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
@@ -51,18 +49,26 @@ public class Hood extends SubsystemBase {
   private void configureSmartDashboardButtons() {
     // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
     SmartDashboard.putData("Hood/Calibrate", calibrate());
-    SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putData("Hood/SetPosition", setPositionThing());
     SmartDashboard.putData("Hood/GoToZero", goToZero());
   }
 
   public void periodic() {
+    SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber(
         "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
+    SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber(
+        "Hood/CurrentAngle",
+        minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
   }
 
   private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
     return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+  }
+
+  private double minionRotationsToHoodAngleDegrees(double minionRotations) { // inverse of ^^
+    return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
   }
 
   private void setPosition(double angle) {
@@ -71,6 +77,9 @@ public class Hood extends SubsystemBase {
 
   private void setCalibrate() {
     hood.setControl(new DutyCycleOut(-0.16));
+    if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
+      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+    }
   }
 
   private void stopHoodMotor() {
@@ -82,11 +91,8 @@ public class Hood extends SubsystemBase {
   }
 
   public Command calibrate() {
-    return new SequentialCommandGroup(
-            new RunCommand(() -> setCalibrate(), this)
-                .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0),
-            new InstantCommand(
-                () -> hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5)), this))
+    return new RunCommand(() -> setCalibrate(), this)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0)
         .andThen(stopHood());
   }
 
