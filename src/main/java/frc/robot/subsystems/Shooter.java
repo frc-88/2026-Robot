@@ -234,9 +234,9 @@ public class Shooter extends SubsystemBase {
         this);
   }
 
-  public Command runShooterVoltage() {
-    return new RunCommand(() -> setVoltage(shootVoltage.getValue()));
-  }
+  // public Command runShooterVoltage() {
+  //   return new RunCommand(() -> setVoltage(shootVoltage.getValue()));
+  // }
 
   public Command stopShooter() {
     return setVelocity(0.0);

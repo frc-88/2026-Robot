@@ -41,7 +41,7 @@ public class TrajectorySolver extends SubsystemBase {
     vel1 = vel;
     robotYaw = Rotation2d.kZero;
     robotToTurret = Constants.robotToTurret;
-    targetPosition = Constants.HUB_POSE;
+    targetPosition = Constants.HUB;
   }
 
   public double getAngle() {

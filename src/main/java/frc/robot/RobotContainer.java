@@ -28,6 +28,7 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
+import frc.robot.subsystems.Turret;
 // import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -52,18 +53,15 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final Drive drive;
-  // private final Turret turret;
+  private final Turret turret;
   public Feeder feeder = new Feeder();
   public Shooter shooter = new Shooter();
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
-<<<<<<< HEAD
   public TrajectorySolver trajectorySolver;
   public Batman batman = new Batman();
   public final Vision vision;
-=======
   public Hood hood = new Hood();
->>>>>>> origin/turret
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -94,15 +92,11 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-<<<<<<< HEAD
         vision =
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        turret = new Turret(gyro);
-=======
-        // turret = new Turret(gyro);
->>>>>>> origin/turret
+        //turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -115,15 +109,11 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-<<<<<<< HEAD
-        turret = new Turret(gyro);
-        vision = // TODO: this is just to get it to compile
+        // turret = new Turret(gyro);
+        vision =
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-=======
-        // turret = new Turret(gyro);
->>>>>>> origin/turret
         break;
 
       default:
@@ -132,14 +122,17 @@ public class RobotContainer {
         drive =
             new Drive(
                 gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-<<<<<<< HEAD
-        turret = new Turret(gyro);
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
-=======
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight(camera0Name, drive::getRotation));
         // turret = new Turret(gyro);
->>>>>>> origin/turret
         break;
     }
+
+    turret = new Turret(gyro);
+
+    
 
     // spinner = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
 
@@ -168,37 +161,13 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
-<<<<<<< HEAD
-    if (Util.logif()) {
-      SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-      SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
-      SmartDashboard.putData("RunIntake", intake.runIndexer());
-      SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-      SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
-      SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
-      SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
-    }
-=======
     SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
     SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
     SmartDashboard.putData("RunFeeder", feeder.runFeeder());
     SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
     SmartDashboard.putData("RunShooter", shooter.runShooter());
     SmartDashboard.putData("StopShooter", shooter.stopShooter());
-    SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
+    // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
     SmartDashboard.putData("RunIntake", intake.runIntake());
     SmartDashboard.putData("StopIntake", intake.stopIntake());
     SmartDashboard.putData("RunSpinner", spinner.runSpinner());
@@ -221,7 +190,6 @@ public class RobotContainer {
         "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
     SmartDashboard.putData("Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
     SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
->>>>>>> origin/turret
   }
 
   private void configureDefaultCommands() {
@@ -263,9 +231,6 @@ public class RobotContainer {
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-<<<<<<< HEAD
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-=======
     controller
         .x()
         .onTrue(
@@ -282,7 +247,6 @@ public class RobotContainer {
                 .alongWith(feeder.stopFeeder()));
 
     // Reset gyro to 0° when B button is pressed
->>>>>>> origin/turret
     controller
         .b()
         .onTrue(
