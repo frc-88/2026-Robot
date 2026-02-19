@@ -201,12 +201,7 @@ public class RobotContainer {
     //         () -> -controller.getLeftY(),
     //         () -> -controller.getLeftX(),
     //         () -> -controller.getRightX()));
-    drive.setDefaultCommand(
-        DriveCommands.rotateAroundTurret(
-            drive,
-            () -> 0.8 * joystick.getRawAxis(1),
-            () -> 0.8 * joystick.getRawAxis(0),
-            () -> -0.8 * joystick.getRawAxis(4)));
+    drive.setDefaultCommand(driveRotateAroundTurret());
   }
 
   public void disabledInit() {

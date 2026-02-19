@@ -22,7 +22,7 @@ public class TrajectorySolver extends SubsystemBase {
   public DoublePreferenceConstant angle = new DoublePreferenceConstant("Traj/angle", 0.0);
   public DoublePreferenceConstant speed = new DoublePreferenceConstant("Traj/speed", 0.0);
 
-  private Translation2d turretToTargetDistance;
+  private Translation2d turretToCurrentTarget;
   private Translation2d turretToTargetRelativeVelocity;
 
   private boolean hasPreviousTimeOfFlightGuess = false;
@@ -66,7 +66,7 @@ public class TrajectorySolver extends SubsystemBase {
     // TODO Do this
     // robotRotationalVelocity = vel1.get().getRotation().getRadians();
 
-    turretToTargetDistance =
+    turretToCurrentTarget =
         targetPosition.minus(robotPosition).minus(robotToTurret.rotateBy(robotYaw));
     turretToTargetRelativeVelocity =
         robotVelocity
@@ -79,7 +79,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
-      turretToProjectedTarget = turretToTargetDistance;
+      turretToProjectedTarget = turretToCurrentTarget;
       Logger.recordOutput("Field/distance", turretToProjectedTarget.getNorm());
       Logger.recordOutput(
           "Field/ProjectedHub",
@@ -87,8 +87,8 @@ public class TrajectorySolver extends SubsystemBase {
               turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
               Rotation2d.kZero));
       hasPreviousTimeOfFlightGuess = false;
-      hoodAngle = lookupAngle(turretToTargetDistance.getNorm());
-      shootSpeed = lookupSpeed(turretToTargetDistance.getNorm());
+      hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
+      shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
     Logger.recordOutput(
         "Field/TurretPosition",
@@ -97,12 +97,12 @@ public class TrajectorySolver extends SubsystemBase {
 
   public void newton() {
     if (!hasPreviousTimeOfFlightGuess) {
-      timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
+      timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
     } // otherwise use last value
     int i;
     for (i = 0; i < numberOfIterations; i++) {
       turretToProjectedTarget =
-          turretToTargetDistance.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
+          turretToCurrentTarget.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
       turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
       timeOfFlight =
           timeOfFlight
@@ -114,17 +114,19 @@ public class TrajectorySolver extends SubsystemBase {
                               / turretToProjectedTargetDistance));
     }
     if (timeOfFlight > 5) {
-      timeOfFlight = lookupTime(turretToTargetDistance.getNorm());
+      timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
       System.out.println("Newton Solution Diverged. TOF: " + timeOfFlight);
     }
     turretToProjectedTarget =
-        turretToTargetDistance.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
+        turretToCurrentTarget.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
     Logger.recordOutput(
         "Field/ProjectedHub",
-        new Pose2d(turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))), Rotation2d.kZero));
+        new Pose2d(
+            turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
+            Rotation2d.kZero));
   }
 
   public double lookupTime(double distance) {
