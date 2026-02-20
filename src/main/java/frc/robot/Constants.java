@@ -39,7 +39,7 @@ public final class Constants {
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
 
   // Intake
-  public static final int INTAKE_MAIN = 2;
+  public static final int INTAKE_PIVOT = 0;
 
   // Spinner
   public static final int SPINNER_MAIN = 17;
