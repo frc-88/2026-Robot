@@ -182,8 +182,7 @@ public class RobotContainer {
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
       SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory().ignoringDisable(true));
-      SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
-      SmartDashboard.putData("SetPositionTurretField", turret.setPositionField());
+      SmartDashboard.putData("SetTurretTargeting", turret.setPositionTargeting());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunFeeder", feeder.runFeeder());
       SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
@@ -227,15 +226,9 @@ public class RobotContainer {
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
-    turret.setDefaultCommand(turret.setPosition());
+    turret.setDefaultCommand(turret.setPositionTargeting());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall());
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
   }
 
   public void disabledInit() {
@@ -323,13 +316,13 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter(), turret.setPosition())
+        new ParallelCommandGroup(shooter.runShooter(), turret.setPositionTargeting())
             .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
         new ParallelCommandGroup(
             spinner.runSpinner(),
             feeder.runFeeder(),
             shooter.runShooter(),
-            turret.setPosition(),
+            turret.setPositionTargeting(),
             hood.setIsShooting()));
   }
 

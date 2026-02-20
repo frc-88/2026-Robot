@@ -33,10 +33,10 @@ public class Turret extends SubsystemBase {
   private CANcoder m_cancoder66 = new CANcoder(Constants.TURRET_CANCODER_ID1, CANBus.roboRIO());
   private CANcoder m_cancoder50 = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
-  Supplier<Rotation2d> m_yaw;
+  Supplier<Rotation2d> m_robotYaw;
   DoubleSupplier m_rate;
 
-  DoubleSupplier m_hub;
+  DoubleSupplier m_targetFacing;
 
   private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
   private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
@@ -56,18 +56,16 @@ public class Turret extends SubsystemBase {
   private DoublePreferenceConstant p_reverseLimit =
       new DoublePreferenceConstant("Turret/Reverse Limit", 0.0);
 
-  private DoublePreferenceConstant p_pose = new DoublePreferenceConstant("Turret/Target", 0.0);
   private boolean m_tracking = false;
   private boolean m_circumnavigating = false;
   private double m_circumnavigationTarget;
   private double m_defaultFacing = 0.;
   private double m_target = 0;
-  private double m_targetYaw = 0.0;
 
   public Turret(Supplier<Rotation2d> yaw, DoubleSupplier rate, DoubleSupplier hub) {
-    m_yaw = yaw;
+    m_robotYaw = yaw;
     m_rate = rate;
-    m_hub = hub;
+    m_targetFacing = hub;
 
     configureMotors();
     configureCANCoder();
@@ -255,7 +253,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getYaw() {
-    return m_yaw.get().getDegrees();
+    return m_robotYaw.get().getDegrees();
   }
 
   private boolean isPositionSafe(double position) {
@@ -283,17 +281,12 @@ public class Turret extends SubsystemBase {
     return new InstantCommand(() -> calibrateEncoders(), this);
   }
 
-  public Command setPosition() {
-    return new RunCommand(() -> goToFacing(m_targetYaw - getYaw()), this);
-  }
-
-  public Command setPositionField() {
-    return new RunCommand(() -> goToFacing(m_hub.getAsDouble() - getYaw() + 180.0), this);
+  public Command setPositionTargeting() {
+    return new RunCommand(() -> goToFacing(m_targetFacing.getAsDouble() - getYaw()), this); // 180?
   }
 
   @Override
   public void periodic() {
-    m_targetYaw = m_yaw.get().getDegrees();
     if (Util.logif()) {
       SmartDashboard.putNumber("Turret/Talon Absolute", m_turret.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
