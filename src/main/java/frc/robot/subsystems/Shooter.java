@@ -6,7 +6,6 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -66,12 +65,6 @@ public class Shooter extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
 
-  // Hood
-  private double targetAngle = 0;
-  private MotionMagicVoltage hoodRequest = new MotionMagicVoltage(0.0);
-  private MotionMagicPIDPreferenceConstants hoodConfigConstants =
-      new MotionMagicPIDPreferenceConstants("HoodMotor");
-
   // SysId
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final SysIdRoutine m_sysIdRoutine =
@@ -100,7 +93,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
-    shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     shooterMain.getConfigurator().apply(shooterConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
@@ -238,7 +231,7 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooter() {
     return new RunCommand(
-        () -> setShooterSpeed(),
+        () -> setShooterSpeed(() -> shootSpeed.getValue()),
         // () -> increaseFeedForward.getValue(),
         // () -> increaseDelay.getValue(),
         // () -> increaseDuration.getValue()),
@@ -263,9 +256,5 @@ public class Shooter extends SubsystemBase {
 
   public InstantCommand setVelocity(double velocity) {
     return new InstantCommand(() -> targetVelocity = velocity, this);
-  }
-
-  public InstantCommand setAngle(double angle) {
-    return new InstantCommand(() -> targetAngle = angle);
   }
 }

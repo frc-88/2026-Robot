@@ -87,10 +87,10 @@ public class Turret extends SubsystemBase {
     config.Slot0.kV = p_turretPID.getKV().getValue();
     config.Slot0.kS = p_turretPID.getKS().getValue();
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        turretFacingToEncoderPosition(p_forwardLimit.getValue());
+        turretFacingToFalconEncoderPosition(p_forwardLimit.getValue());
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        turretFacingToEncoderPosition(p_reverseLimit.getValue());
+        turretFacingToFalconEncoderPosition(p_reverseLimit.getValue());
     config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -106,7 +106,7 @@ public class Turret extends SubsystemBase {
 
   public void sync() {
     if (isEncoderConnected()) {
-      m_turret.setPosition(turretFacingToEncoderPosition(getAbsoluteAngleOfTurret()));
+      m_turret.setPosition(turretFacingToFalconEncoderPosition(getAbsoluteAngleOfTurret()));
     } else {
       m_turret.setPosition(0.0);
     }
@@ -150,16 +150,16 @@ public class Turret extends SubsystemBase {
     m_target = target;
     if (m_circumnavigating && !isFacingSafe(target)) {
       // if we are circumnavigating, ignore the input and keep doing that until we get there
-      goToPosition(turretFacingToEncoderPosition(m_circumnavigationTarget), false);
+      goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);
       m_circumnavigating = Math.abs(m_circumnavigationTarget - getFacing()) > 5.0;
     } else if (isFacingSafe(target)) {
       // otherwise go to the input target if it is safe.
-      goToPosition(turretFacingToEncoderPosition(target), spinCompensation);
+      goToPosition(turretFacingToFalconEncoderPosition(target), spinCompensation);
     } else if (isFacingSafe(m_circumnavigationTarget = calcCircumnavigationTarget(target))) {
       // but if the target isn't safe, and our circumnavigation target is, start circumnavigating
       m_circumnavigating = true;
       // TODO? - adjust config here if different PID needed for targeting vs. circumnavigating
-      goToPosition(turretFacingToEncoderPosition(m_circumnavigationTarget), false);
+      goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);
     } else {
       System.out.println("Turret unsafe target: " + target);
       // target is unsafe and circumnavigation target is unsafe, ignore it
@@ -204,7 +204,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isFacingSafe(double degrees) {
-    return isPositionSafe(turretFacingToEncoderPosition(degrees));
+    return isPositionSafe(turretFacingToFalconEncoderPosition(degrees));
   }
 
   public double getFacing() {
@@ -212,7 +212,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean isSynchronized() {
-    return Math.abs(getFacing() - turretFacingToEncoderPosition(getAbsoluteAngleOfTurret()))
+    return Math.abs(getFacing() - turretFacingToFalconEncoderPosition(getAbsoluteAngleOfTurret()))
         < p_syncThreshold.getValue();
   }
 
@@ -237,19 +237,19 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToPosition(double position, boolean spinCompensation) {
-    if (spinCompensation) {
-      m_turret.setControl(
-          motionMagicReq
-              .withPosition(position)
-              .withFeedForward(
-                  5
-                      * 0.1
-                      * p_turretPID.getKV().getValue()
-                      * turretFacingToEncoderPosition(m_rate.getAsDouble())
-                      / 1023.0));
-    } else {
-      m_turret.setControl(motionMagicReq.withPosition(position));
-    }
+    // if (spinCompensation) {
+    //   m_turret.setControl(
+    //       motionMagicReq
+    //           .withPosition(position)
+    //           .withFeedForward(
+    //               5
+    //                   * 0.1
+    //                   * p_turretPID.getKV().getValue()
+    //                   * turretFacingToEncoderPosition(m_rate.getAsDouble())
+    //                   / 1023.0));
+    // } else {
+    m_turret.setControl(motionMagicReq.withPosition(position));
+    // }
   }
 
   public double getYaw() {
@@ -258,9 +258,11 @@ public class Turret extends SubsystemBase {
 
   private boolean isPositionSafe(double position) {
     return (position
-            < turretFacingToEncoderPosition(p_forwardLimit.getValue() - p_limitBuffer.getValue()))
+            < turretFacingToFalconEncoderPosition(
+                p_forwardLimit.getValue() - p_limitBuffer.getValue()))
         && (position
-            > turretFacingToEncoderPosition(p_reverseLimit.getValue() + p_limitBuffer.getValue()));
+            > turretFacingToFalconEncoderPosition(
+                p_reverseLimit.getValue() + p_limitBuffer.getValue()));
   }
 
   private double getAbsoluteAngleOfTurret() {
@@ -270,15 +272,25 @@ public class Turret extends SubsystemBase {
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
-    return (turretPosition / 41.66) * 360.0;
+    return (turretPosition / (5 * (100 / 12)) * 360.0);
   }
 
-  private double turretFacingToEncoderPosition(double degrees) {
-    return (degrees / 360.0) * (41.66);
+  private double turretEncoderPositionToFacing4(double turretPosition) {
+    return (turretPosition / (4 * (100 / 12)) * 360.0);
   }
 
-  public Command calibrateFactory() {
+  private double turretFacingToFalconEncoderPosition(double degrees) {
+    return (degrees / 360.0) * (5 * (100 / 12));
+  }
+
+  public Command calibrateEncodersFactory() {
     return new InstantCommand(() -> calibrateEncoders(), this);
+  }
+
+  public Command calibrateTurret() {
+    return new InstantCommand(
+        () ->
+            m_turret.setPosition(turretFacingToFalconEncoderPosition(getAbsoluteAngleOfTurret())));
   }
 
   public Command setPositionTargeting() {
@@ -289,16 +301,19 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     if (Util.logif()) {
+      SmartDashboard.putNumber(
+          "Turret/DemandedAngle", m_targetFacing.getAsDouble() - getYaw() + 180.0);
       SmartDashboard.putNumber("Turret/Talon Absolute", m_turret.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Turret/CANCoder Position", m_cancoder66.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
-          "Turret/Difference",
+          "Turret/RealAngle",
           (m_cancoder66.getPosition().getValueAsDouble()
                   - m_cancoder50.getPosition().getValueAsDouble())
               * p_proportion.getValue());
       SmartDashboard.putNumber("Turret/Position", getPosition());
       SmartDashboard.putNumber("Turret/Facing", getFacing());
+      SmartDashboard.putNumber("Turret/Facing4", turretEncoderPositionToFacing4(getPosition()));
       SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
       SmartDashboard.putBoolean("Turret/Tracking", isTracking());
       SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));

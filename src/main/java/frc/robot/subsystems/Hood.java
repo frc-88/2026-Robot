@@ -67,16 +67,18 @@ public class Hood extends SubsystemBase {
     if (Util.logif()) {
       SmartDashboard.putData("Hood/Calibrate", calibrate());
       SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+      SmartDashboard.putData("Hood/SetPositionManual", setPositionTargeting());
       SmartDashboard.putData("Hood/GoToZero", goToZero());
     }
   }
 
   public void periodic() {
-    if (isShooting) {
-      m_targetPitch = 90 - m_pitch.getAsDouble();
-    } else {
-      m_targetPitch = 14;
-    }
+    // if (isShooting) {
+    //   m_targetPitch = 90.0 - m_pitch.getAsDouble();
+    // } else {
+    //   m_targetPitch = 14.0;
+    // }
+    m_targetPitch = targetPos.getValue();
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       SmartDashboard.putNumber(
@@ -98,6 +100,7 @@ public class Hood extends SubsystemBase {
 
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
+    System.out.println(angle);
   }
 
   private void setCalibrate() {
@@ -131,6 +134,10 @@ public class Hood extends SubsystemBase {
 
   public Command setPositionTargeting() {
     return new RunCommand(() -> setPosition(m_targetPitch), this);
+  }
+
+  public Command setPositionManual() {
+    return new RunCommand(() -> setPosition(25.0), this);
   }
 
   public Command goToZero() {

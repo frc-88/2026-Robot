@@ -95,6 +95,7 @@ public class TrajectorySolver extends SubsystemBase {
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
+      Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
     }
   }
 

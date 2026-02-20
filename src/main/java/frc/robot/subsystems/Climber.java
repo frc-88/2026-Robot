@@ -167,7 +167,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Go Grip", gotoGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
-    SmartDashboard.putData("Climber/Go Ground", gotoGround());
+    SmartDashboard.putData("Climber/Go Ground", gotoStow());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
@@ -348,7 +348,7 @@ public class Climber extends SubsystemBase {
     return new RunCommand(() -> liftGotoPosition(liftTuckTarget.getValue()), this);
   }
 
-  public Command gotoGround() {
+  public Command gotoStow() {
     return new RunCommand(() -> liftGotoPosition(liftDownTarget.getValue()), this);
   }
 

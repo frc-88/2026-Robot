@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
@@ -143,11 +142,6 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("Start Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
-
     trajectorySolver =
         new TrajectorySolver(
             () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
@@ -156,6 +150,11 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    NamedCommands.registerCommand("Start Intake", new WaitCommand(1));
+    NamedCommands.registerCommand("Stop Intake", new WaitCommand(1));
+    NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
+    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
 
     // Set up SysId routines
     // autoChooser.addOption(
@@ -181,7 +180,8 @@ public class RobotContainer {
   private void configureSmartDashboardButtons() {
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData("CalibrateTurret", turret.calibrateFactory().ignoringDisable(true));
+      SmartDashboard.putData(
+          "CalibrateTurret", turret.calibrateEncodersFactory().ignoringDisable(true));
       SmartDashboard.putData("SetTurretTargeting", turret.setPositionTargeting());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunFeeder", feeder.runFeeder());
@@ -197,22 +197,22 @@ public class RobotContainer {
       SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-      SmartDashboard.putData(
-          "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData(
-          "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+      //   SmartDashboard.putData(
+      //       "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
+      //   SmartDashboard.putData(
+      //       "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
+      //   SmartDashboard.putData(
+      //       "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
+      //   SmartDashboard.putData(
+      //       "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
+      //   SmartDashboard.putData(
+      //       "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
+      //   SmartDashboard.putData(
+      //       "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
+      //   SmartDashboard.putData(
+      //       "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
+      //   SmartDashboard.putData(
+      //       "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
     }
@@ -285,7 +285,7 @@ public class RobotContainer {
     buttons.button(2).onTrue(climber.leftFlip());
     // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
-    buttons.button(5).onTrue(climber.gotoGround()); // is this stow?
+    buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
