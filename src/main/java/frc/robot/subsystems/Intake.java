@@ -75,12 +75,12 @@ public class Intake extends SubsystemBase {
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
     // TODO: determine actual conversion,this is from Hood
-    return (pivotAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+    return (pivotAngle/360.0) * (15.0);
   }
 
   private double intakePivotRotationsToAngle(double minionRotations) { // inverse of ^^
     // TODO: determine actual conversion,this is from Hood
-    return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
+    return (minionRotations * 360) / (15.0);
   }
 
   // private void setSpeed(double speed) {
@@ -115,7 +115,7 @@ public class Intake extends SubsystemBase {
     // TODO: convert this (from Hood) to Intake and figure out proper calibration numbers
     intakePivot.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (intakePivot.getStatorCurrent().getValueAsDouble() > 20.0) {
-      intakePivot.setPosition(intakePivotAngleDegreesToRotations(13.5));
+      intakePivot.setPosition(intakePivotAngleDegreesToRotations(0));
     }
   }
 
