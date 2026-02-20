@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Util;
-import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
@@ -23,7 +22,7 @@ public class Hood extends SubsystemBase {
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  //private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+  // private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
   private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
   private DoubleSupplier m_pitch;
@@ -81,8 +80,7 @@ public class Hood extends SubsystemBase {
 
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/TrajectorySetpoint", m_pitch.getAsDouble());
+      SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
       SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Hood/CurrentAngle",
