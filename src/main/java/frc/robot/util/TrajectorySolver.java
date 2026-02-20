@@ -155,7 +155,7 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupAngle(double distance) {
-    return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
+    return 84.15886-16.18452 * Math.log(distance);
     // - 1.11 * (Math.pow(distance, 3.0));
   }
 

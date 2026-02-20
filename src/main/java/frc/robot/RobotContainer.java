@@ -149,7 +149,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
 
     trajectorySolver =
-        new TrajectorySolver(() -> batman.isConnected() ? batman.getPose2d() : drive.getPose(), drive::getChassisSpeedsFieldRelative);
+        new TrajectorySolver(
+            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
+            drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
@@ -288,9 +290,9 @@ public class RobotContainer {
   public void configureButtonBox() {
     buttons.button(1).onTrue(climber.gotoGrip());
     buttons.button(2).onTrue(climber.leftFlip());
-    //buttons.button(3).onTrue(climber.rightFlip());
+    // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
-    buttons.button(5).onTrue(climber.gotoGround()); //is this stow?
+    buttons.button(5).onTrue(climber.gotoGround()); // is this stow?
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
@@ -299,7 +301,8 @@ public class RobotContainer {
   }
 
   public Command resetBatman() {
-    return new InstantCommand(() -> batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
+    return new InstantCommand(
+        () -> batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
   }
 
   public Command driveRotateAroundRobotCenter() {

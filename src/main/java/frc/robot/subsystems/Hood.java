@@ -74,8 +74,7 @@ public class Hood extends SubsystemBase {
   public void periodic() {
     if (isShooting) {
       m_targetPitch = 90 - m_pitch.getAsDouble();
-    }
-    else {
+    } else {
       m_targetPitch = 14;
     }
     if (Util.logif()) {
@@ -119,7 +118,6 @@ public class Hood extends SubsystemBase {
   public Command setIsShooting() {
     return new InstantCommand(() -> isShooting = true);
   }
-
 
   public Command stopHood() {
     return new RunCommand(() -> stopHoodMotor(), this);
