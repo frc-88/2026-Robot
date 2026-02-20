@@ -270,9 +270,7 @@ public class RobotContainer {
         .rightTrigger()
         .onTrue(shoot())
         .onFalse(
-            intake
-                .stopIntake()
-                .alongWith(driveRotateAroundTurretCenter())
+            driveRotateAroundTurretCenter()
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
                 .alongWith(feeder.stopFeeder())
