@@ -10,14 +10,17 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
-  public Translation2d robotToTurret;
-  public Translation2d targetPosition;
+  private Translation2d robotToTurret = Constants.robotToTurret;
+  private Translation2d targetPosition = Constants.HUB;
 
-  public Translation2d robotPosition = new Translation2d(0.0, 0.0); // m
-  public Rotation2d robotYaw = new Rotation2d(Math.PI * (1.0 / 3.0)); // rad
-  public Translation2d robotVelocity = new Translation2d(-0.2, -0.2); // m/s
+  Supplier<Pose2d> drivePoseSupplier;
+  Supplier<Pose2d> velocityPoseSupplier;
+
+  public Translation2d robotPosition = Translation2d.kZero; // m
+  public Rotation2d robotYaw = Rotation2d.kZero; // rad
+  public Translation2d robotVelocity = Translation2d.kZero; // m/s
   public double robotRotationalVelocity = 0.0; // rad/s
-  public Translation2d targetVelocity = new Translation2d(0, 0); // for hub: 0
+  public Translation2d targetVelocity = Translation2d.kZero; // for hub: 0
 
   public DoublePreferenceConstant angle = new DoublePreferenceConstant("Traj/angle", 0.0);
   public DoublePreferenceConstant speed = new DoublePreferenceConstant("Traj/speed", 0.0);
@@ -29,20 +32,15 @@ public class TrajectorySolver extends SubsystemBase {
   private boolean hasPreviousTimeOfFlightGuess = false;
   private double timeOfFlight = 0.0; // seconds
   private Translation2d turretToProjectedTarget = Translation2d.kZero; // m; distanceToTarget
-  private double turretToProjectedTargetDistance;
+  private double turretToProjectedTargetDistance = 0.0;
   private int numberOfIterations = 5;
 
   public double hoodAngle;
   public double shootSpeed;
-  Supplier<Pose2d> drivePose1;
-  Supplier<Pose2d> vel1;
 
-  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> vel) {
-    drivePose1 = drivePose;
-    vel1 = vel;
-    robotYaw = Rotation2d.kZero;
-    robotToTurret = Constants.robotToTurret;
-    targetPosition = Constants.HUB;
+  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
+    drivePoseSupplier = drivePose;
+    velocityPoseSupplier = velocityPose;
   }
 
   public double getAngle() {
@@ -61,10 +59,10 @@ public class TrajectorySolver extends SubsystemBase {
 
   @Override
   public void periodic() {
-    robotPosition = drivePose1.get().getTranslation();
-    robotVelocity = vel1.get().getTranslation(); // TODO: make this turret velocity
-    robotYaw = drivePose1.get().getRotation();
-    robotRotationalVelocity = vel1.get().getRotation().getRadians();
+    robotPosition = drivePoseSupplier.get().getTranslation();
+    robotVelocity = velocityPoseSupplier.get().getTranslation(); // TODO: make this turret velocity
+    robotYaw = drivePoseSupplier.get().getRotation();
+    robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 

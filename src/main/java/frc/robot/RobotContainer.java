@@ -12,6 +12,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -192,6 +193,10 @@ public class RobotContainer {
         "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
     SmartDashboard.putData("Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
     SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurret());
+    SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveDefault());
+    SmartDashboard.putData(
+        "Batman/SetPose", batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
   }
 
   private void configureDefaultCommands() {
