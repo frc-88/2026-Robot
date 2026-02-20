@@ -69,7 +69,7 @@ public class Hood extends SubsystemBase {
   }
 
   public void periodic() {
-    m_targetPitch = m_pitch.getAsDouble() - 90.0;
+    m_targetPitch = 90 - m_pitch.getAsDouble();
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       SmartDashboard.putNumber(

@@ -58,7 +58,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Turret turret;
   public Feeder feeder = new Feeder();
-  public Shooter shooter = new Shooter();
+  public Shooter shooter;
   public Intake intake = new Intake();
   public Spinner spinner = new Spinner();
   public TrajectorySolver trajectorySolver;
@@ -145,9 +145,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
     NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
 
-    trajectorySolver = new TrajectorySolver(drive::getPose, drive::getChassisSpeedsFieldRelative);
+    trajectorySolver = new TrajectorySolver(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
+    shooter = new Shooter(trajectorySolver::getShootSpeed);
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
