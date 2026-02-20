@@ -295,7 +295,8 @@ public class Turret extends SubsystemBase {
 
   public Command setPositionTargeting() {
     return new RunCommand(
-        () -> goToFacing(m_targetFacing.getAsDouble() - getYaw() + 180.0), this); // 180?
+        () -> goToFacing(180.0 + m_targetFacing.getAsDouble() - getYaw()),
+        this); // 180? //m_targetFacing.getAsDouble() - getYaw() +
   }
 
   @Override

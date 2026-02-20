@@ -73,12 +73,12 @@ public class Hood extends SubsystemBase {
   }
 
   public void periodic() {
-    // if (isShooting) {
-    //   m_targetPitch = 90.0 - m_pitch.getAsDouble();
-    // } else {
-    //   m_targetPitch = 14.0;
-    // }
-    m_targetPitch = targetPos.getValue();
+    if (isShooting) {
+      m_targetPitch = targetPos.getValue(); // 90.0 - m_pitch.getAsDouble();
+    } else {
+      m_targetPitch = 14.0;
+    }
+
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       SmartDashboard.putNumber(

@@ -81,7 +81,7 @@ public class TrajectorySolver extends SubsystemBase {
             .minus(targetVelocity);
     Logger.recordOutput(
         "Trajectory/TurretToTargetRelativeVelocity", turretToTargetRelativeVelocity);
-    // TODO tune this
+
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
