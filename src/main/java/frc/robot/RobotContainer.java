@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -294,6 +295,11 @@ public class RobotContainer {
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
+    buttons.button(10).onTrue(resetBatman());
+  }
+
+  public Command resetBatman() {
+    return new InstantCommand(() -> batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
   }
 
   public Command driveRotateAroundRobotCenter() {
