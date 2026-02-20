@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -21,6 +22,8 @@ public class Intake extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants intakeConfigConstants =
       new MotionMagicPIDPreferenceConstants("Intake/IntakePivotMotor");
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
+
   private DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Intake/PivotTarget", 0);
   private PWM intakeSpinner = new PWM(0);
@@ -54,7 +57,7 @@ public class Intake extends SubsystemBase {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("Intake/Calibrate", calibrateIntake());
-    SmartDashboard.putData("Intake/SetPosition", setPositionThing());
+    SmartDashboard.putData("Intake/SetPosition", pivotGoToPosition());
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
   }
@@ -70,9 +73,9 @@ public class Intake extends SubsystemBase {
         intakePivotRotationsToAngle(intakePivot.getPosition().getValueAsDouble()));
   }
 
-  private double intakePivotAngleDegreesToRotations(double hoodAngle) {
+  private double intakePivotAngleDegreesToRotations(double pivotAngle) {
     // TODO: determine actual conversion,this is from Hood
-    return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+    return (pivotAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
   }
 
   private double intakePivotRotationsToAngle(double minionRotations) { // inverse of ^^
@@ -109,21 +112,20 @@ public class Intake extends SubsystemBase {
   }
 
   private void setCalibrate() {
-    // TODO: convert this (from Hood) to Intake and figure out proper calibration method
-    // intakePivot.setControl(request.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    // if (intakePivot.getStatorCurrent().getValueAsDouble() > 20.0) {
-    //   intakePivot.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
-
+    // TODO: convert this (from Hood) to Intake and figure out proper calibration numbers
+    intakePivot.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
+    if (intakePivot.getStatorCurrent().getValueAsDouble() > 20.0) {
+      intakePivot.setPosition(intakePivotAngleDegreesToRotations(13.5));
+    }
   }
 
   public Command calibrateIntake() {
-    // TODO: this is from Hood, it may need to be adapted for Intake
     return new RunCommand(() -> setCalibrate(), this)
         .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 60.0)
         .andThen(stopIntake());
   }
 
-  public Command setPositionThing() {
+  public Command pivotGoToPosition() {
     return new RunCommand(() -> setPosition(targetPos.getValue()), this);
   }
 
