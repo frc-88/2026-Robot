@@ -3,6 +3,7 @@ package frc.robot.util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
@@ -66,6 +67,8 @@ public class TrajectorySolver extends SubsystemBase {
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
+    targetPosition = findTarget(); // no velocity set
+
     Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
@@ -127,6 +130,20 @@ public class TrajectorySolver extends SubsystemBase {
         new Pose2d(
             turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
             Rotation2d.kZero));
+  }
+
+  public Translation2d findTarget() {
+    if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
+      if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
+        return Constants.LEFT_SHUTTLE_TARGET;
+      }
+      else {
+        return Constants.RIGHT_SHUTTLE_TARGET;
+      }
+    }
+    else {
+      return Constants.HUB;
+    }
   }
 
   public double lookupTime(double distance) {

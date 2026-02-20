@@ -74,4 +74,6 @@ public final class Constants {
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
   public static Translation2d HUB =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
+  public static Translation2d RIGHT_SHUTTLE_TARGET = new Translation2d(0.5, 0.5);
+  public static Translation2d LEFT_SHUTTLE_TARGET = new Translation2d(0.5, 7.5);
 }
