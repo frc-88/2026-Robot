@@ -52,19 +52,13 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
     feederConfig.Slot0.kS = feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted =
-        InvertedValue.CounterClockwise_Positive; // clockwise + for full hopper+shooter test;
-    // counterclockwise + for shooter
+        InvertedValue.CounterClockwise_Positive;
     feeder.getConfigurator().apply(feederConfig);
 
     feeder.getVelocity().setUpdateFrequency(100);
   }
 
   public void periodic() {
-    // SmartDashboard.putNumber("Feeder/FeederVelocity", 0.5);
-    // SmartDashboard.putNumber("Feeder/FeederVoltage",
-    // feeder.getMotorVoltage().getValueAsDouble());
-    // SmartDashboard.putNumber("Feeder/FeederCurrent",
-    // feeder.getTorqueCurrent().getValueAsDouble());
   }
 
   private void setVoltage(Voltage volts) {
