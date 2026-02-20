@@ -18,14 +18,16 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Hood extends SubsystemBase {
-  private TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+  private final TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+
+  private final MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private final DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
-  private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
-  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
-  private DoubleSupplier m_pitch;
+  private final DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+
+  private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
 
   public Hood(DoubleSupplier pitch) {
@@ -68,19 +70,6 @@ public class Hood extends SubsystemBase {
     }
   }
 
-  public void periodic() {
-    m_targetPitch = 90 - m_pitch.getAsDouble();
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
-      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/CurrentAngle",
-          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
-    }
-  }
-
   private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
     return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
   }
@@ -102,6 +91,20 @@ public class Hood extends SubsystemBase {
 
   private void stopHoodMotor() {
     hood.stopMotor();
+  }
+
+  public void periodic() {
+    m_targetPitch = 90 - m_pitch.getAsDouble();
+
+    if (Util.logif()) {
+      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
+      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Hood/CurrentAngle",
+          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
+    }
   }
 
   public Command stopHood() {
