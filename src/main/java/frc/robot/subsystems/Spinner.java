@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -30,9 +31,11 @@ public class Spinner extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    if (Util.logif()) {
+      SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    }
   }
 
   private void configureTalons() {

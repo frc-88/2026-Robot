@@ -201,6 +201,10 @@ public class Shooter extends SubsystemBase {
     setShooterSpeed(() -> targetVelocity);
   }
 
+  public boolean atShooterSpeed() {
+    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 1.0;
+  }
+
   // This should eventually be moved to utils in base or something
   private void calculateBPS() {
     ballsCount = ballsCount + 1;

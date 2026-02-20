@@ -60,6 +60,10 @@ public final class Constants {
   public static final int TURRET_GEAR_RATIO = 1;
   public static final double TURRET_COUNTS_PER_REV = 1;
 
+  //TODO This
+  public static final double FIELD_WIDTH = 8.05;
+  public static final double FIELD_LENGTH = 17.55;
+
   // Drive
   // See generated/TunerConstants.java
 

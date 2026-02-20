@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
+import org.littletonrobotics.junction.Logger;
 
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
@@ -70,6 +71,7 @@ public class Batman extends SubsystemBase {
     quest.commandPeriodic();
     SmartDashboard.putNumber("Quest/Battery", getBatteryPercent());
     SmartDashboard.putBoolean("Quest/isConnected", isConnected());
+    Logger.recordOutput("Quest/Pose", currentPose);
 
     if (!isConnected() || !isTracking()) {
       shouldUse = false;
