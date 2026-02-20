@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -79,32 +81,16 @@ public class Intake extends SubsystemBase {
   }
 
   private double intakePivotRotationsToAngle(double minionRotations) { // inverse of ^^
-    // TODO: determine actual conversion,this is from Hood
+    // TODO: determine actual conversion; this is from Hood
     return (minionRotations * 360) / (15.0);
   }
 
-  // private void setSpeed(double speed) {
-  //   intake.setControl(requestcycle.withOutput(speed));
-  // }
-
-  // private void stopMotors() {
-  //   intake.stopMotor();
-  // }
-
-  private void setSpeed(double speed) {
-    intakeSpinner.setSpeed(speed);
+  private void setSpinnerSpeed(DoubleSupplier speed) {
+    intakeSpinner.setSpeed(speed.getAsDouble());
   }
 
-  private void stopMotors() {
+  private void stopSpinner() {
     intakeSpinner.setSpeed(0.0);
-  }
-
-  public Command runIntake() {
-    return new RunCommand(() -> setSpeed(speed.getValue()), this);
-  }
-
-  public Command stopIntake() {
-    return new RunCommand(() -> stopMotors(), this);
   }
 
   private void setPosition(double angle) {
@@ -119,6 +105,24 @@ public class Intake extends SubsystemBase {
     }
   }
 
+  private void intakeOut() {
+    setPosition(90.0);
+    setSpinnerSpeed(() -> speed.getValue());
+  }
+
+  private void intakeIn() {
+    setPosition(0.0);
+    stopSpinner();
+  }
+
+  public Command runIntake() {
+    return new RunCommand(() -> setSpinnerSpeed(() -> speed.getValue()), this);
+  }
+
+  public Command stopIntake() {
+    return new RunCommand(() -> stopSpinner(), this);
+  }
+
   public Command calibrateIntake() {
     return new RunCommand(() -> setCalibrate(), this)
         .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 60.0)
@@ -131,11 +135,11 @@ public class Intake extends SubsystemBase {
 
   public Command retractIntake() {
     // TODO: determine proper retract angle, put it here
-    return new RunCommand(() -> setPosition(0.0), this);
+    return new RunCommand(() -> intakeIn(), this);
   }
 
   public Command deployIntake() {
     // TODO: determine proper deploy angle, put it here
-    return new RunCommand(() -> setPosition(0.0), this);
+    return new RunCommand(() -> intakeOut(), this);
   }
 }
