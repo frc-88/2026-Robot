@@ -45,7 +45,7 @@ public class Intake extends SubsystemBase {
     config.Slot0.kS = intakeConfigConstants.getKS().getValue();
     config.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
     config.MotorOutput.Inverted =
-        InvertedValue.CounterClockwise_Positive; // this might not work yet
+        InvertedValue.Clockwise_Positive;
 
     // TODO: figure out limits and enable them
     // config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = <forward limit>
@@ -97,7 +97,7 @@ public class Intake extends SubsystemBase {
 
   private void setCalibrate() {
     // TODO: convert this (from Hood) to Intake and figure out proper calibration numbers
-    intakePivot.setControl(calibrationRequest.withOutput(0.16).withIgnoreSoftwareLimits(true));
+    intakePivot.setControl(calibrationRequest.withOutput(0.1).withIgnoreSoftwareLimits(true));
     if (intakePivot.getStatorCurrent().getValueAsDouble() > 20.0) {
       intakePivot.setPosition(intakePivotAngleDegreesToRotations(0));
     }
@@ -105,7 +105,7 @@ public class Intake extends SubsystemBase {
 
   private void intakeOut() {
     setPosition(90.0);
-    setSpinnerSpeed(() -> speed.getValue());
+    // setSpinnerSpeed(() -> speed.getValue());
   }
 
   private void intakeIn() {
