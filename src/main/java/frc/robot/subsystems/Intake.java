@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/SetRotations", pivotGoToRotations());
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
-    SmartDashboard.putData("Intake/Zero", zeroIntake());
+    SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
   }
 
   public void periodic() {
