@@ -170,7 +170,7 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    if(Util.logif()) {
+    if (Util.logif()) {
       Logger.processInputs("Drive/Gyro", gyroInputs);
     }
     for (var module : modules) {
@@ -234,8 +234,7 @@ public class Drive extends SubsystemBase {
     m_yaw = yaw;
   }
 
-  
-    public boolean weAreRed() {
+  public boolean weAreRed() {
     return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
   }
 

@@ -52,6 +52,14 @@ public final class Constants {
   public static final int SHOOTER_FOLLOWER = 5;
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
+  // Climber
+  public static final int CLIMBER_LIFT = 21;
+  public static final int CLIMBER_PIVOT = 22;
+  public static final int CLIMBER_CANRANGE = 8;
+  public static final int CLIMBER_PIGEON = 20;
+  public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
+  public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);
+
   // Turret
   public static final int TURRET_MOTOR_ID = 6;
   public static final int TURRET_CANCODER_ID1 = 15;
@@ -64,6 +72,7 @@ public final class Constants {
   public static final double FIELD_LENGTH = 16.54;
 
   // Drive
+  public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
 
   // HOOD Milk

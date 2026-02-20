@@ -9,8 +9,6 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 
-import java.lang.annotation.Target;
-
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -24,10 +22,10 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
@@ -68,15 +66,17 @@ public class RobotContainer {
   public Hood hood;
   public final Vision vision;
   private final Simulation simulation;
+  public Climber climber = new Climber();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private LoggedDashboardChooser autoChooser;
 
   // private Joystick joystick0 = new Joystick(0);
   // private Joystick joystick1 = new Joystick(1);
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+  //   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -151,20 +151,20 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     configureSmartDashboardButtons();
     configureDefaultCommands();
@@ -222,10 +222,17 @@ public class RobotContainer {
     hood.setDefaultCommand(hood.setPositionThing());
     turret.setDefaultCommand(turret.setPosition());
     drive.setDefaultCommand(driveRotateAroundTurret());
+    climber.setDefaultCommand(climber.stopall());
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
   }
 
   public void disabledInit() {
-    // shooter.resetBPS();
+    shooter.resetBPS();
   }
 
   private void configureDriverController() {
@@ -289,9 +296,16 @@ public class RobotContainer {
   }
 
   public Command shoot() {
-    return new SequentialCommandGroup(new ParallelCommandGroup(shooter.runShooter(), turret.setPosition(), hood.setPositionThing())
-    .until(() -> turret.onTarget() && shooter.atShooterSpeed()), 
-    new ParallelCommandGroup(spinner.runSpinner(), feeder.runFeeder(), shooter.runShooter(), turret.setPosition(), hood.setPositionThing()));
+    return new SequentialCommandGroup(
+        new ParallelCommandGroup(
+                shooter.runShooter(), turret.setPosition(), hood.setPositionThing())
+            .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
+        new ParallelCommandGroup(
+            spinner.runSpinner(),
+            feeder.runFeeder(),
+            shooter.runShooter(),
+            turret.setPosition(),
+            hood.setPositionThing()));
   }
 
   // /**
@@ -300,6 +314,7 @@ public class RobotContainer {
   //  * @return the command to run in autonomous
   //  */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    // return autoChooser.get();
+    return null;
   }
 }
