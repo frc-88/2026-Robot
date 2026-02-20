@@ -11,12 +11,14 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -133,6 +135,11 @@ public class RobotContainer {
         // turret = new Turret(gyro);
         break;
     }
+
+    NamedCommands.registerCommand("Start Intake", new WaitCommand(1));
+    NamedCommands.registerCommand("Stop Intake", new WaitCommand(1));
+    NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
+    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
 
     trajectorySolver = new TrajectorySolver(drive::getPose, drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);

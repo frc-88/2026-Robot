@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "Drive Into Tower Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L3"
           }
         }
       ]
