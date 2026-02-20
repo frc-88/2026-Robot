@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -17,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.DoubleSupplier;
 
 public class Intake extends SubsystemBase {
 
@@ -77,7 +76,7 @@ public class Intake extends SubsystemBase {
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
     // TODO: determine actual conversion,this is from Hood
-    return (pivotAngle/360.0) * (15.0);
+    return (pivotAngle / 360.0) * (15.0);
   }
 
   private double intakePivotRotationsToAngle(double minionRotations) { // inverse of ^^
