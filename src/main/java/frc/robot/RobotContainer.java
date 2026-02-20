@@ -210,7 +210,7 @@ public class RobotContainer {
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurret());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveDefault());
     }
-    SmartDashboard.putData(
+    SmartDashboard.putData( // DO NOT FLIP IF RED
         "Batman/SetPose", batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
   }
 

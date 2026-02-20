@@ -87,18 +87,18 @@ public class Batman extends SubsystemBase {
   }
 
   public void checkPose(Pose2d newPose, double linearStddev, double angularStddev) {
-    Pose2d newPoseDiff = newPose.relativeTo(drivePose);
-    double score = linearStddev + rotationWeight.getValue() * angularStddev;
-    score =
-        score
-            + newPoseDiff.getX()
-            + newPoseDiff.getY()
-            + rotationWeight.getValue() * newPoseDiff.getRotation().getRadians();
-    if (bestScore == 0 || score < bestScore) {
-      bestScore = score;
-      resetPose(visionPose);
-    }
+    // Pose2d newPoseDiff = newPose.relativeTo(drivePose);
+    // double score = linearStddev + rotationWeight.getValue() * angularStddev;
+    // score =
+    //     score
+    //         + newPoseDiff.getX()
+    //         + newPoseDiff.getY()
+    //         + rotationWeight.getValue() * newPoseDiff.getRotation().getRadians();
+    // if (bestScore == 0 || score < bestScore) {
+    //   bestScore = score;
+    //   resetPose(visionPose);
   }
+  // }
 
   public Command resetQuestPose(Pose3d pose) {
     return new InstantCommand(() -> resetPose(pose));
