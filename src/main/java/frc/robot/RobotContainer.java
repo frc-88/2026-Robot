@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
@@ -70,6 +71,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private CommandGenericHID buttons = new CommandGenericHID(1);
   private LoggedDashboardChooser autoChooser;
 
   // private Joystick joystick0 = new Joystick(0);
@@ -209,8 +211,8 @@ public class RobotContainer {
           "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
       SmartDashboard.putData(
           "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
-      SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurret());
-      SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveDefault());
+      SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
+      SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
     }
     SmartDashboard.putData( // DO NOT FLIP IF RED
         "Batman/SetPose", batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
@@ -223,7 +225,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionThing());
     turret.setDefaultCommand(turret.setPosition());
-    drive.setDefaultCommand(driveRotateAroundTurret());
+    drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall());
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -253,7 +255,7 @@ public class RobotContainer {
         .onTrue(
             intake
                 .stopIntake()
-                .alongWith(driveRotateAroundTurret())
+                .alongWith(driveRotateAroundTurretCenter())
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
@@ -274,14 +276,28 @@ public class RobotContainer {
         .onFalse(
             intake
                 .stopIntake()
-                .alongWith(driveRotateAroundTurret())
+                .alongWith(driveRotateAroundTurretCenter())
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
-                .alongWith(feeder.stopFeeder()));
+                .alongWith(feeder.stopFeeder())
+                .alongWith(hood.setNotShooting()));
     controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }
 
-  public Command driveDefault() {
+  public void configureButtonBox() {
+    buttons.button(1).onTrue(climber.gotoGrip());
+    buttons.button(2).onTrue(climber.leftFlip());
+    buttons.button(3).onTrue(climber.rightFlip());
+    buttons.button(4).onTrue(climber.gotoL1());
+    buttons.button(5).onTrue(climber.gotoGround()); //is this stow?
+    buttons.button(6).onTrue(intake.deployIntake());
+    buttons.button(7).onTrue(intake.retractIntake());
+    buttons.button(8).onTrue(driveRotateAroundRobotCenter());
+    buttons.button(9).onTrue(driveRotateAroundTurretCenter());
+
+  }
+
+  public Command driveRotateAroundRobotCenter() {
     return DriveCommands.joystickDrive(
         drive,
         () -> -controller.getLeftY(),
@@ -289,7 +305,7 @@ public class RobotContainer {
         () -> -controller.getRightX());
   }
 
-  public Command driveRotateAroundTurret() {
+  public Command driveRotateAroundTurretCenter() {
     return DriveCommands.rotateAroundTurret(
         drive,
         () -> -controller.getLeftY(),
@@ -307,7 +323,8 @@ public class RobotContainer {
             feeder.runFeeder(),
             shooter.runShooter(),
             turret.setPosition(),
-            hood.setPositionThing()));
+            hood.setPositionThing(),
+            hood.setIsShooting()));
   }
 
   // /**

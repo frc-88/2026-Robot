@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -27,6 +28,8 @@ public class Hood extends SubsystemBase {
   private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
   private DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
+
+  public boolean isShooting = false;
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
@@ -69,7 +72,12 @@ public class Hood extends SubsystemBase {
   }
 
   public void periodic() {
-    m_targetPitch = 90 - m_pitch.getAsDouble();
+    if (isShooting) {
+      m_targetPitch = 90 - m_pitch.getAsDouble();
+    }
+    else {
+      m_targetPitch = 14;
+    }
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       SmartDashboard.putNumber(
@@ -103,6 +111,15 @@ public class Hood extends SubsystemBase {
   private void stopHoodMotor() {
     hood.stopMotor();
   }
+
+  public Command setNotShooting() {
+    return new InstantCommand(() -> isShooting = false);
+  }
+
+  public Command setIsShooting() {
+    return new InstantCommand(() -> isShooting = true);
+  }
+
 
   public Command stopHood() {
     return new RunCommand(() -> stopHoodMotor(), this);
