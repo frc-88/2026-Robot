@@ -23,7 +23,7 @@ public class Hood extends SubsystemBase {
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+  //private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
   private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
   private DoubleSupplier m_pitch;
@@ -74,7 +74,7 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = targetPos.getValue(); // 90.0 - m_pitch.getAsDouble();
+      m_targetPitch = (90 - m_pitch.getAsDouble());
     } else {
       m_targetPitch = 14.0;
     }
@@ -82,7 +82,7 @@ public class Hood extends SubsystemBase {
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       SmartDashboard.putNumber(
-          "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
+          "Hood/TrajectorySetpoint", m_pitch.getAsDouble());
       SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Hood/CurrentAngle",
@@ -136,9 +136,9 @@ public class Hood extends SubsystemBase {
     return new RunCommand(() -> setPosition(m_targetPitch), this);
   }
 
-  public Command setPositionManual() {
-    return new RunCommand(() -> setPosition(25.0), this);
-  }
+  // public Command setPositionManual() {
+  //   return new RunCommand(() -> setPosition(25.0), this);
+  // }
 
   public Command goToZero() {
     return new RunCommand(() -> setPosition(0.0), this);

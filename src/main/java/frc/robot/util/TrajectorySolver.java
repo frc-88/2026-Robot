@@ -161,7 +161,8 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupSpeed(double distance) {
-    return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
+    return 27.71457 + 2.96448 * (distance);
+    // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));
   }
 }

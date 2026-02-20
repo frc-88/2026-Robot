@@ -231,12 +231,13 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooter() {
     return new RunCommand(
-        () -> setShooterSpeed(() -> shootSpeed.getValue()),
+        () -> setShooterSpeed(),
         // () -> increaseFeedForward.getValue(),
         // () -> increaseDelay.getValue(),
         // () -> increaseDuration.getValue()),
         this);
   }
+  //   () -> setShooterSpeed(() -> shootSpeed.getValue()),
 
   // public Command runShooterVoltage() {
   //   return new RunCommand(() -> setVoltage(shootVoltage.getValue()));
