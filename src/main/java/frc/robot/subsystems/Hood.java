@@ -25,7 +25,7 @@ public class Hood extends SubsystemBase {
   private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
   private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
   private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
-
+  
   private DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
 
