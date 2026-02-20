@@ -136,12 +136,10 @@ public class TrajectorySolver extends SubsystemBase {
     if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
       if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
         return Constants.LEFT_SHUTTLE_TARGET;
-      }
-      else {
+      } else {
         return Constants.RIGHT_SHUTTLE_TARGET;
       }
-    }
-    else {
+    } else {
       return Constants.HUB;
     }
   }
