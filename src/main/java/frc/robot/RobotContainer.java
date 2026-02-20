@@ -145,7 +145,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
     NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
 
-    trajectorySolver = new TrajectorySolver(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
+    trajectorySolver =
+        new TrajectorySolver(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
