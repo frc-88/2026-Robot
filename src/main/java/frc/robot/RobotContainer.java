@@ -178,8 +178,6 @@ public class RobotContainer {
       // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-      SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
       SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
       SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));

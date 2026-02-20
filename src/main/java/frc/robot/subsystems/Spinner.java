@@ -27,6 +27,8 @@ public class Spinner extends SubsystemBase {
 
   public Spinner() {
     configureTalons();
+    SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
+    SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
   }
 
   private void configureTalons() {
