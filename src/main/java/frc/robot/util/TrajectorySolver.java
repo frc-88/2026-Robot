@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
   private Translation2d robotToTurret = Constants.robotToTurret;
-  private Translation2d targetPosition = Constants.HUB;
+  private Translation2d targetPosition = Constants.HUB_POSITION;
 
   Supplier<Pose2d> drivePoseSupplier;
   Supplier<Pose2d> velocityPoseSupplier;
@@ -61,13 +61,13 @@ public class TrajectorySolver extends SubsystemBase {
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
-    robotVelocity = velocityPoseSupplier.get().getTranslation(); // TODO: make this turret velocity
+    robotVelocity = velocityPoseSupplier.get().getTranslation();
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
-    targetPosition = findTarget(); // no velocity set
+    targetPosition = findTargetPosition(); // no velocity set
 
     Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
 
@@ -132,15 +132,15 @@ public class TrajectorySolver extends SubsystemBase {
             Rotation2d.kZero));
   }
 
-  public Translation2d findTarget() {
+  public Translation2d findTargetPosition() {
     if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
       if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
-        return Constants.LEFT_SHUTTLE_TARGET;
+        return Constants.LEFT_SHUTTLE_TARGET_POSITION;
       } else {
-        return Constants.RIGHT_SHUTTLE_TARGET;
+        return Constants.RIGHT_SHUTTLE_TARGET_POSITION;
       }
     } else {
-      return Constants.HUB;
+      return Constants.HUB_POSITION;
     }
   }
 

@@ -50,6 +50,10 @@ public class Batman extends SubsystemBase {
     return currentPose;
   }
 
+  public Pose2d getPose2d() {
+    return currentPose.toPose2d();
+  }
+
   public boolean isTracking() {
     return quest.isTracking();
   }
