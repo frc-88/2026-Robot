@@ -13,9 +13,9 @@ import java.util.Queue;
 import java.util.function.BooleanSupplier;
 
 public class SoundManager extends SubsystemBase {
-  public static enum Sounds {
-    BASS,
-    BIG_ERROR
+  public static class Sounds {
+    public static String BASS = "bass";
+    public static String ERROR = "BigError";
   }
 
   boolean goodToGo = false;
@@ -25,30 +25,15 @@ public class SoundManager extends SubsystemBase {
   private StringSubscriber sub = topic.subscribe("");
   private StringPublisher pub = topic.publish();
 
-  private static Queue<Sounds> toPlay = new ArrayDeque<>();
+  private static Queue<String> toPlay = new ArrayDeque<>();
 
   public SoundManager() {}
 
-  private static String resolveName(Sounds sound) {
-    String soundString;
-    switch (sound) {
-      case BASS:
-        soundString = "bass";
-        break;
-
-      default:
-        soundString = "";
-        break;
-    }
-
-    return soundString;
-  }
-
-  public static void playSoundIf(Sounds sound, BooleanSupplier condition) {
+  public static void playSoundIf(String sound, BooleanSupplier condition) {
     new Trigger(condition).onTrue(new InstantCommand(() -> toPlay.add(sound)));
   }
 
-  public static void playSound(Sounds sound) {
+  public static void playSound(String sound) {
     toPlay.add(sound);
   }
 
@@ -62,7 +47,7 @@ public class SoundManager extends SubsystemBase {
     }
 
     if (goodToGo) {
-      pub.set(resolveName(toPlay.poll()));
+      pub.set(toPlay.poll());
     }
   }
 }
