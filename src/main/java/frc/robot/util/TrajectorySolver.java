@@ -24,6 +24,7 @@ public class TrajectorySolver extends SubsystemBase {
 
   private Translation2d turretToCurrentTarget;
   private Translation2d turretToTargetRelativeVelocity;
+  private Translation2d turretPosition;
 
   private boolean hasPreviousTimeOfFlightGuess = false;
   private double timeOfFlight = 0.0; // seconds
@@ -63,17 +64,19 @@ public class TrajectorySolver extends SubsystemBase {
     robotPosition = drivePose1.get().getTranslation();
     robotVelocity = vel1.get().getTranslation(); // TODO: make this turret velocity
     robotYaw = drivePose1.get().getRotation();
-    // TODO Do this
-    robotRotationalVelocity = 0; // vel1.get().getRotation().getRadians();
+    robotRotationalVelocity = vel1.get().getRotation().getRadians();
 
-    turretToCurrentTarget =
-        targetPosition.minus(robotPosition.plus(robotToTurret.rotateBy(robotYaw)));
+    turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
+
+    Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
+
+    turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
         robotVelocity
-            // .plus(
-            //     robotToTurret
-            //         .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
-            //         .times(robotRotationalVelocity))
+            .plus(
+                robotToTurret
+                    .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
+                    .times(robotRotationalVelocity))
             .minus(targetVelocity);
     Logger.recordOutput(
         "Trajectory/TurretToTargetRelativeVelocity", turretToTargetRelativeVelocity);
@@ -92,9 +95,6 @@ public class TrajectorySolver extends SubsystemBase {
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
-    Logger.recordOutput(
-        "Trajectory/TurretPosition",
-        new Pose2d(robotPosition.plus(robotToTurret.rotateBy(robotYaw)), Rotation2d.kZero));
   }
 
   public void newton() {

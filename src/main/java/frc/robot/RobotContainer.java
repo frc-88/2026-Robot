@@ -25,6 +25,7 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Simulation;
 import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Turret;
 // import frc.robot.subsystems.Turret;
@@ -59,6 +60,7 @@ public class RobotContainer {
   public Batman batman = new Batman();
   public final Vision vision;
   public Hood hood = new Hood();
+  private final Simulation simulation;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -94,6 +96,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
+        simulation = null;
         // turret = new Turret(gyro);
         break;
 
@@ -112,6 +115,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
+        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
@@ -124,6 +128,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
+        simulation = null;
         // turret = new Turret(gyro);
         break;
     }
