@@ -226,7 +226,7 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    hood.setDefaultCommand(hood.setPositionThing());
+    hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.setPosition());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall());
@@ -324,14 +324,13 @@ public class RobotContainer {
   public Command shoot() {
     return new SequentialCommandGroup(
         new ParallelCommandGroup(
-                shooter.runShooter(), turret.setPosition(), hood.setPositionThing())
+                shooter.runShooter(), turret.setPosition())
             .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
         new ParallelCommandGroup(
             spinner.runSpinner(),
             feeder.runFeeder(),
             shooter.runShooter(),
             turret.setPosition(),
-            hood.setPositionThing(),
             hood.setIsShooting()));
   }
 

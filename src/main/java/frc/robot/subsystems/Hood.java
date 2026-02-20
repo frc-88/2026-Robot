@@ -66,7 +66,7 @@ public class Hood extends SubsystemBase {
     // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
     if (Util.logif()) {
       SmartDashboard.putData("Hood/Calibrate", calibrate());
-      SmartDashboard.putData("Hood/SetPosition", setPositionThing());
+      SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
       SmartDashboard.putData("Hood/GoToZero", goToZero());
     }
   }
@@ -129,7 +129,7 @@ public class Hood extends SubsystemBase {
         .andThen(stopHood());
   }
 
-  public Command setPositionThing() {
+  public Command setPositionTargeting() {
     return new RunCommand(() -> setPosition(m_targetPitch), this);
   }
 
