@@ -70,6 +70,7 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
     SmartDashboard.putData("Intake/ForceDeploy", forceDeploy());
+    SmartDashboard.putData("Intake/ForceRetract", forceRetract());
   }
 
   public void periodic() {
@@ -120,6 +121,11 @@ public class Intake extends SubsystemBase {
     intakePivot.setControl(calibrationRequest.withOutput(0.3));
   }
 
+  private void hardRetract() {
+    intakePivot.setControl(calibrationRequest.withOutput(-0.3));
+    intakeSpinner.setSpeed(0.0);
+  }
+
   private void intakeOut() {
     goToRotations(14.333496);
     // setSpinnerSpeed(() -> speed.getValue());
@@ -133,7 +139,14 @@ public class Intake extends SubsystemBase {
 
   public Command forceDeploy() {
     return new RunCommand(() -> hardDeploy(), this)
-        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 50.0);
+        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 50.0)
+        .andThen(runIntake());
+  }
+
+  public Command forceRetract() {
+    return new RunCommand(() -> hardRetract(), this)
+        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 20.0)
+        .andThen(stopIntake());
   }
 
   public Command zeroIntake() {
