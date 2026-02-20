@@ -173,8 +173,6 @@ public class RobotContainer {
       SmartDashboard.putData("SetPositoinTurret", turret.setPosition());
       SmartDashboard.putData("SetPositionTurretField", turret.setPositionField());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-      SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
       // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
@@ -194,14 +192,7 @@ public class RobotContainer {
           "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
       SmartDashboard.putData(
           "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData(
-          "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
+
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurret());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveDefault());
     }

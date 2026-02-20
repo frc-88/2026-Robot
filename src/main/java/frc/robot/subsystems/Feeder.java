@@ -10,10 +10,12 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -41,6 +43,15 @@ public class Feeder extends SubsystemBase {
 
   public Feeder() {
     configureTalons();
+
+    SmartDashboard.putData("Feeder/RunFeeder", runFeeder());
+    SmartDashboard.putData("Feeder/StopFeeder", stopFeeder());
+    SmartDashboard.putData(
+        "Feeder/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Feeder/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Feeder/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   private void configureTalons() {
@@ -51,15 +62,13 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
     feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
     feederConfig.Slot0.kS = feederConfigConstants.getKS().getValue();
-    feederConfig.MotorOutput.Inverted =
-        InvertedValue.CounterClockwise_Positive;
+    feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     feeder.getConfigurator().apply(feederConfig);
 
     feeder.getVelocity().setUpdateFrequency(100);
   }
 
-  public void periodic() {
-  }
+  public void periodic() {}
 
   private void setVoltage(Voltage volts) {
     feeder.setControl(m_voltReq.withOutput(volts));
