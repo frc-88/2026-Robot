@@ -323,8 +323,7 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(
-                shooter.runShooter(), turret.setPosition())
+        new ParallelCommandGroup(shooter.runShooter(), turret.setPosition())
             .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
         new ParallelCommandGroup(
             spinner.runSpinner(),
