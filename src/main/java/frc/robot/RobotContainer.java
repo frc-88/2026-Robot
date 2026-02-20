@@ -287,14 +287,13 @@ public class RobotContainer {
   public void configureButtonBox() {
     buttons.button(1).onTrue(climber.gotoGrip());
     buttons.button(2).onTrue(climber.leftFlip());
-    buttons.button(3).onTrue(climber.rightFlip());
+    //buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
     buttons.button(5).onTrue(climber.gotoGround()); //is this stow?
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
-
   }
 
   public Command driveRotateAroundRobotCenter() {
