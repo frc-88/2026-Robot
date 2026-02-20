@@ -209,7 +209,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean atShooterSpeed() {
-    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 1.0;
+    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
   }
 
   // This should eventually be moved to utils in base or something
