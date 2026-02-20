@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Batman extends SubsystemBase {
@@ -69,6 +70,7 @@ public class Batman extends SubsystemBase {
   public void resetPose(Pose3d pose) {
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+    System.out.println("GETTING RUN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
   }
 
   @Override
@@ -105,7 +107,7 @@ public class Batman extends SubsystemBase {
   }
   // }
 
-  public Command resetQuestPose(Pose3d pose) {
-    return new InstantCommand(() -> resetPose(pose));
+  public Command resetQuestPose(Supplier<Pose3d> pose) {
+    return new InstantCommand(() -> resetPose(pose.get()));
   }
 }

@@ -217,7 +217,7 @@ public class RobotContainer {
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
     }
     SmartDashboard.putData( // DO NOT FLIP IF RED
-        "Batman/SetPose", batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
+        "Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
@@ -293,7 +293,7 @@ public class RobotContainer {
 
   public Command resetBatman() {
     return new InstantCommand(
-        () -> batman.resetQuestPose(new Pose3d(drive.getPose())).ignoringDisable(true));
+        () -> batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true));
   }
 
   public Command driveRotateAroundRobotCenter() {
