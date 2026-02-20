@@ -117,7 +117,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void hardDeploy() {
-    intakePivot.setControl(calibrationRequest.withOutput(0.1));
+    intakePivot.setControl(calibrationRequest.withOutput(0.3));
   }
 
   private void intakeOut() {
@@ -133,7 +133,7 @@ public class Intake extends SubsystemBase {
 
   public Command forceDeploy() {
     return new RunCommand(() -> hardDeploy(), this)
-        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 30.0);
+        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 50.0);
   }
 
   public Command zeroIntake() {
