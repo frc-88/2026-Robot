@@ -146,6 +146,10 @@ public class Turret extends SubsystemBase {
     goToFacing(target, false);
   }
 
+  public void stopMotors() {
+    m_turret.stopMotor();
+  }
+
   public void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
     if (m_circumnavigating && !isFacingSafe(target)) {
@@ -300,7 +304,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command setPositionToZero() {
-    return new RunCommand(() -> goToFacing(0.0), this);
+    return new RunCommand(() -> stopMotors(), this);
   }
 
   @Override
