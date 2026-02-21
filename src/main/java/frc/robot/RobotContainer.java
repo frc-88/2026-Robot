@@ -174,6 +174,7 @@ public class RobotContainer {
     configureSmartDashboardButtons();
     configureDefaultCommands();
     configureDriverController();
+    configureButtonBox();
   }
 
   private void configureSmartDashboardButtons() {

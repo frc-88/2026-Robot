@@ -172,7 +172,7 @@ public class Drive extends SubsystemBase {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     gyroYaw = gyroInputs.yawPosition;
-    Logger.recordOutput("Drive/Gyro", gyroYaw);
+    Logger.recordOutput("Drive/GyroYaw", gyroYaw);
     if (Util.logif()) {
       Logger.processInputs("Drive/Gyro", gyroInputs);
     }
@@ -223,8 +223,8 @@ public class Drive extends SubsystemBase {
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-        Logger.recordOutput("Drive/RawGyro", rawGyroRotation);
       }
+      Logger.recordOutput("Drive/RawGyro", rawGyroRotation);
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
