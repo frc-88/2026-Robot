@@ -76,8 +76,10 @@ public class Batman extends SubsystemBase {
   @Override
   public void periodic() {
     quest.commandPeriodic();
-    SmartDashboard.putNumber("Quest/Battery", getBatteryPercent());
-    SmartDashboard.putBoolean("Quest/isConnected", isConnected());
+    //SmartDashboard.putNumber("Quest/Battery", getBatteryPercent());
+    //SmartDashboard.putBoolean("Quest/isConnected", isConnected());
+    Logger.recordOutput("Quest/Battery", getBatteryPercent());
+    Logger.recordOutput("Quest/IsConnected", isConnected());
     Logger.recordOutput("Quest/Pose", currentPose);
 
     if (!isConnected() || !isTracking()) {
