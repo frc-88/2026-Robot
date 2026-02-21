@@ -88,7 +88,8 @@ public class Batman extends SubsystemBase {
       PoseFrame[] poses = quest.getAllUnreadPoseFrames();
       if (poses.length > 0) {
         currentPose = poses[poses.length - 1].questPose3d();
-        lastPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
+        currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
+        lastPose = currentPose;
       }
     }
     Logger.recordOutput("Quest/Pose", currentPose);
