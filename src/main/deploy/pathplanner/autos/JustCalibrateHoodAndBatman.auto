@@ -5,15 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Calibrate Hood"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Reset Batman"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Calibrate Hood"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Batman"
+                }
+              }
+            ]
           }
         }
       ]
