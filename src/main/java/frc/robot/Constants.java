@@ -53,8 +53,8 @@ public final class Constants {
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Climber
-  public static final int CLIMBER_LIFT = 21;
-  public static final int CLIMBER_PIVOT = 22;
+  public static final int CLIMBER_LIFT = 18;
+  public static final int CLIMBER_PIVOT = 16;
   public static final int CLIMBER_CANRANGE = 8;
   public static final int CLIMBER_PIGEON = 20;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;

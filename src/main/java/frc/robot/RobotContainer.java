@@ -217,6 +217,7 @@ public class RobotContainer {
       //       "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
+      SmartDashboard.putData("Prepclimb", prepClimber());
     }
     SmartDashboard.putData( // DO NOT FLIP IF RED
         "Batman/SetPose", resetBatman());
@@ -281,7 +282,7 @@ public class RobotContainer {
   }
 
   public void configureButtonBox() {
-    buttons.button(1).onTrue(climber.gotoGrip());
+    buttons.button(1).onTrue(prepClimber());
     buttons.button(2).onTrue(climber.leftFlip());
     // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
@@ -291,6 +292,10 @@ public class RobotContainer {
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
+  }
+
+  public Command prepClimber() {
+    return climber.calibrate().withTimeout(0.5).andThen(climber.gotoGrip());
   }
 
   public Command resetBatman() {

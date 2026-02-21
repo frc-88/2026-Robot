@@ -103,7 +103,7 @@ public class Hood extends SubsystemBase {
 
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
+    if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
     }
   }
@@ -126,7 +126,7 @@ public class Hood extends SubsystemBase {
 
   public Command calibrate() {
     return new RunCommand(() -> setCalibrate(), this)
-        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 30.0)
         .andThen(stopHood());
   }
 
