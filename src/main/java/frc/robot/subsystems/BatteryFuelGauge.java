@@ -34,7 +34,6 @@ public class BatteryFuelGauge extends SubsystemBase {
     batteryManufacturer.addOption("Duracell", BatteryManufacturer.Duracell);
     batteryManufacturer.addOption("Energizer", BatteryManufacturer.Energizer);
 
-    updateDashboardNickname();
     updateDashboardManufacturer();
   }
 
@@ -52,16 +51,9 @@ public class BatteryFuelGauge extends SubsystemBase {
         "Battery Gauge/Rated Capacity (Ah)", battFuelGauge.getRatedCapacityAh());
     SmartDashboard.putNumber("Battery Gauge/Cycles", battFuelGauge.getNumCycles());
     SmartDashboard.putNumber("Battery Gauge/Age (Days)", battFuelGauge.getBatteryAgeDays());
-
-    updateDashboardNickname();
-    updateDashboardManufacturer();
-  }
-
-  public void
-      updateDashboardNickname() { // Get the nickname from the battery gauge and update the display
-    // on the smart dashboard
     SmartDashboard.putString("Battery Gauge/Nickname", battFuelGauge.getNickname());
-    // System.out.println(battFuelGauge.getNickname());
+
+    updateDashboardManufacturer();
   }
 
   public void updateDashboardManufacturer() {
@@ -88,7 +80,6 @@ public class BatteryFuelGauge extends SubsystemBase {
     // Function that saves the battery nickname to the battery gauge. This does NOT return a
     // command.
     battFuelGauge.setNickname(batteryNickname.getValue());
-    updateDashboardNickname();
   }
 
   public void saveBatteryManufacturer() {
