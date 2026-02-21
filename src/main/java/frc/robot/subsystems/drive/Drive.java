@@ -64,6 +64,7 @@ public class Drive extends SubsystemBase {
           Math.max(
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+  public Rotation2d gyroYaw = new Rotation2d();
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 74.088;
@@ -159,7 +160,7 @@ public class Drive extends SubsystemBase {
   }
 
   public Rotation2d getYaw() {
-    return rawGyroRotation;
+    return gyroYaw;
   }
 
   public double getRate() {
@@ -170,6 +171,7 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
+    gyroYaw = gyroInputs.yawPosition;
     if (Util.logif()) {
       Logger.processInputs("Drive/Gyro", gyroInputs);
     }
