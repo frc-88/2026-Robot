@@ -70,13 +70,13 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
-  private LoggedDashboardChooser autoChooser;
+  //   private LoggedDashboardChooser autoChooser;
 
   // private Joystick joystick0 = new Joystick(0);
   // private Joystick joystick1 = new Joystick(1);
 
   // Dashboard inputs
-  //   private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -344,7 +344,7 @@ public class RobotContainer {
   //  * @return the command to run in autonomous
   //  */
   public Command getAutonomousCommand() {
-    // return autoChooser.get();
-    return null;
+    return autoChooser.get();
+    // return null;
   }
 }
