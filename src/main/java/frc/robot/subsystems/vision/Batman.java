@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -76,11 +75,10 @@ public class Batman extends SubsystemBase {
   @Override
   public void periodic() {
     quest.commandPeriodic();
-    //SmartDashboard.putNumber("Quest/Battery", getBatteryPercent());
-    //SmartDashboard.putBoolean("Quest/isConnected", isConnected());
+    // SmartDashboard.putNumber("Quest/Battery", getBatteryPercent());
+    // SmartDashboard.putBoolean("Quest/isConnected", isConnected());
     Logger.recordOutput("Quest/Battery", getBatteryPercent());
     Logger.recordOutput("Quest/IsConnected", isConnected());
-    Logger.recordOutput("Quest/Pose", currentPose);
 
     if (!isConnected() || !isTracking()) {
       shouldUse = false;
@@ -90,9 +88,10 @@ public class Batman extends SubsystemBase {
       PoseFrame[] poses = quest.getAllUnreadPoseFrames();
       if (poses.length > 0) {
         currentPose = poses[poses.length - 1].questPose3d();
-        lastPose = currentPose;
+        lastPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
       }
     }
+    Logger.recordOutput("Quest/Pose", currentPose);
   }
 
   public void checkPose(Pose2d newPose, double linearStddev, double angularStddev) {

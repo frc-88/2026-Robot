@@ -155,7 +155,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
 
-
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -287,8 +286,8 @@ public class RobotContainer {
     // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
     buttons.button(5).onTrue(climber.gotoStow());
-    buttons.button(6).onTrue(intake.deployIntake());
-    buttons.button(7).onTrue(intake.retractIntake());
+    buttons.button(6).onTrue(intake.forceDeploy());
+    buttons.button(7).onTrue(intake.forceRetract());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
