@@ -292,8 +292,7 @@ public class RobotContainer {
   }
 
   public Command resetBatman() {
-    return new InstantCommand(
-        () -> batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true));
+    return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
   }
 
   public Command driveRotateAroundRobotCenter() {
