@@ -153,6 +153,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Start Shooter", shoot());
     NamedCommands.registerCommand("Stop Shooter", stopShoot());
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
+    NamedCommands.registerCommand("Reset Batman", resetBatman());
+
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
