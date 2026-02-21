@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -148,12 +149,13 @@ public class RobotContainer {
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    NamedCommands.registerCommand("Start Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
+    NamedCommands.registerCommand("Start Intake", intake.forceDeploy());
+    NamedCommands.registerCommand("Stop Intake", intake.forceRetract());
+    NamedCommands.registerCommand("Start Shooter", shoot());
+    NamedCommands.registerCommand("Stop Shooter", stopShoot());
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
     // autoChooser.addOption(
@@ -268,7 +270,7 @@ public class RobotContainer {
     controller
         .rightTrigger()
         .onTrue(shoot())
-        .onFalse(
+        .onFalse( //TODO: Replace with stop shoot when okay
             driveRotateAroundTurretCenter()
                 .alongWith(shooter.stopShooter())
                 .alongWith(spinner.stopSpinner())
@@ -320,6 +322,14 @@ public class RobotContainer {
             shooter.runShooter(),
             turret.setPositionTargeting(),
             hood.setIsShooting()));
+  }
+
+    public Command stopShoot() { // temporarily just for autos. Copied from shoot controller command 
+        return driveRotateAroundTurretCenter()
+                .alongWith(shooter.stopShooter())
+                .alongWith(spinner.stopSpinner())
+                .alongWith(feeder.stopFeeder())
+                .alongWith(hood.setNotShooting());
   }
 
   // /**
