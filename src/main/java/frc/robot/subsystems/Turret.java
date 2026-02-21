@@ -299,6 +299,10 @@ public class Turret extends SubsystemBase {
         this); // 180? //m_targetFacing.getAsDouble() - getYaw() +
   }
 
+  public Command setPositionToZero() {
+    return new RunCommand(() -> goToFacing(0.0), this);
+  }
+
   @Override
   public void periodic() {
     if (Util.logif()) {

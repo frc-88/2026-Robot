@@ -229,7 +229,7 @@ public class RobotContainer {
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
-    turret.setDefaultCommand(turret.setPositionTargeting());
+    turret.setDefaultCommand(turret.setPositionToZero());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall());
   }
