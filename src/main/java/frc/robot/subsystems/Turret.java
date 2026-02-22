@@ -105,11 +105,12 @@ public class Turret extends SubsystemBase {
   }
 
   public void sync() {
-    if (isEncoderConnected()) {
-      m_turret.setPosition(turretFacingToFalconEncoderPosition(getAbsoluteAngleOfTurret()));
-    } else {
-      m_turret.setPosition(0.0);
-    }
+    // if (isEncoderConnected()) {
+    //   m_turret.setPosition(turretFacingToFalconEncoderPosition(getAbsoluteAngleOfTurret()));
+    // } else {
+    //   m_turret.setPosition(0.0);
+    // }
+    m_turret.setPosition(0.0);
   }
 
   public void calibrateEncoders() {
@@ -270,17 +271,11 @@ public class Turret extends SubsystemBase {
   }
 
   private double getAbsoluteAngleOfTurret() {
-    return (m_cancoder66.getPosition().getValueAsDouble()
-            - m_cancoder50.getPosition().getValueAsDouble())
-        * p_proportion.getValue();
+    return turretEncoderPositionToFacing(m_turret.getPosition().getValueAsDouble());
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
     return (turretPosition / (5 * (100 / 12)) * 360.0);
-  }
-
-  private double turretEncoderPositionToFacing4(double turretPosition) {
-    return (turretPosition / (4 * (100 / 12)) * 360.0);
   }
 
   private double turretFacingToFalconEncoderPosition(double degrees) {
@@ -322,7 +317,6 @@ public class Turret extends SubsystemBase {
               * p_proportion.getValue());
       SmartDashboard.putNumber("Turret/Position", getPosition());
       SmartDashboard.putNumber("Turret/Facing", getFacing());
-      SmartDashboard.putNumber("Turret/Facing4", turretEncoderPositionToFacing4(getPosition()));
       SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
       SmartDashboard.putBoolean("Turret/Tracking", isTracking());
       SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
