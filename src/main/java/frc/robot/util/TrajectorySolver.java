@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -161,7 +162,12 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupSpeed(double distance) {
-    return 27.71457 + 2.96448 * (distance);
+    if (Constants.currentMode == Mode.SIM) {
+      return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
+
+    } else { // real
+      return 27.71457 + 2.96448 * (distance);
+    }
     // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));
   }
