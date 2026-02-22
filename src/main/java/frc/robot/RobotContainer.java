@@ -91,10 +91,16 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("Start Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Intake", new WaitCommand(1));
-    NamedCommands.registerCommand("Start Shooter", new WaitCommand(1));
-    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(1));
+
+    NamedCommands.registerCommand("Deploy Intake", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Start Intake", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Stop Intake", new WaitCommand(0.5));
+
+    NamedCommands.registerCommand("Start Shooter", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(0.5));
+
+    NamedCommands.registerCommand("Climb Grab Right", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.5));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
