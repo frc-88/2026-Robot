@@ -70,6 +70,7 @@ public final class Constants {
 
   public static final double FIELD_WIDTH = 8.07;
   public static final double FIELD_LENGTH = 16.54;
+  public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
 
   // Drive
   public static final int BASE_PIGEON = 0;
@@ -84,8 +85,17 @@ public final class Constants {
       //     Units.inchesToMeters(Math.hypot(6.745, 5.75)),
       //     Rotation2d.fromDegrees(-30.0)); // 6.745, -5.75
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
-  public static Translation2d HUB_POSITION =
+  public static Translation2d HUB_POSITION_BLUE =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(0.5, 0.5);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(0.5, 7.5);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 0.5);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 7.5);
+
+  public static Translation2d HUB_POSITION_RED =
+      new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84))
+          .unaryMinus()
+          .plus(FIELD_DIMENSIONS);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_RED =
+      new Translation2d(0.5, 0.5).unaryMinus().plus(FIELD_DIMENSIONS);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_RED =
+      new Translation2d(0.5, 7.5).unaryMinus().plus(FIELD_DIMENSIONS);
 }

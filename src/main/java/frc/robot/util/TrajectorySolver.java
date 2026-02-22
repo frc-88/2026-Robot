@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -13,7 +15,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
   private Translation2d robotToTurret = Constants.robotToTurret;
-  private Translation2d targetPosition = Constants.HUB_POSITION;
+  private Translation2d targetPosition = Constants.HUB_POSITION_BLUE;
 
   Supplier<Pose2d> drivePoseSupplier;
   Supplier<Pose2d> velocityPoseSupplier;
@@ -70,7 +72,8 @@ public class TrajectorySolver extends SubsystemBase {
 
     targetPosition = findTargetPosition(); // no velocity set
 
-    Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
+    Logger.recordOutput(
+        "Trajectory/TurretPosition", flipIfRed(new Pose2d(turretPosition, Rotation2d.kZero)));
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
@@ -88,16 +91,18 @@ public class TrajectorySolver extends SubsystemBase {
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
       Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
-      Logger.recordOutput(
-          "Trajectory/ProjectedHub",
-          new Pose2d(
-              turretToProjectedTarget.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
-              Rotation2d.kZero));
+
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
     Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
+    Logger.recordOutput(
+        "Trajectory/ProjectedHub",
+        flipIfRed(
+            new Pose2d(
+                turretToProjectedTarget.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
+                Rotation2d.kZero)));
   }
 
   public void newton() {
@@ -127,23 +132,46 @@ public class TrajectorySolver extends SubsystemBase {
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
-    Logger.recordOutput(
-        "Trajectory/ProjectedHub",
-        new Pose2d(
-            turretToProjectedTarget.plus(robotPosition.plus(robotToTurret.rotateBy(robotYaw))),
-            Rotation2d.kZero));
   }
 
   public Translation2d findTargetPosition() {
-    if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
-      if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
-        return Constants.LEFT_SHUTTLE_TARGET_POSITION;
+    if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Blue) {
+      if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
+        if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
+          return Constants.LEFT_SHUTTLE_TARGET_POSITION_BLUE;
+        } else {
+          return Constants.RIGHT_SHUTTLE_TARGET_POSITION_BLUE;
+        }
       } else {
-        return Constants.RIGHT_SHUTTLE_TARGET_POSITION;
+        return Constants.HUB_POSITION_BLUE;
       }
-    } else {
-      return Constants.HUB_POSITION;
+    } else { // RED
+      if (robotPosition.getX() < Units.inchesToMeters(181.56)) {
+        if (robotPosition.getY() < Units.inchesToMeters(158.32)) {
+          return Constants.LEFT_SHUTTLE_TARGET_POSITION_RED;
+        } else {
+          return Constants.RIGHT_SHUTTLE_TARGET_POSITION_RED;
+        }
+      } else {
+        return Constants.HUB_POSITION_RED;
+      }
     }
+  }
+
+  public boolean weAreRed() {
+    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+  }
+
+  public Pose2d flipIfRed(Pose2d pose) {
+    return weAreRed() ? flipPose(pose) : pose;
+  }
+
+  private Pose2d flipPose(Pose2d pose) {
+    return pose.relativeTo(
+        new Pose2d(
+            Constants.FIELD_LENGTH,
+            Constants.FIELD_WIDTH,
+            new Rotation2d(Units.degreesToRadians(180))));
   }
 
   public double lookupTime(double distance) {
