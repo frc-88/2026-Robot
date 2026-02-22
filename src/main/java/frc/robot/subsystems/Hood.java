@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,82 +30,85 @@ public class Hood extends SubsystemBase {
   private double m_targetPitch = 0.0;
 
   public boolean isShooting = false;
-
-  public Hood(DoubleSupplier pitch) {
-    m_pitch = pitch;
-    configureMinion();
-    configureSmartDashboardButtons();
-  }
-
-  private void configureMinion() {
-    TalonFXSConfiguration hoodConfig = new TalonFXSConfiguration();
-
-    hoodConfig.Slot0.kP = hoodConfigConstants.getKP().getValue();
-    hoodConfig.Slot0.kI = hoodConfigConstants.getKI().getValue();
-    hoodConfig.Slot0.kD = hoodConfigConstants.getKD().getValue();
-    hoodConfig.Slot0.kV = hoodConfigConstants.getKV().getValue();
-    hoodConfig.Slot0.kS = hoodConfigConstants.getKS().getValue();
-    hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
-
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(34.5);
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(13.5);
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
-    hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
-        hoodConfigConstants.getMaxVelocity().getValue();
-    hoodConfig.MotionMagic.MotionMagicAcceleration =
-        hoodConfigConstants.getMaxAcceleration().getValue();
-    hood.getConfigurator().apply(hoodConfig);
-  }
-
-  private void configureSmartDashboardButtons() {
-    // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
-    if (Util.logif()) {
-      SmartDashboard.putData("Hood/Calibrate", calibrate());
-      SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
-      SmartDashboard.putData("Hood/SetPositionManual", setPositionTargeting());
-      SmartDashboard.putData("Hood/GoToZero", goToZero());
+  
+  private boolean m_calibrated = false;
+  
+    public Hood(DoubleSupplier pitch) {
+      m_pitch = pitch;
+      configureMinion();
+      configureSmartDashboardButtons();
     }
-  }
-
-  public void periodic() {
-    if (isShooting) {
-      m_targetPitch = (90 - m_pitch.getAsDouble());
-    } else {
-      m_targetPitch = 14.0;
+  
+    private void configureMinion() {
+      TalonFXSConfiguration hoodConfig = new TalonFXSConfiguration();
+  
+      hoodConfig.Slot0.kP = hoodConfigConstants.getKP().getValue();
+      hoodConfig.Slot0.kI = hoodConfigConstants.getKI().getValue();
+      hoodConfig.Slot0.kD = hoodConfigConstants.getKD().getValue();
+      hoodConfig.Slot0.kV = hoodConfigConstants.getKV().getValue();
+      hoodConfig.Slot0.kS = hoodConfigConstants.getKS().getValue();
+      hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
+  
+      hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+          hoodAngleDegreesToRotationsOfMinion(34.5);
+      hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+      hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+          hoodAngleDegreesToRotationsOfMinion(13.5);
+      hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+  
+      hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
+          hoodConfigConstants.getMaxVelocity().getValue();
+      hoodConfig.MotionMagic.MotionMagicAcceleration =
+          hoodConfigConstants.getMaxAcceleration().getValue();
+      hood.getConfigurator().apply(hoodConfig);
     }
-
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
-      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/CurrentAngle",
-          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
+  
+    private void configureSmartDashboardButtons() {
+      // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
+      if (Util.logif()) {
+        SmartDashboard.putData("Hood/Calibrate", calibrate());
+        SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+        SmartDashboard.putData("Hood/SetPositionManual", setPositionTargeting());
+        SmartDashboard.putData("Hood/GoToZero", goToZero());
+      }
     }
-  }
-
-  private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
-    return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
-  }
-
-  private double minionRotationsToHoodAngleDegrees(double minionRotations) { // inverse of ^^
-    return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
-  }
-
-  private void setPosition(double angle) {
-    hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
-    System.out.println(angle);
-  }
-
-  private void setCalibrate() {
-    hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
-      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+  
+    public void periodic() {
+      if (isShooting) {
+        m_targetPitch = (90 - m_pitch.getAsDouble());
+      } else {
+        m_targetPitch = 14.0;
+      }
+  
+      if (Util.logif()) {
+        SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
+        SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber(
+            "Hood/CurrentAngle",
+            minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
+      }
+    }
+  
+    private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
+      return (hoodAngle / 360.0) * (287.0 / 18.0) * (36.0 / 12.0);
+    }
+  
+    private double minionRotationsToHoodAngleDegrees(double minionRotations) { // inverse of ^^
+      return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
+    }
+  
+    private void setPosition(double angle) {
+      hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
+      System.out.println(angle);
+    }
+  
+    private void setCalibrate() {
+      hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
+      if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
+        hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+        m_calibrated = true;
     }
   }
 
@@ -131,7 +135,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setPositionTargeting() {
-    return new RunCommand(() -> setPosition(m_targetPitch), this);
+    return new ConditionalCommand(new RunCommand(() -> setPosition(m_targetPitch), this), calibrate(), () -> m_calibrated);
   }
 
   // public Command setPositionManual() {
