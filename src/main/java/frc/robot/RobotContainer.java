@@ -122,7 +122,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
