@@ -44,7 +44,7 @@ public final class Constants {
   // Spinner
   public static final int SPINNER_MAIN = 17;
 
-  // Shooter Feeder
+  // Feeder
   public static final int FEEDER_MAIN = 19;
 
   // Shooter
@@ -68,22 +68,20 @@ public final class Constants {
   public static final int TURRET_GEAR_RATIO = 1;
   public static final double TURRET_COUNTS_PER_REV = 1;
 
-  public static final double FIELD_WIDTH = 8.07;
-  public static final double FIELD_LENGTH = 16.54;
-  public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
-
   // Drive
   public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
 
   // HOOD Milk
-  public static int HOOD = 16;
-  public static double MINION_ROT_TO_ANGLE = (1.0 / (287.0 / 54.0)) * 360.0;
+  public static final int HOOD = 16;
+  public static final double MINION_ROT_TO_ANGLE = (1.0 / (287.0 / 54.0)) * 360.0;
 
-  public static Translation2d robotToTurret =
-      // new Translation2d(
-      //     Units.inchesToMeters(Math.hypot(6.745, 5.75)),
-      //     Rotation2d.fromDegrees(-30.0)); // 6.745, -5.75
+  // Robot and Field constants
+  public static final double FIELD_WIDTH = 8.07; // meters
+  public static final double FIELD_LENGTH = 16.54; // meters
+  public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
+
+  public static final Translation2d robotToTurret =
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
   public static Translation2d HUB_POSITION_BLUE =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
