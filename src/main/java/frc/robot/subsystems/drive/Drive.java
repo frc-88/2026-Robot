@@ -64,6 +64,7 @@ public class Drive extends SubsystemBase {
           Math.max(
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+  public Rotation2d gyroYaw = new Rotation2d();
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 74.088;
@@ -159,7 +160,7 @@ public class Drive extends SubsystemBase {
   }
 
   public Rotation2d getYaw() {
-    return rawGyroRotation;
+    return gyroYaw;
   }
 
   public double getRate() {
@@ -170,6 +171,8 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
+    gyroYaw = gyroInputs.yawPosition;
+    Logger.recordOutput("Drive/GyroYaw", gyroYaw);
     if (Util.logif()) {
       Logger.processInputs("Drive/Gyro", gyroInputs);
     }
@@ -221,6 +224,7 @@ public class Drive extends SubsystemBase {
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
+      Logger.recordOutput("Drive/RawGyro", rawGyroRotation);
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
@@ -250,6 +254,7 @@ public class Drive extends SubsystemBase {
     return weAreRed() ? flipPose(pose) : pose;
   }
 
+  @AutoLogOutput(key = "Odometry/RobotFlipped")
   public Pose2d getPoseFlipped() {
     return flipIfRed(getPose());
   }
@@ -357,8 +362,12 @@ public class Drive extends SubsystemBase {
 
   public Pose2d getChassisSpeedsFieldRelative() {
     ChassisSpeeds res = ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), rawGyroRotation);
-    return new Pose2d(
-        res.vxMetersPerSecond, res.vyMetersPerSecond, new Rotation2d(res.omegaRadiansPerSecond));
+    return
+    // flipIfRed(
+    new Pose2d(
+        res.vxMetersPerSecond, res.vyMetersPerSecond, new Rotation2d(res.omegaRadiansPerSecond))
+    // )
+    ;
   }
 
   /** Returns the position of each module in radians. */

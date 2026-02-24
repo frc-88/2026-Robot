@@ -9,6 +9,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,6 +31,10 @@ public class Hood extends SubsystemBase {
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
+
+  public boolean isShooting = false;
+
+  private boolean m_calibrated = false;
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
@@ -65,8 +71,26 @@ public class Hood extends SubsystemBase {
     // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
     if (Util.logif()) {
       SmartDashboard.putData("Hood/Calibrate", calibrate());
-      SmartDashboard.putData("Hood/SetPosition", setPositionThing());
+      SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+      SmartDashboard.putData("Hood/SetPositionManual", setPositionTargeting());
       SmartDashboard.putData("Hood/GoToZero", goToZero());
+    }
+  }
+
+  public void periodic() {
+    if (isShooting) {
+      m_targetPitch = (90 - m_pitch.getAsDouble());
+    } else {
+      m_targetPitch = 14.0;
+    }
+
+    if (Util.logif()) {
+      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
+      SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
+      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Hood/CurrentAngle",
+          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
     }
   }
 
@@ -80,12 +104,14 @@ public class Hood extends SubsystemBase {
 
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
+    System.out.println(angle);
   }
 
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
+    if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+      m_calibrated = true;
     }
   }
 
@@ -93,18 +119,12 @@ public class Hood extends SubsystemBase {
     hood.stopMotor();
   }
 
-  public void periodic() {
-    m_targetPitch = 90 - m_pitch.getAsDouble();
+  public Command setNotShooting() {
+    return new InstantCommand(() -> isShooting = false);
+  }
 
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/Setpoint", hoodAngleDegreesToRotationsOfMinion(targetPos.getValue()));
-      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/CurrentAngle",
-          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
-    }
+  public Command setIsShooting() {
+    return new InstantCommand(() -> isShooting = true);
   }
 
   public Command stopHood() {
@@ -113,13 +133,18 @@ public class Hood extends SubsystemBase {
 
   public Command calibrate() {
     return new RunCommand(() -> setCalibrate(), this)
-        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 30.0)
         .andThen(stopHood());
   }
 
-  public Command setPositionThing() {
-    return new RunCommand(() -> setPosition(m_targetPitch), this);
+  public Command setPositionTargeting() {
+    return new ConditionalCommand(
+        new RunCommand(() -> setPosition(m_targetPitch), this), calibrate(), () -> m_calibrated);
   }
+
+  // public Command setPositionManual() {
+  //   return new RunCommand(() -> setPosition(25.0), this);
+  // }
 
   public Command goToZero() {
     return new RunCommand(() -> setPosition(0.0), this);

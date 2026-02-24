@@ -39,7 +39,7 @@ public final class Constants {
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
 
   // Intake
-  public static final int INTAKE_MAIN = 2;
+  public static final int INTAKE_PIVOT = 0;
 
   // Spinner
   public static final int SPINNER_MAIN = 17;
@@ -53,8 +53,8 @@ public final class Constants {
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Climber
-  public static final int CLIMBER_LIFT = 21;
-  public static final int CLIMBER_PIVOT = 22;
+  public static final int CLIMBER_LIFT = 18;
+  public static final int CLIMBER_PIVOT = 16;
   public static final int CLIMBER_CANRANGE = 8;
   public static final int CLIMBER_PIGEON = 20;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
@@ -79,11 +79,21 @@ public final class Constants {
   // Robot and Field constants
   public static final double FIELD_WIDTH = 8.07; // meters
   public static final double FIELD_LENGTH = 16.54; // meters
+  public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
 
   public static final Translation2d robotToTurret =
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
-  public static final Translation2d HUB =
+  public static Translation2d HUB_POSITION_BLUE =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static final Translation2d RIGHT_SHUTTLE_TARGET = new Translation2d(0.5, 0.5);
-  public static final Translation2d LEFT_SHUTTLE_TARGET = new Translation2d(0.5, 7.5);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 0.5);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 7.5);
+
+  public static Translation2d HUB_POSITION_RED =
+      new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84))
+          .unaryMinus()
+          .plus(FIELD_DIMENSIONS);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_RED =
+      new Translation2d(0.5, 0.5).unaryMinus().plus(FIELD_DIMENSIONS);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_RED =
+      new Translation2d(0.5, 7.5).unaryMinus().plus(FIELD_DIMENSIONS);
 }

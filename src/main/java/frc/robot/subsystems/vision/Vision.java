@@ -155,6 +155,7 @@ public class Vision extends SubsystemBase {
             observation.pose().toPose2d(),
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+        System.out.println("Vision consumer running");
       }
 
       // Log camera datadata
