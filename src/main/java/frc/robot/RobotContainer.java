@@ -143,15 +143,24 @@ public class RobotContainer {
     }
 
 
-    NamedCommands.registerCommand("Deploy Intake", new WaitCommand(0.5));
-    NamedCommands.registerCommand("Start Intake", new WaitCommand(0.5));
-    NamedCommands.registerCommand("Stop Intake", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Deploy Intake", intake.forceDeploy());
+    NamedCommands.registerCommand("Retract Intake", intake.forceRetract());
 
-    NamedCommands.registerCommand("Start Shooter", new WaitCommand(0.5));
-    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Start Intake", intake.runIntake()); // TODO: Test intake commands
+    NamedCommands.registerCommand("Stop Intake", intake.stopIntake());
 
-    NamedCommands.registerCommand("Climb Grab Right", new WaitCommand(0.5));
-    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Start Shooter", shoot());
+    NamedCommands.registerCommand("Stop Shooter", new WaitCommand(0.5)); // TODO: Fix this command, the stop shoot command does not appear to be in this branch.
+
+    NamedCommands.registerCommand("Climb Grab Right", climber.gotoGrip()); // TODO: Test climber commands
+    NamedCommands.registerCommand("Climb L1", climber.gotoL1());
+    NamedCommands.registerCommand("Climb Left Flip", climber.leftFlip());
+    NamedCommands.registerCommand("Climb Right Flip", climber.rightFlip());
+
+    NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
+    NamedCommands.registerCommand("Reset Batman", resetBatman());
+
+
     trajectorySolver =
         new TrajectorySolver(
             () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
