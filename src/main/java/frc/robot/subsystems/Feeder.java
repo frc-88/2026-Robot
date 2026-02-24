@@ -9,6 +9,9 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +23,8 @@ import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Feeder extends SubsystemBase {
 
@@ -68,6 +73,21 @@ public class Feeder extends SubsystemBase {
     feeder.getConfigurator().apply(feederConfig);
 
     feeder.getVelocity().setUpdateFrequency(100);
+  }
+
+  @AutoLogOutput(key = "Feeder/Voltage")
+  private Voltage getVoltage() {
+    return feeder.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput(key = "Feeder/Current")
+  private Current getCurrent() {
+    return feeder.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput(key = "Feeder/Velocity")
+  private AngularVelocity getVelocity() {
+    return feeder.getVelocity().getValue();
   }
 
   private void setVoltage(Voltage volts) {
