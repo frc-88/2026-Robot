@@ -115,7 +115,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
@@ -218,10 +218,10 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    hood.setDefaultCommand(hood.setPositionTargeting());  // TODO calibration first
-    turret.setDefaultCommand(turret.setPositionToZero());  // TODO calibration first
+    hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
+    turret.setDefaultCommand(turret.setPositionToZero()); // TODO calibration first
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
-    climber.setDefaultCommand(climber.stopall());   // TODO calibration
+    climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
 
   public void disabledInit() {
