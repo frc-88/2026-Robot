@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.0837178312151616,
+        "y": 4.976910931190748
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.0934681483922377,
+        "y": 4.665291714786143
+      },
+      "isLocked": false,
+      "linkedName": "Tower Left Approach"
+    },
+    {
+      "anchor": {
+        "x": 1.0837178312151616,
+        "y": 4.649292685519442
+      },
+      "prevControl": {
+        "x": 1.0837716350769728,
+        "y": 5.1221726499407465
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 0.5,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": false
+}
