@@ -32,7 +32,6 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Simulation;
 import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Turret;
-// import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -56,26 +55,20 @@ public class RobotContainer {
 
   private final Drive drive;
   private final Turret turret;
-  public Feeder feeder = new Feeder();
-  public Shooter shooter;
-  public Intake intake = new Intake();
-  public Spinner spinner = new Spinner();
-  public TrajectorySolver trajectorySolver;
-  public Batman batman = new Batman();
-  public Hood hood;
-  public final Vision vision;
+  private final Feeder feeder = new Feeder();
+  private final Shooter shooter;
+  private final Intake intake = new Intake();
+  private final Spinner spinner = new Spinner();
+  private final TrajectorySolver trajectorySolver;
+  private final Batman batman = new Batman();
+  private final Hood hood;
+  private final Vision vision;
   private final Simulation simulation;
-  public Climber climber = new Climber();
+  private final Climber climber = new Climber();
 
-  // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
-  //   private LoggedDashboardChooser autoChooser;
 
-  // private Joystick joystick0 = new Joystick(0);
-  // private Joystick joystick1 = new Joystick(1);
-
-  // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -186,15 +179,11 @@ public class RobotContainer {
           "CalibrateTurret", turret.calibrateEncodersFactory().ignoringDisable(true));
       SmartDashboard.putData("SetTurretTargeting", turret.setPositionTargeting());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunFeeder", feeder.runFeeder());
-      SmartDashboard.putData("StopFeeder", feeder.stopFeeder());
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
       // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunSpinner", spinner.runSpinner());
-      SmartDashboard.putData("StopSpinner", spinner.stopSpinner());
       SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
       SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
