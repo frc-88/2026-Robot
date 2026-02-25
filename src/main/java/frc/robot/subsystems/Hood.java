@@ -104,7 +104,6 @@ public class Hood extends SubsystemBase {
 
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
-    System.out.println(angle);
   }
 
   private void setCalibrate() {
