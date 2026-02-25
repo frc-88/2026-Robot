@@ -4,12 +4,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
-import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,10 +21,7 @@ public class TrajectorySolver extends SubsystemBase {
   public Rotation2d robotYaw = Rotation2d.kZero; // rad
   public Translation2d robotVelocity = Translation2d.kZero; // m/s
   public double robotRotationalVelocity = 0.0; // rad/s
-  public Translation2d targetVelocity = Translation2d.kZero; // for hub: 0
-
-  public DoublePreferenceConstant angle = new DoublePreferenceConstant("Traj/angle", 0.0);
-  public DoublePreferenceConstant speed = new DoublePreferenceConstant("Traj/speed", 0.0);
+  public Translation2d targetVelocity = Translation2d.kZero;
 
   private Translation2d turretToCurrentTarget;
   private Translation2d turretToTargetRelativeVelocity;
@@ -49,12 +43,10 @@ public class TrajectorySolver extends SubsystemBase {
 
   public double getAngle() {
     return hoodAngle;
-    // return angle.getValue(); // for testing
   }
 
   public double getShootSpeed() {
     return shootSpeed;
-    // return speed.getValue(); // for testing
   }
 
   public double getYaw() {
@@ -72,8 +64,6 @@ public class TrajectorySolver extends SubsystemBase {
 
     targetPosition = findTargetPosition(); // no velocity set
 
-    Logger.recordOutput(
-        "Trajectory/TurretPosition", flipIfRed(new Pose2d(turretPosition, Rotation2d.kZero)));
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
@@ -83,26 +73,27 @@ public class TrajectorySolver extends SubsystemBase {
                     .rotateBy(robotYaw.plus(Rotation2d.fromRadians(Math.PI / 2)))
                     .times(robotRotationalVelocity))
             .minus(targetVelocity);
+    
+    Logger.recordOutput("Trajectory/RobotPosition", new Pose2d(robotPosition, Rotation2d.kZero));
+    Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
     Logger.recordOutput(
-        "Trajectory/TurretToTargetRelativeVelocity", turretToTargetRelativeVelocity);
+        "Trajectory/TurretToTargetRelativeVelocity",
+        new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
 
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
-      Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
 
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
+    Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
     Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
     Logger.recordOutput(
         "Trajectory/ProjectedHub",
-        flipIfRed(
-            new Pose2d(
-                turretToProjectedTarget.plus(robotPosition).plus(robotToTurret.rotateBy(robotYaw)),
-                Rotation2d.kZero)));
+        new Pose2d(turretToProjectedTarget.plus(turretPosition), Rotation2d.kZero));
   }
 
   public void newton() {
@@ -124,8 +115,8 @@ public class TrajectorySolver extends SubsystemBase {
                               / turretToProjectedTargetDistance));
     }
     if (timeOfFlight > 5) {
-      timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
       System.out.println("Newton Solution Diverged. TOF: " + timeOfFlight);
+      timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
     }
     turretToProjectedTarget =
         turretToCurrentTarget.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
@@ -135,43 +126,18 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Translation2d findTargetPosition() {
-    if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Blue) {
-      if (robotPosition.getX() > Units.inchesToMeters(181.56)) {
-        if (robotPosition.getY() > Units.inchesToMeters(158.32)) {
-          return Constants.LEFT_SHUTTLE_TARGET_POSITION_BLUE;
-        } else {
-          return Constants.RIGHT_SHUTTLE_TARGET_POSITION_BLUE;
-        }
+    if (turretPosition.getX() > Units.inchesToMeters(181.56)) {
+      if (turretPosition.getY() > Units.inchesToMeters(158.32)) {
+        Logger.recordOutput("Trajectory/TargetSelection", "LEFT_SHUTTLE_TARGET_POSITION");
+        return Constants.LEFT_SHUTTLE_TARGET_POSITION_BLUE;
       } else {
-        return Constants.HUB_POSITION_BLUE;
+        Logger.recordOutput("Trajectory/TargetSelection", "RIGHT_SHUTTLE_TARGET_POSITION");
+        return Constants.RIGHT_SHUTTLE_TARGET_POSITION_BLUE;
       }
-    } else { // RED
-      if (robotPosition.getX() < Units.inchesToMeters(181.56)) {
-        if (robotPosition.getY() < Units.inchesToMeters(158.32)) {
-          return Constants.LEFT_SHUTTLE_TARGET_POSITION_RED;
-        } else {
-          return Constants.RIGHT_SHUTTLE_TARGET_POSITION_RED;
-        }
-      } else {
-        return Constants.HUB_POSITION_RED;
-      }
+    } else {
+      Logger.recordOutput("Trajectory/TargetSelection", "HUB_POSITION");
+      return Constants.HUB_POSITION_BLUE;
     }
-  }
-
-  public boolean weAreRed() {
-    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-  }
-
-  public Pose2d flipIfRed(Pose2d pose) {
-    return weAreRed() ? flipPose(pose) : pose;
-  }
-
-  private Pose2d flipPose(Pose2d pose) {
-    return pose.relativeTo(
-        new Pose2d(
-            Constants.FIELD_LENGTH,
-            Constants.FIELD_WIDTH,
-            new Rotation2d(Units.degreesToRadians(180))));
   }
 
   public double lookupTime(double distance) {
@@ -185,8 +151,12 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupAngle(double distance) {
-    return 84.15886 - 16.18452 * Math.log(distance);
-    // - 1.11 * (Math.pow(distance, 3.0));
+    if (Constants.currentMode == Mode.SIM) {
+      return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
+    } else { // real
+      return 84.15886 - 16.18452 * Math.log(distance);
+      // - 1.11 * (Math.pow(distance, 3.0));
+    }
   }
 
   public double lookupSpeed(double distance) {
