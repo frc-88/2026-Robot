@@ -152,7 +152,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Start Shooter", shoot());
     NamedCommands.registerCommand("Stop Shooter", new WaitCommand(0.5)); // TODO: Fix this command, the stop shoot command does not appear to be in this branch.
 
-    NamedCommands.registerCommand("Climb Grab Right", climber.gotoGrip()); // TODO: Test climber commands
+    NamedCommands.registerCommand("Start Shuttle", new WaitCommand(0.5)); // TODO: Implement this if needed, and fix this command
+
+    NamedCommands.registerCommand("Climb Grab Right", climber.gotoGrip()); // TODO: Test climber commands and change them if needed
+    NamedCommands.registerCommand("Climb Grab Left", climber.gotoGrip());
     NamedCommands.registerCommand("Climb L1", climber.gotoL1());
     NamedCommands.registerCommand("Climb Left Flip", climber.leftFlip());
     NamedCommands.registerCommand("Climb Right Flip", climber.rightFlip());

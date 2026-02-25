@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Start Shooter"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Deploy Intake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Start Shooter"
+                }
+              }
+            ]
           }
         },
         {
@@ -23,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto1_01StartToDepot"
+                  "pathName": "Auto7_01StartToShuttle"
                 }
               },
               {
@@ -31,27 +44,33 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "named",
-                      "data": {
-                        "name": "Deploy Intake"
-                      }
-                    },
-                    {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.0
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Stop Shooter"
+                        "waitTime": 2.1
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "Start Intake"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 2.2
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Stop Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Start Shuttle"
                       }
                     }
                   ]
@@ -61,13 +80,31 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Shooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Intake"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto2_02LeaveDepot"
+                  "pathName": "Auto7_02ShuttleToTower"
                 }
               },
               {
@@ -77,7 +114,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.6
+                        "waitTime": 1.0
                       }
                     },
                     {
@@ -89,7 +126,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.1
+                        "waitTime": 1.8
                       }
                     },
                     {
@@ -117,21 +154,9 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Auto2_03Rotate"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Drive Into Tower Left"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Climb Grab Left"
+            "name": "Climb Grab Right"
           }
         },
         {

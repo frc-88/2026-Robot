@@ -37,6 +37,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Climb Grab Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Climb L1"
           }
         }

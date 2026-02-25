@@ -19,6 +19,12 @@
                 "data": {
                   "commands": [
                     {
+                      "type": "named",
+                      "data": {
+                        "name": "Deploy Intake"
+                      }
+                    },
+                    {
                       "type": "wait",
                       "data": {
                         "waitTime": 1.0
@@ -27,7 +33,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Deploy Intake"
+                        "name": "Start Intake"
                       }
                     }
                   ]
@@ -102,6 +108,12 @@
           "type": "path",
           "data": {
             "pathName": "Drive Into Tower Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Grab Left"
           }
         },
         {
