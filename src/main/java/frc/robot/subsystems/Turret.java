@@ -153,7 +153,7 @@ public class Turret extends SubsystemBase {
 
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
-    
+
     if (m_circumnavigating && !isFacingSafe(target)) {
       // if we are circumnavigating, ignore the input and keep doing that until we get there
       goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);

@@ -307,14 +307,10 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter(), turret.aim())
+        new ParallelCommandGroup(shooter.runShooter(), turret.startTargeting())
             .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
         new ParallelCommandGroup(
-            spinner.runSpinner(),
-            feeder.runFeeder(),
-            shooter.runShooter(),
-            turret.aim(),
-            hood.setIsShooting()));
+            spinner.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
   }
 
   public Command stopShoot() { // temporarily just for autos. Copied from shoot controller command
@@ -322,7 +318,8 @@ public class RobotContainer {
         .stopShooter()
         .alongWith(spinner.stopSpinner())
         .alongWith(feeder.stopFeeder())
-        .alongWith(hood.setNotShooting());
+        .alongWith(hood.setNotShooting())
+        .alongWith(turret.stopTargeting());
   }
 
   // /**
