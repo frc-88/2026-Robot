@@ -297,9 +297,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command setPositionTargeting() {
-    return new RunCommand(
-        () -> goToFacing(m_currentTargetFacing),
-        this);
+    return new RunCommand(() -> goToFacing(m_currentTargetFacing), this);
   }
 
   public Command setPositionToZero() {
@@ -313,7 +311,8 @@ public class Turret extends SubsystemBase {
             - getRobotFieldYaw();
     if (Util.logif()) {
       SmartDashboard.putNumber("Turret/TargetFacingAngle", m_currentTargetFacing);
-      SmartDashboard.putNumber("Turret/TalonEncoderPosition", m_turret.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Turret/TalonEncoderPosition", m_turret.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Turret/CANCoder66Position", m_cancoder66.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
@@ -326,8 +325,10 @@ public class Turret extends SubsystemBase {
       SmartDashboard.putBoolean("Turret/Synchonized", isSynchronized());
       SmartDashboard.putBoolean("Turret/Tracking", isTracking());
       SmartDashboard.putBoolean("Turret/Safe", isPositionSafe(getPosition()));
-      SmartDashboard.putNumber("Turret/Cancoder66Position", m_cancoder66.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber("Turret/Cancoder50Position", m_cancoder50.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Turret/Cancoder66Position", m_cancoder66.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Turret/Cancoder50Position", m_cancoder50.getPosition().getValueAsDouble());
     }
   }
 }
