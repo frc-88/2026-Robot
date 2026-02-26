@@ -116,7 +116,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void calibrate() {
-    // This is only necessary if the CANcoder is moved or adjusted.
+    // This is only necessary if the CANcoders are moved or adjusted.
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
@@ -153,6 +153,7 @@ public class Turret extends SubsystemBase {
 
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
+    
     if (m_circumnavigating && !isFacingSafe(target)) {
       // if we are circumnavigating, ignore the input and keep doing that until we get there
       goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);
