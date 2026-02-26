@@ -262,7 +262,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getRobotFieldYaw() {
-    return m_robotYaw.get().getDegrees();
+    return new Rotation2d(m_robotYaw.get().getRadians()).getDegrees();
   }
 
   private boolean isPositionSafe(double position) {
