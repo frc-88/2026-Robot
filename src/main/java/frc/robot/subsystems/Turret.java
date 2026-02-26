@@ -12,9 +12,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -47,16 +45,17 @@ public class Turret extends SubsystemBase {
       new DoublePreferenceConstant("Turret/Sync Threshold", 5.0);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 40.0, 20.0, 0.0, 3.2,
-           0.0, 0.0, 0.01, 0.0, 0);
+          "Turret/PID", 40.0, 20.0, 0.0, 3.2, 0.0, 0.0, 0.01, 0.0, 0);
   private final DoublePreferenceConstant p_forwardLimit =
       new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
       new DoublePreferenceConstant("Turret/Reverse Limit", -225.0);
   private final DoublePreferenceConstant p_spinCompensation =
       new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
-  private final DoublePreferenceConstant p_cancoder50offset = new DoublePreferenceConstant("Turret/CANCoder50 Offset", 0.0);
-  private final DoublePreferenceConstant p_cancoder66offset = new DoublePreferenceConstant("Turret/CANCoder66 Offset", 0.0);
+  private final DoublePreferenceConstant p_cancoder50offset =
+      new DoublePreferenceConstant("Turret/CANCoder50 Offset", 0.0);
+  private final DoublePreferenceConstant p_cancoder66offset =
+      new DoublePreferenceConstant("Turret/CANCoder66 Offset", 0.0);
 
   private Supplier<Pose2d> m_robotPose;
   private DoubleSupplier m_robotYawRate;
@@ -129,8 +128,10 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    p_cancoder50offset.setValue(-m_cancoder50.getAbsolutePosition().getValueAsDouble() + p_cancoder50offset.getValue());
-    p_cancoder66offset.setValue(-m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    p_cancoder50offset.setValue(
+        -m_cancoder50.getAbsolutePosition().getValueAsDouble() + p_cancoder50offset.getValue());
+    p_cancoder66offset.setValue(
+        -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
     configureCANCoders();
     sync();
   }

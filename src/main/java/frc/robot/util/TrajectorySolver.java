@@ -60,7 +60,7 @@ public class TrajectorySolver extends SubsystemBase {
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
-    robotVelocity = velocityPoseSupplier.get().getTranslation(); //.unaryMinus() for REAL
+    robotVelocity = velocityPoseSupplier.get().getTranslation(); // .unaryMinus() for REAL
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 

@@ -68,7 +68,7 @@ public final class Constants {
   public static final int TURRET_GEAR_RATIO = 1;
   public static final double TURRET_COUNTS_PER_REV = 1;
 
-  //Retractomatic
+  // Retractomatic
   public static final int RETRACTOMATIC = 6;
 
   // Drive
