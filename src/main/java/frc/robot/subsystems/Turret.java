@@ -183,15 +183,6 @@ public class Turret extends SubsystemBase {
     }
   }
 
-  public boolean onTarget() {
-    return !m_targeting || Math.abs(getFacing() - m_target) < 5.0;
-  }
-
-  private boolean notMoving() {
-    return Math.abs(turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble()) * 10.)
-        < 45.;
-  }
-
   private double calcCircumnavigationTarget(double origin) {
     double target;
 
@@ -253,6 +244,15 @@ public class Turret extends SubsystemBase {
 
   private double turretFacingToFalconEncoderPosition(double degrees) {
     return (degrees / 360.0) * (5 * (100 / 12));
+  }
+
+  public boolean onTarget() {
+    return !m_targeting || Math.abs(getFacing() - m_target) < 5.0;
+  }
+
+  public boolean notMoving() {
+    return Math.abs(turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble()) * 10.)
+        < 45.;
   }
 
   public Command calibrateZero() {
