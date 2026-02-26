@@ -258,7 +258,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
     controller
         .rightTrigger()
-        .onTrue(shoot())
+        .onTrue(spinner.runSpinner().alongWith(shooter.runShooter()).alongWith(feeder.runFeeder()))
         .onFalse( // TODO: Replace with stop shoot when okay
             driveRotateAroundTurretCenter()
                 .alongWith(shooter.stopShooter())
