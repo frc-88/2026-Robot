@@ -12,7 +12,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -135,14 +134,15 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private boolean encodersHealthy() {
-    return m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red &&
-           m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid &&
-           m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red &&
-           m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
+    return m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+        && m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid
+        && m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+        && m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 
   private void aimAtTarget() {
-    double target = (Util.weAreRed() ? m_targetFacing.getAsDouble() : 180.0 - m_targetFacing.getAsDouble());
+    double target =
+        (Util.weAreRed() ? m_targetFacing.getAsDouble() : 180.0 - m_targetFacing.getAsDouble());
     target -= m_robotYaw.get().getDegrees();
     goToFacing(m_targeting ? target : 0.0);
   }
