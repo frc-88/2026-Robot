@@ -137,7 +137,7 @@ public class RobotContainer {
         new TrajectorySolver(
             () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
+    turret = new Turret(drive::getPose, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 

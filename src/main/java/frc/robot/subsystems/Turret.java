@@ -12,6 +12,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -38,22 +40,25 @@ public class Turret extends SubsystemBase {
 
   // Preferences
   private final DoublePreferenceConstant p_proportion =
-      new DoublePreferenceConstant("Turret/Zero", 0.0);
+      new DoublePreferenceConstant("Turret/Conversion Constant", -262.0588);
   private final DoublePreferenceConstant p_limitBuffer =
-      new DoublePreferenceConstant("Turret/Limit Buffer", 0.0);
+      new DoublePreferenceConstant("Turret/Limit Buffer", 10.0);
   private final DoublePreferenceConstant p_syncThreshold =
-      new DoublePreferenceConstant("Turret/Sync Threshold", 0.0);
+      new DoublePreferenceConstant("Turret/Sync Threshold", 5.0);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
+          "Turret/PID", 40.0, 20.0, 0.0, 3.2,
+           0.0, 0.0, 0.01, 0.0, 0);
   private final DoublePreferenceConstant p_forwardLimit =
-      new DoublePreferenceConstant("Turret/Forward Limit", 0.0);
+      new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
-      new DoublePreferenceConstant("Turret/Reverse Limit", 0.0);
+      new DoublePreferenceConstant("Turret/Reverse Limit", -225.0);
   private final DoublePreferenceConstant p_spinCompensation =
       new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
+  private final DoublePreferenceConstant p_cancoder50offset = new DoublePreferenceConstant("Turret/CANCoder50 Offset", 0.0);
+  private final DoublePreferenceConstant p_cancoder66offset = new DoublePreferenceConstant("Turret/CANCoder66 Offset", 0.0);
 
-  private Supplier<Rotation2d> m_robotYaw;
+  private Supplier<Pose2d> m_robotPose;
   private DoubleSupplier m_robotYawRate;
   private DoubleSupplier m_targetFacing;
 
@@ -64,15 +69,15 @@ public class Turret extends SubsystemBase {
   private double m_circumnavigationTarget;
 
   public Turret(
-      Supplier<Rotation2d> driveYawSupplier,
+      Supplier<Pose2d> drivePoseSupplier,
       DoubleSupplier driveGyroRateSupplier,
       DoubleSupplier trajectorySolverFacingSupplier) {
-    m_robotYaw = driveYawSupplier;
+    m_robotPose = drivePoseSupplier;
     m_robotYawRate = driveGyroRateSupplier;
     m_targetFacing = trajectorySolverFacingSupplier;
 
     configureMotors();
-    configureCANCoder();
+    configureCANCoders();
 
     SmartDashboard.putData("Calibrate", calibrateZero().ignoringDisable(true));
     SmartDashboard.putData("Aim", aim());
@@ -104,15 +109,19 @@ public class Turret extends SubsystemBase {
     m_turret.getConfigurator().apply(config);
   }
 
-  private void configureCANCoder() {
-    CANcoderConfiguration config = new CANcoderConfiguration();
+  private void configureCANCoders() {
+    CANcoderConfiguration config50 = new CANcoderConfiguration();
+    CANcoderConfiguration config66 = new CANcoderConfiguration();
 
-    m_cancoder66.getConfigurator().apply(config);
-    m_cancoder50.getConfigurator().apply(config);
+    config50.MagnetSensor.MagnetOffset = p_cancoder50offset.getValue();
+    config66.MagnetSensor.MagnetOffset = p_cancoder66offset.getValue();
+
+    m_cancoder50.getConfigurator().apply(config50);
+    m_cancoder66.getConfigurator().apply(config66);
   }
 
   private void sync() {
-    m_turret.setPosition(getCANCoderFacing());
+    m_turret.setPosition(turretFacingToFalconEncoderPosition(getCANCoderFacing()));
   }
 
   private void calibrate() {
@@ -120,8 +129,9 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    m_cancoder50.setPosition(0.0);
-    m_cancoder66.setPosition(0.0);
+    p_cancoder50offset.setValue(-m_cancoder50.getAbsolutePosition().getValueAsDouble() + p_cancoder50offset.getValue());
+    p_cancoder66offset.setValue(-m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    configureCANCoders();
     sync();
   }
 
@@ -143,7 +153,7 @@ public class Turret extends SubsystemBase {
   private void aimAtTarget() {
     double target =
         (Util.weAreRed() ? m_targetFacing.getAsDouble() : 180.0 - m_targetFacing.getAsDouble());
-    target -= m_robotYaw.get().getDegrees();
+    target -= m_robotPose.get().getRotation().getDegrees();
     goToFacing(m_targeting ? target : 0.0);
   }
 
