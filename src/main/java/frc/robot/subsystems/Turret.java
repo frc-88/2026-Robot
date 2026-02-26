@@ -312,6 +312,7 @@ public class Turret extends SubsystemBase {
     m_currentRobotPose = m_robotPose.get();
     m_currentTargetFacing = -180.0 + m_targetFacing.getAsDouble() - getRobotFieldYaw();
     if (Util.logif()) {
+      SmartDashboard.putNumber("Turret/FacingAngleError", getFacing() - m_currentTargetFacing);
       SmartDashboard.putNumber("Turret/TargetFacingAngle", m_currentTargetFacing);
       SmartDashboard.putNumber(
           "Turret/TalonEncoderPosition", m_turret.getPosition().getValueAsDouble());
