@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -310,7 +311,10 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     m_currentRobotPose = m_robotPose.get();
-    m_currentTargetFacing = -180.0 + m_targetFacing.getAsDouble() - getRobotFieldYaw();
+    m_currentTargetFacing =
+        Math.toDegrees(
+            MathUtil.angleModulus(
+                Math.toRadians(-180.0 + m_targetFacing.getAsDouble() - getRobotFieldYaw())));
     if (Util.logif()) {
       SmartDashboard.putNumber("Turret/FacingAngleError", getFacing() - m_currentTargetFacing);
       SmartDashboard.putNumber("Turret/TargetFacingAngle", m_currentTargetFacing);
