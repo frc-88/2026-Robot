@@ -141,7 +141,7 @@ public class TrajectorySolver extends SubsystemBase {
       target = Constants.HUB_POSITION;
     }
 
-    return Util.flipIfRed(new Pose2d(target, new Rotation2d())).getTranslation();
+    return Util.flipIfRed(target);
   }
 
   public double lookupTime(double distance) {
