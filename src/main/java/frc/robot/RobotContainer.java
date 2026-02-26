@@ -259,15 +259,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    controller
-        .rightTrigger()
-        .onTrue(spinner.runSpinner().alongWith(shooter.runShooter()).alongWith(feeder.runFeeder()))
-        .onFalse( // TODO: Replace with stop shoot when okay
-            driveRotateAroundTurretCenter()
-                .alongWith(shooter.stopShooter())
-                .alongWith(spinner.stopSpinner())
-                .alongWith(feeder.stopFeeder())
-                .alongWith(hood.setNotShooting()));
+    controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
+
     controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }
 
@@ -311,7 +304,7 @@ public class RobotContainer {
   public Command shoot() {
     return new SequentialCommandGroup(
         new ParallelCommandGroup(shooter.runShooter(), turret.setPositionTargeting())
-            .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
+            .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
             spinner.runSpinner(),
             feeder.runFeeder(),
