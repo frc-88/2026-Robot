@@ -26,6 +26,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /** insert new haiku here */
 public class Turret extends SubsystemBase {
@@ -261,6 +262,7 @@ public class Turret extends SubsystemBase {
     // }
   }
 
+  @AutoLogOutput(key = "Turret/RobotFieldYaw")
   public double getRobotFieldYaw() {
     return m_robotYaw.get().getDegrees();
   }
