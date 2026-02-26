@@ -33,7 +33,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -238,26 +237,6 @@ public class Drive extends SubsystemBase {
     m_yaw = yaw;
   }
 
-  public boolean weAreRed() {
-    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-  }
-
-  private Pose2d flipPose(Pose2d pose) {
-    return pose.relativeTo(
-        new Pose2d(
-            Constants.FIELD_LENGTH,
-            Constants.FIELD_WIDTH,
-            new Rotation2d(Units.degreesToRadians(180))));
-  }
-
-  public Pose2d flipIfRed(Pose2d pose) {
-    return weAreRed() ? flipPose(pose) : pose;
-  }
-
-  @AutoLogOutput(key = "Odometry/RobotFlipped")
-  public Pose2d getPoseFlipped() {
-    return flipIfRed(getPose());
-  }
   /**
    * Runs the drive at the desired velocity.
    *

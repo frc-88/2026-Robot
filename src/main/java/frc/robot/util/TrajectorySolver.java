@@ -125,18 +125,23 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Translation2d findTargetPosition() {
-    if (turretPosition.getX() > Units.inchesToMeters(181.56)) {
-      if (turretPosition.getY() > Units.inchesToMeters(158.32)) {
+    Translation2d target;
+    Translation2d turret = Util.flipIfRed(turretPosition);
+
+    if (turret.getX() > Units.inchesToMeters(181.56)) {
+      if (turret.getY() > Units.inchesToMeters(158.32)) {
         Logger.recordOutput("Trajectory/TargetSelection", "LEFT_SHUTTLE_TARGET_POSITION");
-        return Constants.LEFT_SHUTTLE_TARGET_POSITION;
+        target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
       } else {
         Logger.recordOutput("Trajectory/TargetSelection", "RIGHT_SHUTTLE_TARGET_POSITION");
-        return Constants.RIGHT_SHUTTLE_TARGET_POSITION;
+        target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
       }
     } else {
       Logger.recordOutput("Trajectory/TargetSelection", "HUB_POSITION");
-      return Constants.HUB_POSITION;
+      target = Constants.HUB_POSITION;
     }
+
+    return Util.flipIfRed(new Pose2d(target, new Rotation2d())).getTranslation();
   }
 
   public double lookupTime(double distance) {
