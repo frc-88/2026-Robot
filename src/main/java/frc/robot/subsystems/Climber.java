@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -33,10 +34,11 @@ import java.util.function.DoubleSupplier;
 
 public class Climber extends SubsystemBase {
 
-  private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, "Drivetrain");
-  private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, "Drivetrain");
-  private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, "Drivetrain");
-  private final Pigeon2 pigeon = new Pigeon2(0, "Drivetrain");
+  private final CANBus canbus = new CANBus("Drivetrain");
+  private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, canbus);
+  private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, canbus);
+  private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, canbus);
+  private final Pigeon2 pigeon = new Pigeon2(0, canbus);
   // PowerDistribution pdh = new PowerDistribution();
   // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 

@@ -15,18 +15,21 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Util;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
 public class Hood extends SubsystemBase {
-  private TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+  private final TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+
+  private final MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private final DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  // private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
-  private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
-  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
-  private DoubleSupplier m_pitch;
+  private final DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+
+  private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
 
   public boolean isShooting = false;
@@ -101,7 +104,6 @@ public class Hood extends SubsystemBase {
 
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
-    System.out.println(angle);
   }
 
   private void setCalibrate() {
