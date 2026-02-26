@@ -115,7 +115,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
@@ -135,8 +135,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () ->
-                batman.isConnected() ? drive.flipIfRed(batman.getPose2d()) : drive.getPoseFlipped(),
+            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
             drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
@@ -256,15 +255,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    controller
-        .rightTrigger()
-        .onTrue(spinner.runSpinner().alongWith(shooter.runShooter()).alongWith(feeder.runFeeder()))
-        .onFalse( // TODO: Replace with stop shoot when okay
-            driveRotateAroundTurretCenter()
-                .alongWith(shooter.stopShooter())
-                .alongWith(spinner.stopSpinner())
-                .alongWith(feeder.stopFeeder())
-                .alongWith(hood.setNotShooting()));
+    controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
+
     controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }
 
@@ -308,7 +300,7 @@ public class RobotContainer {
   public Command shoot() {
     return new SequentialCommandGroup(
         new ParallelCommandGroup(shooter.runShooter(), turret.startTargeting())
-            .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
+            .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
             spinner.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
   }

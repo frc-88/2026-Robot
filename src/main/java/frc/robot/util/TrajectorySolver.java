@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
@@ -41,14 +42,17 @@ public class TrajectorySolver extends SubsystemBase {
     velocityPoseSupplier = velocityPose;
   }
 
+  @AutoLogOutput(key = "Trajectory/HoodAngle")
   public double getAngle() {
     return hoodAngle;
   }
 
+  @AutoLogOutput(key = "Trajectory/ShooterSpeed")
   public double getShootSpeed() {
     return shootSpeed;
   }
 
+  @AutoLogOutput(key = "Trajectory/Yaw")
   public double getYaw() {
     return turretToProjectedTarget.getAngle().getDegrees();
   }
@@ -56,7 +60,7 @@ public class TrajectorySolver extends SubsystemBase {
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
-    robotVelocity = velocityPoseSupplier.get().getTranslation();
+    robotVelocity = velocityPoseSupplier.get().getTranslation(); //.unaryMinus() for REAL
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 
@@ -89,7 +93,7 @@ public class TrajectorySolver extends SubsystemBase {
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
     Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
-    Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
+    // Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
     Logger.recordOutput(
         "Trajectory/ProjectedHub",
         new Pose2d(turretToProjectedTarget.plus(turretPosition), Rotation2d.kZero));
@@ -125,18 +129,23 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Translation2d findTargetPosition() {
-    if (turretPosition.getX() > Units.inchesToMeters(181.56)) {
-      if (turretPosition.getY() > Units.inchesToMeters(158.32)) {
+    Translation2d target;
+    Translation2d turret = Util.flipIfRed(turretPosition);
+
+    if (turret.getX() > Units.inchesToMeters(181.56)) {
+      if (turret.getY() > Units.inchesToMeters(158.32)) {
         Logger.recordOutput("Trajectory/TargetSelection", "LEFT_SHUTTLE_TARGET_POSITION");
-        return Constants.LEFT_SHUTTLE_TARGET_POSITION;
+        target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
       } else {
         Logger.recordOutput("Trajectory/TargetSelection", "RIGHT_SHUTTLE_TARGET_POSITION");
-        return Constants.RIGHT_SHUTTLE_TARGET_POSITION;
+        target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
       }
     } else {
       Logger.recordOutput("Trajectory/TargetSelection", "HUB_POSITION");
-      return Constants.HUB_POSITION;
+      target = Constants.HUB_POSITION;
     }
+
+    return Util.flipIfRed(target);
   }
 
   public double lookupTime(double distance) {

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -18,6 +19,7 @@ import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
@@ -79,14 +81,15 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = (90 - m_pitch.getAsDouble());
+      m_targetPitch = MathUtil.clamp(90.0 - m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
       m_targetPitch = 14.0;
     }
 
+    Logger.recordOutput("Hood/AngleSetpoint", m_targetPitch);
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
+      // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
       SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Hood/CurrentAngle",
@@ -132,7 +135,7 @@ public class Hood extends SubsystemBase {
 
   public Command calibrate() {
     return new RunCommand(() -> setCalibrate(), this)
-        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 30.0)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 10.0)
         .andThen(stopHood());
   }
 
