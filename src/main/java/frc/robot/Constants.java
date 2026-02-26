@@ -68,6 +68,9 @@ public final class Constants {
   public static final int TURRET_GEAR_RATIO = 1;
   public static final double TURRET_COUNTS_PER_REV = 1;
 
+  //Retractomatic
+  public static final int RETRACTOMATIC = 6;
+
   // Drive
   public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
