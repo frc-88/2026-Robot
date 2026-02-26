@@ -310,11 +310,7 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     m_currentRobotPose = m_robotPose.get();
-    m_currentTargetFacing =
-        (Util.weAreRed()
-                ? -180.0 + m_targetFacing.getAsDouble()
-                : -180.0 + m_targetFacing.getAsDouble())
-            - getRobotFieldYaw();
+    m_currentTargetFacing = -180.0 + m_targetFacing.getAsDouble() - getRobotFieldYaw();
     if (Util.logif()) {
       SmartDashboard.putNumber("Turret/TargetFacingAngle", m_currentTargetFacing);
       SmartDashboard.putNumber(
