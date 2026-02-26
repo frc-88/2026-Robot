@@ -37,6 +37,7 @@ public class Turret extends SubsystemBase {
   DoubleSupplier m_rate;
 
   DoubleSupplier m_targetFacing;
+  private double m_currentTargetFacing = 0.0;
 
   private MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
   private DutyCycleOut dutyCycleReq = new DutyCycleOut(0);
@@ -62,10 +63,13 @@ public class Turret extends SubsystemBase {
   private double m_defaultFacing = 0.;
   private double m_target = 0;
 
-  public Turret(Supplier<Rotation2d> yaw, DoubleSupplier rate, DoubleSupplier hub) {
-    m_robotYaw = yaw;
-    m_rate = rate;
-    m_targetFacing = hub;
+  public Turret(
+      Supplier<Rotation2d> driveYawSupplier,
+      DoubleSupplier driveGyroRateSupplier,
+      DoubleSupplier trajectorySolverFacingSupplier) {
+    m_robotYaw = driveYawSupplier;
+    m_rate = driveGyroRateSupplier;
+    m_targetFacing = trajectorySolverFacingSupplier;
 
     configureMotors();
     configureCANCoder();
@@ -294,7 +298,7 @@ public class Turret extends SubsystemBase {
 
   public Command setPositionTargeting() {
     return new RunCommand(
-        () -> goToFacing(180.0 + m_targetFacing.getAsDouble() - getYaw()),
+        () -> goToFacing(180.0 - m_currentTargetFacing - getYaw()),
         this); // 180? //m_targetFacing.getAsDouble() - getYaw() +
   }
 
@@ -304,9 +308,10 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    m_currentTargetFacing =
+        Util.weAreRed() ? -m_targetFacing.getAsDouble() + 180.0 : m_targetFacing.getAsDouble();
     if (Util.logif()) {
-      SmartDashboard.putNumber(
-          "Turret/DemandedAngle", m_targetFacing.getAsDouble() - getYaw() + 180.0);
+      SmartDashboard.putNumber("Turret/DemandedAngle", 180.0 - m_currentTargetFacing - getYaw());
       SmartDashboard.putNumber("Turret/Talon Absolute", m_turret.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Turret/CANCoder Position", m_cancoder66.getPosition().getValueAsDouble());

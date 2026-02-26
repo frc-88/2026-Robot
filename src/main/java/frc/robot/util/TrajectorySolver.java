@@ -73,7 +73,7 @@ public class TrajectorySolver extends SubsystemBase {
                     .times(robotRotationalVelocity))
             .minus(targetVelocity);
 
-    Logger.recordOutput("Trajectory/RobotPosition", new Pose2d(robotPosition, Rotation2d.kZero));
+    Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
     Logger.recordOutput(
         "Trajectory/TurretToTargetRelativeVelocity",
