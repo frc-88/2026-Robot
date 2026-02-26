@@ -115,7 +115,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
@@ -135,8 +135,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () ->
-                batman.isConnected() ? drive.flipIfRed(batman.getPose2d()) : drive.getPoseFlipped(),
+            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
             drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getPoseFlipped, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
