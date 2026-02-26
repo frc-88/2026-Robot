@@ -27,10 +27,10 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.HotTub;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Simulation;
-import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -58,7 +58,7 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder();
   private final Shooter shooter;
   private final Intake intake = new Intake();
-  private final Spinner spinner = new Spinner();
+  private final HotTub hotTub = new HotTub();
   private final TrajectorySolver trajectorySolver;
   private final Batman batman = new Batman();
   private final Hood hood;
@@ -184,8 +184,8 @@ public class RobotContainer {
       // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
+      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
+      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
       //   SmartDashboard.putData(
@@ -213,7 +213,7 @@ public class RobotContainer {
   }
 
   private void configureDefaultCommands() {
-    spinner.setDefaultCommand(spinner.stopSpinner());
+    hotTub.setDefaultCommand(hotTub.stopSpinner());
     intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
@@ -245,7 +245,7 @@ public class RobotContainer {
                 .stopIntake()
                 .alongWith(driveRotateAroundTurretCenter())
                 .alongWith(shooter.stopShooter())
-                .alongWith(spinner.stopSpinner())
+                .alongWith(hotTub.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
 
     // Reset gyro to 0° when B button is pressed
@@ -305,7 +305,7 @@ public class RobotContainer {
         new ParallelCommandGroup(shooter.runShooter(), turret.setPositionTargeting())
             .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
-            spinner.runSpinner(),
+            hotTub.runSpinner(),
             feeder.runFeeder(),
             shooter.runShooter(),
             turret.setPositionTargeting(),
@@ -315,7 +315,7 @@ public class RobotContainer {
   public Command stopShoot() { // temporarily just for autos. Copied from shoot controller command
     return shooter
         .stopShooter()
-        .alongWith(spinner.stopSpinner())
+        .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
         .alongWith(hood.setNotShooting());
   }
