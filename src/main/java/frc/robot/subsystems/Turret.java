@@ -78,8 +78,10 @@ public class Turret extends SubsystemBase {
     configureMotors();
     configureCANCoders();
 
-    SmartDashboard.putData("Calibrate", calibrateZero().ignoringDisable(true));
-    SmartDashboard.putData("Aim", aim());
+    SmartDashboard.putData("Turret/Calibrate", calibrateZero().ignoringDisable(true));
+    SmartDashboard.putData("Turret/Aim", aim());
+    SmartDashboard.putData("Turret/Start Targeting", startTargeting());
+    SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
