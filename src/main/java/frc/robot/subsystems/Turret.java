@@ -14,7 +14,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,6 +26,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /** insert new haiku here */
 public class Turret extends SubsystemBase {
@@ -33,7 +34,7 @@ public class Turret extends SubsystemBase {
   private CANcoder m_cancoder66 = new CANcoder(Constants.TURRET_CANCODER_ID1, CANBus.roboRIO());
   private CANcoder m_cancoder50 = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
-  Supplier<Rotation2d> m_robotYaw;
+  Supplier<Pose2d> m_robotPose;
   DoubleSupplier m_rate;
 
   DoubleSupplier m_targetFacing;
@@ -62,12 +63,13 @@ public class Turret extends SubsystemBase {
   private double m_circumnavigationTarget;
   private double m_defaultFacing = 0.;
   private double m_target = 0;
+  private Pose2d m_currentRobotPose;
 
   public Turret(
-      Supplier<Rotation2d> driveYawSupplier,
+      Supplier<Pose2d> drivePoseSupplier,
       DoubleSupplier driveGyroRateSupplier,
       DoubleSupplier trajectorySolverFacingSupplier) {
-    m_robotYaw = driveYawSupplier;
+    m_robotPose = drivePoseSupplier;
     m_rate = driveGyroRateSupplier;
     m_targetFacing = trajectorySolverFacingSupplier;
 
@@ -261,8 +263,9 @@ public class Turret extends SubsystemBase {
     // }
   }
 
+  @AutoLogOutput(key = "Turret/RobotFieldYaw")
   public double getRobotFieldYaw() {
-    return new Rotation2d(m_robotYaw.get().getRadians()).getDegrees();
+    return m_currentRobotPose.getRotation().getDegrees();
   }
 
   private boolean isPositionSafe(double position) {
@@ -306,8 +309,11 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    m_currentRobotPose = m_robotPose.get();
     m_currentTargetFacing =
-        (Util.weAreRed() ? m_targetFacing.getAsDouble() : 180.0 - m_targetFacing.getAsDouble())
+        (Util.weAreRed()
+                ? -180.0 + m_targetFacing.getAsDouble()
+                : -180.0 + m_targetFacing.getAsDouble())
             - getRobotFieldYaw();
     if (Util.logif()) {
       SmartDashboard.putNumber("Turret/TargetFacingAngle", m_currentTargetFacing);
