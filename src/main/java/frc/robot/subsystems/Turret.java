@@ -12,6 +12,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -155,10 +157,10 @@ public class Turret extends SubsystemBase {
 
   private void aimAtTarget() {
     double target =
-        (Util.weAreRed() ? m_targetFacing.getAsDouble() : 180.0 - m_targetFacing.getAsDouble());
+        (m_targetFacing.getAsDouble() - 180.0);
     target -= m_robotPose.get().getRotation().getDegrees();
     goToFacing(m_targeting ? target : 0.0);
-  }
+  } 
 
   private void goToFacing(double target) {
     goToFacing(target, false);
