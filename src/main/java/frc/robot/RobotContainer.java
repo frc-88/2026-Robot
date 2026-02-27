@@ -175,9 +175,6 @@ public class RobotContainer {
   private void configureSmartDashboardButtons() {
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData(
-          "CalibrateTurret", turret.calibrateEncodersFactory().ignoringDisable(true));
-      SmartDashboard.putData("SetTurretTargeting", turret.setPositionTargeting());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
@@ -218,7 +215,7 @@ public class RobotContainer {
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
-    turret.setDefaultCommand(turret.setPositionTargeting()); // TODO calibration first
+    turret.setDefaultCommand(turret.aim()); // TODO calibration first
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
@@ -302,17 +299,13 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter(), turret.setPositionTargeting())
+        new ParallelCommandGroup(shooter.runShooter())
             .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
-            hotTub.runSpinner(),
-            feeder.runFeeder(),
-            shooter.runShooter(),
-            turret.setPositionTargeting(),
-            hood.setIsShooting()));
+            hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
   }
 
-  public Command stopShoot() { // temporarily just for autos. Copied from shoot controller command
+  public Command stopShoot() {
     return shooter
         .stopShooter()
         .alongWith(hotTub.stopSpinner())
