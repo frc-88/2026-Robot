@@ -44,7 +44,7 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
   public double getAngle() {
-    return hoodAngle;
+    return 90.0 - hoodAngle;
   }
 
   @AutoLogOutput(key = "Trajectory/ShooterSpeed")
