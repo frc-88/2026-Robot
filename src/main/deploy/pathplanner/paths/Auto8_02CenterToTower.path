@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 7.681447330774885,
-        "y": 4.828629665074723
+        "y": 4.83
       },
       "prevControl": null,
       "nextControl": {
         "x": 7.072116877047503,
-        "y": 5.952755751772036
+        "y": 5.954126086697315
       },
       "isLocked": false,
       "linkedName": "Auto8_01End"
