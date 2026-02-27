@@ -299,7 +299,7 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter(), turret.startTargeting())
+        new ParallelCommandGroup(shooter.runShooter())
             .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
             hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
@@ -310,8 +310,7 @@ public class RobotContainer {
         .stopShooter()
         .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
-        .alongWith(hood.setNotShooting())
-        .alongWith(turret.stopTargeting());
+        .alongWith(hood.setNotShooting());
   }
 
   // /**
