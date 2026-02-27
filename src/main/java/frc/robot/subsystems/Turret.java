@@ -79,6 +79,7 @@ public class Turret extends SubsystemBase {
     configureCANCoders();
 
     SmartDashboard.putData("Turret/Calibrate", calibrateZero().ignoringDisable(true));
+    SmartDashboard.putData("Turret/Sync", syncCommand().ignoringDisable(true));
     SmartDashboard.putData("Turret/Aim", aim());
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
@@ -135,7 +136,6 @@ public class Turret extends SubsystemBase {
     p_cancoder66offset.setValue(
         -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
     configureCANCoders();
-    sync();
   }
 
   @AutoLogOutput
@@ -223,6 +223,11 @@ public class Turret extends SubsystemBase {
     return Math.abs(getFacing() - getCANCoderFacing()) < p_syncThreshold.getValue();
   }
 
+  @AutoLogOutput
+  private double syncError() {
+    return getFacing() - getCANCoderFacing();
+  }
+
   private boolean isFacingSafe(double degrees) {
     return isPositionSafe(turretFacingToFalconEncoderPosition(degrees));
   }
@@ -270,6 +275,10 @@ public class Turret extends SubsystemBase {
 
   public Command calibrateZero() {
     return new InstantCommand(() -> calibrate(), this);
+  }
+
+  public Command syncCommand() {
+    return new InstantCommand(() -> sync(), this);
   }
 
   public Command aim() {
