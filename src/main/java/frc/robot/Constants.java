@@ -70,7 +70,7 @@ public final class Constants {
 
   // Battery Fuel Gauge
   public static final int BATTERY_FUEL_GAUGE = 0;
-  
+
   // Retractomatic
   public static final int RETRACTOMATIC = 6;
 
