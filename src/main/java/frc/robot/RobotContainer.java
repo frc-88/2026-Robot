@@ -216,7 +216,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
     turret.setDefaultCommand(turret.aim()); // TODO calibration first
-    drive.setDefaultCommand(driveRotateAroundTurretCenter());
+    drive.setDefaultCommand(driveRotateAroundRobotCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
 

@@ -89,6 +89,7 @@ public class Hood extends SubsystemBase {
     // m_targetPitch = targetPos.getValue();
 
     Logger.recordOutput("Hood/AngleSetpoint", m_targetPitch);
+    Logger.recordOutput("Hood/isShooting", isShooting);
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
