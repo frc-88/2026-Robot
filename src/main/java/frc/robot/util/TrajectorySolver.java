@@ -166,7 +166,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
-      return 6.45 + 4.56 * distance;
+      return 9.18 + 3.01 * distance;
       // - 1.11 * (Math.pow(distance, 3.0));
     }
   }
@@ -176,7 +176,7 @@ public class TrajectorySolver extends SubsystemBase {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
 
     } else { // real
-      return 25.4 + 3.94 * (distance);
+      return 23.3 + 4.23 * (distance);
     }
     // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));

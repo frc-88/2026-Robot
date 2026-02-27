@@ -86,7 +86,7 @@ public class Hood extends SubsystemBase {
       m_targetPitch = 14.0;
     }
     // Lookup Table Building Override
-    m_targetPitch = targetPos.getValue();
+    // m_targetPitch = targetPos.getValue();
 
     Logger.recordOutput("Hood/AngleSetpoint", m_targetPitch);
     if (Util.logif()) {
