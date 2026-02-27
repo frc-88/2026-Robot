@@ -223,7 +223,7 @@ public class RobotContainer {
   }
 
   public void disabledInit() {
-    // shooter.resetBPS();
+    shooter.resetBPS();
   }
 
   private void configureDriverController() {
@@ -321,7 +321,6 @@ public class RobotContainer {
   //  * @return the command to run in autonomous
   //  */
   public Command getAutonomousCommand() {
-    // return autoChooser.get();
-    return null;
+    return autoChooser.get();
   }
 }
