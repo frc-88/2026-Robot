@@ -154,9 +154,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void aimAtTarget() {
-    double target = (m_targetFacing.getAsDouble() - 180.0);
-    target -= m_robotPose.get().getRotation().getDegrees();
-    goToFacing(m_targeting ? target : 0.0);
+    goToFacing(m_targeting ? getTargetFacing() : 0.0);
   }
 
   private void goToFacing(double target) {
@@ -225,6 +223,16 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput
   private double syncError() {
     return getFacing() - getCANCoderFacing();
+  }
+
+  @AutoLogOutput
+  private double facingError() {
+    return getFacing() - getTargetFacing();
+  }
+
+  @AutoLogOutput
+  private double getTargetFacing() {
+    return m_targetFacing.getAsDouble() - m_robotPose.get().getRotation().getDegrees();
   }
 
   private boolean isFacingSafe(double degrees) {

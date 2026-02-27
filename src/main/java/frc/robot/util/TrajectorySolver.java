@@ -54,7 +54,7 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput(key = "Trajectory/Yaw")
   public double getYaw() {
-    return turretToProjectedTarget.getAngle().getDegrees();
+    return turretToProjectedTarget.getAngle().getDegrees() - 180.0;
   }
 
   @Override
@@ -166,7 +166,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
-      return 84.15886 - 16.18452 * Math.log(distance);
+      return 6.45 + 4.56 * distance;
       // - 1.11 * (Math.pow(distance, 3.0));
     }
   }
@@ -176,7 +176,7 @@ public class TrajectorySolver extends SubsystemBase {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
 
     } else { // real
-      return 27.71457 + 2.96448 * (distance);
+      return 25.4 + 3.94 * (distance);
     }
     // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));

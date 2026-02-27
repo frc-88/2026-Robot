@@ -123,6 +123,10 @@ public class Shooter extends SubsystemBase {
 
   public void periodic() {
     targetVelocity = m_targetSpeed.getAsDouble();
+
+    // Lookup Table Building Override
+    targetVelocity = shootSpeed.getValue();
+
     if (Util.logif()) {
       SmartDashboard.putNumber(
           "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());

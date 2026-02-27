@@ -81,10 +81,12 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = MathUtil.clamp(90.0 - m_pitch.getAsDouble(), 14.0, 34.0);
+      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
       m_targetPitch = 14.0;
     }
+    // Lookup Table Building Override
+    m_targetPitch = targetPos.getValue();
 
     Logger.recordOutput("Hood/AngleSetpoint", m_targetPitch);
     if (Util.logif()) {
