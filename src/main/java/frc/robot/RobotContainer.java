@@ -97,7 +97,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
         simulation = null;
-        // turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -110,7 +109,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        // turret = new Turret(gyro);
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -129,7 +127,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
         simulation = null;
-        // turret = new Turret(gyro);
         break;
     }
 
@@ -150,22 +147,6 @@ public class RobotContainer {
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    // Set up SysId routines
-    // autoChooser.addOption(
-    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
     configureSmartDashboardButtons();
     configureDefaultCommands();
     configureDriverController();
@@ -178,7 +159,6 @@ public class RobotContainer {
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
-      // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
       SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
@@ -205,8 +185,7 @@ public class RobotContainer {
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
       SmartDashboard.putData("Prepclimb", prepClimber());
     }
-    SmartDashboard.putData( // DO NOT FLIP IF RED
-        "Batman/SetPose", resetBatman());
+    SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
@@ -215,7 +194,7 @@ public class RobotContainer {
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
-    turret.setDefaultCommand(turret.aim()); // TODO calibration first
+    turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
@@ -277,7 +256,7 @@ public class RobotContainer {
     return climber.calibrate().withTimeout(0.5).andThen(climber.gotoGrip());
   }
 
-  public Command resetBatman() {
+  public Command resetBatman() { // DO NOT FLIP IF RED
     return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
   }
 
