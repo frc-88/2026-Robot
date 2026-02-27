@@ -61,10 +61,6 @@ public class TrajectorySolver extends SubsystemBase {
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
     robotVelocity = velocityPoseSupplier.get().getTranslation();
-    if (Constants.currentMode == Mode.REAL) {
-      robotVelocity =
-          robotVelocity.rotateBy(Rotation2d.fromDegrees(-90.0)); // why do we have to do this??
-    }
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 
