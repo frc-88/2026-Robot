@@ -302,10 +302,7 @@ public class RobotContainer {
         new ParallelCommandGroup(shooter.runShooter(), turret.startTargeting())
             .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
-            hotTub.runSpinner(),
-            feeder.runFeeder(),
-            shooter.runShooter(),
-            hood.setIsShooting()));
+            hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
   }
 
   public Command stopShoot() {
