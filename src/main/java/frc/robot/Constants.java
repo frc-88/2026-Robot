@@ -70,6 +70,9 @@ public final class Constants {
 
   // Battery Fuel Gauge
   public static final int BATTERY_FUEL_GAUGE = 0;
+  
+  // Retractomatic
+  public static final int RETRACTOMATIC = 6;
 
   // Drive
   public static final int BASE_PIGEON = 0;
@@ -86,17 +89,8 @@ public final class Constants {
 
   public static final Translation2d robotToTurret =
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
-  public static Translation2d HUB_POSITION_BLUE =
+  public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 0.5);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_BLUE = new Translation2d(0.5, 7.5);
-
-  public static Translation2d HUB_POSITION_RED =
-      new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84))
-          .unaryMinus()
-          .plus(FIELD_DIMENSIONS);
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION_RED =
-      new Translation2d(0.5, 0.5).unaryMinus().plus(FIELD_DIMENSIONS);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION_RED =
-      new Translation2d(0.5, 7.5).unaryMinus().plus(FIELD_DIMENSIONS);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(1.5, 1.0);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(1.5, 7.0);
 }

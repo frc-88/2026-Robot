@@ -28,10 +28,10 @@ import frc.robot.subsystems.BatteryFuelGauge;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.HotTub;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Simulation;
-import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -59,7 +59,7 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder();
   private final Shooter shooter;
   private final Intake intake = new Intake();
-  private final Spinner spinner = new Spinner();
+  private final HotTub hotTub = new HotTub();
   private final TrajectorySolver trajectorySolver;
   private final Batman batman = new Batman();
   private final Hood hood;
@@ -117,7 +117,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPoseFlipped, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
         break;
 
       default:
@@ -137,9 +137,9 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> batman.isConnected() ? drive.flipIfRed(batman.getPose2d()) : drive.getPose(),
+            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getYaw, drive::getRate, trajectorySolver::getYaw);
+    turret = new Turret(drive::getPose, drive::getRate, trajectorySolver::getYaw);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
@@ -177,17 +177,14 @@ public class RobotContainer {
   private void configureSmartDashboardButtons() {
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData(
-          "CalibrateTurret", turret.calibrateEncodersFactory().ignoringDisable(true));
-      SmartDashboard.putData("SetTurretTargeting", turret.setPositionTargeting());
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
       // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(spinner.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(spinner.stopSpinner()));
+      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
+      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
       //   SmartDashboard.putData(
@@ -215,14 +212,14 @@ public class RobotContainer {
   }
 
   private void configureDefaultCommands() {
-    spinner.setDefaultCommand(spinner.stopSpinner());
-    intake.setDefaultCommand(intake.stopIntake());
+    hotTub.setDefaultCommand(hotTub.stopSpinner());
+    intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    hood.setDefaultCommand(hood.setPositionTargeting());
-    turret.setDefaultCommand(turret.setPositionToZero());
+    hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
+    turret.setDefaultCommand(turret.aim()); // TODO calibration first
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
-    climber.setDefaultCommand(climber.stopall());
+    climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
 
   public void disabledInit() {
@@ -247,7 +244,7 @@ public class RobotContainer {
                 .stopIntake()
                 .alongWith(driveRotateAroundTurretCenter())
                 .alongWith(shooter.stopShooter())
-                .alongWith(spinner.stopSpinner())
+                .alongWith(hotTub.stopSpinner())
                 .alongWith(feeder.stopFeeder()));
 
     // Reset gyro to 0° when B button is pressed
@@ -260,15 +257,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    controller
-        .rightTrigger()
-        .onTrue(shoot())
-        .onFalse( // TODO: Replace with stop shoot when okay
-            driveRotateAroundTurretCenter()
-                .alongWith(shooter.stopShooter())
-                .alongWith(spinner.stopSpinner())
-                .alongWith(feeder.stopFeeder())
-                .alongWith(hood.setNotShooting()));
+    controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
+
     controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }
 
@@ -311,20 +301,16 @@ public class RobotContainer {
 
   public Command shoot() {
     return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter(), turret.setPositionTargeting())
-            .until(() -> turret.onTarget() && shooter.atShooterSpeed()),
+        new ParallelCommandGroup(shooter.runShooter())
+            .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
         new ParallelCommandGroup(
-            spinner.runSpinner(),
-            feeder.runFeeder(),
-            shooter.runShooter(),
-            turret.setPositionTargeting(),
-            hood.setIsShooting()));
+            hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
   }
 
-  public Command stopShoot() { // temporarily just for autos. Copied from shoot controller command
+  public Command stopShoot() {
     return shooter
         .stopShooter()
-        .alongWith(spinner.stopSpinner())
+        .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
         .alongWith(hood.setNotShooting());
   }
