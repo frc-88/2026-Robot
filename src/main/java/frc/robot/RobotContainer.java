@@ -164,10 +164,6 @@ public class RobotContainer {
     // branch.
 
     NamedCommands.registerCommand(
-        "Start Shuttle",
-        new WaitCommand(0.5)); // TODO: Implement this if needed, and fix this command
-
-    NamedCommands.registerCommand(
         "Climb Grab Right",
         climber.gotoGrip()); // TODO: Test climber commands and change them if needed
     NamedCommands.registerCommand("Climb Grab Left", climber.gotoGrip());
