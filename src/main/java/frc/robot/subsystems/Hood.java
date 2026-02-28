@@ -82,10 +82,10 @@ public class Hood extends SubsystemBase {
     if (isShooting) {
       m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
-      m_targetPitch = 14.0;
+      m_targetPitch = 15.0;
     }
     // Lookup Table Building Override
-    // m_targetPitch = targetPos.getValue();
+    //m_targetPitch = targetPos.getValue();
 
     Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
     Logger.recordOutput("Hood/isShooting", isShooting);
@@ -125,7 +125,7 @@ public class Hood extends SubsystemBase {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
       m_calibrated =
           Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
-              > 0.2;
+              < 0.2;
     }
   }
 
