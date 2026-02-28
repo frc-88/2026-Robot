@@ -48,10 +48,6 @@ public class Shooter extends SubsystemBase {
       new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
   private final DoublePreferenceConstant increaseDelay =
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
-  private final DoublePreferenceConstant shootVoltage =
-      new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
-  private final DoublePreferenceConstant increaseFeedForward =
-      new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
 
@@ -106,7 +102,8 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
     shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     shooterConfig.Feedback.SensorToMechanismRatio = 1.0;
-    shooterConfig.Feedback.RotorToSensorRatio = 12.8;
+    shooterConfig.Feedback.RotorToSensorRatio = 12.8; // TODO - determine real value
+    // TODO Run SysId to re-characterize with CANCoder on flywheel shaft
 
     shooterMain.getConfigurator().apply(shooterConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
