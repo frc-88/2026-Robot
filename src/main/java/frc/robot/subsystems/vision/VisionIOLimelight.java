@@ -68,6 +68,8 @@ public class VisionIOLimelight implements VisionIO {
     // Throttle if disabled to save heat
     if (DriverStation.isDisabled()) {
       LimelightHelpers.SetThrottle(m_name,150);
+    } else {
+      LimelightHelpers.SetThrottle(m_name,0);
     }
 
     // Update connection status based on whether an update has been seen in the last 250ms
