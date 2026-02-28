@@ -124,8 +124,7 @@ public class Hood extends SubsystemBase {
     if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
       m_calibrated =
-          Math.abs(
-                  hood.getPosition().getValueAsDouble() - hoodAngleDegreesToRotationsOfMinion(13.5))
+          Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
               > 0.2;
     }
   }
