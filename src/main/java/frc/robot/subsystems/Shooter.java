@@ -37,7 +37,24 @@ public class Shooter extends SubsystemBase {
   private final TalonFX shooterFollower =
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
   private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
-  private DigitalInput feederBeamBreak = new DigitalInput(0);
+  private final DigitalInput feederBeamBreak = new DigitalInput(0);
+
+  private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
+  private final VoltageOut sysIdReq = new VoltageOut(0.0);
+
+  public DoublePreferenceConstant shootSpeed =
+      new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+  public DoublePreferenceConstant increaseDuration =
+      new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
+  public DoublePreferenceConstant increaseDelay =
+      new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
+  public DoublePreferenceConstant shootVoltage =
+      new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
+  private final DoublePreferenceConstant increaseFeedForward =
+      new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
+  private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
+      new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
+
   private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")
@@ -54,24 +71,9 @@ public class Shooter extends SubsystemBase {
   @SuppressWarnings("unused")
   private double ballsPerSecond;
 
-  // Shooter
   private double targetVelocity = 0;
-  private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
-  public DoublePreferenceConstant shootSpeed =
-      new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
-  public DoublePreferenceConstant increaseDuration =
-      new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
-  public DoublePreferenceConstant increaseDelay =
-      new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
-  public DoublePreferenceConstant shootVoltage =
-      new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
-  private final DoublePreferenceConstant increaseFeedForward =
-      new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
-  private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
-      new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
 
   // SysId
-  private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(
@@ -120,6 +122,7 @@ public class Shooter extends SubsystemBase {
     // boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset();
     // timeSinceBoostStarted.start();}));
     shooterMain.getVelocity().setUpdateFrequency(100);
+    shooterMain.getMotorVoltage().setUpdateFrequency(1000);
   }
 
   private void configureCANCoder() {
@@ -129,8 +132,6 @@ public class Shooter extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    // SmartDashboard.putData("Shooter/RunShooter", runShooter());
-    // SmartDashboard.putData("Shooter/StopShooter", stopShooter());
     SmartDashboard.putData(
         "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
     SmartDashboard.putData(
@@ -216,7 +217,7 @@ public class Shooter extends SubsystemBase {
   // // (timeSinceBallLastSeen.get() < (increaseDuration.getValue() + increaseDelay.getValue()))
 
   private void setVoltage(Voltage volts) {
-    shooterMain.setControl(m_voltReq.withOutput(volts));
+    shooterMain.setControl(sysIdReq.withOutput(volts));
   }
 
   private void setShooterSpeed() {
@@ -252,18 +253,8 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runShooter() {
-    return new RunCommand(
-        () -> setShooterSpeed(),
-        // () -> increaseFeedForward.getValue(),
-        // () -> increaseDelay.getValue(),
-        // () -> increaseDuration.getValue()),
-        this);
+    return new RunCommand(() -> setShooterSpeed(), this);
   }
-  //   () -> setShooterSpeed(() -> shootSpeed.getValue()),
-
-  // public Command runShooterVoltage() {
-  //   return new RunCommand(() -> setVoltage(shootVoltage.getValue()));
-  // }
 
   public Command stopShooter() {
     return new RunCommand(() -> shooterMain.stopMotor(), this);
@@ -277,7 +268,7 @@ public class Shooter extends SubsystemBase {
     return m_sysIdRoutine.dynamic(direction);
   }
 
-  public InstantCommand setVelocity(double velocity) {
-    return new InstantCommand(() -> targetVelocity = velocity, this);
+  public Command setVelocity(double velocity) {
+    return new InstantCommand(() -> targetVelocity = velocity);
   }
 }
