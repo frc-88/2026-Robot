@@ -39,29 +39,29 @@ public class Shooter extends SubsystemBase {
   private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
   private final DigitalInput feederBeamBreak = new DigitalInput(0);
 
-  private VelocityVoltage requestShooter = new VelocityVoltage(0.0);
+  private final VelocityVoltage requestShooter = new VelocityVoltage(0.0);
   private final VoltageOut sysIdReq = new VoltageOut(0.0);
 
-  public DoublePreferenceConstant shootSpeed =
+  private final DoublePreferenceConstant shootSpeed =
       new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
-  public DoublePreferenceConstant increaseDuration =
+  private final DoublePreferenceConstant increaseDuration =
       new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
-  public DoublePreferenceConstant increaseDelay =
+  private final DoublePreferenceConstant increaseDelay =
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
-  public DoublePreferenceConstant shootVoltage =
+  private final DoublePreferenceConstant shootVoltage =
       new DoublePreferenceConstant("Shooter/ShootVoltage", 0.0);
   private final DoublePreferenceConstant increaseFeedForward =
       new DoublePreferenceConstant("Shooter/IncreaseFeedForward", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
 
-  private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
+  private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")
   private boolean boosted = false;
-  // private Trigger boostStarted = new Trigger(() -> boosted);
-  private Timer timeSinceBallLastSeen = new Timer();
-  // private Timer timeSinceBoostStarted = new Timer();
+  // private final Trigger boostStarted = new Trigger(() -> boosted);
+  private final Timer timeSinceBallLastSeen = new Timer();
+  // private final Timer timeSinceBoostStarted = new Timer();
 
   // BPS
   private int ballsCount;
@@ -140,35 +140,6 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
-  public void periodic() {
-    targetVelocity = m_targetSpeed.getAsDouble();
-
-    // Lookup Table Building Override
-    // targetVelocity = shootSpeed.getValue();
-
-    if (Util.logif()) {
-      SmartDashboard.putNumber(
-          "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
-      SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
-      SmartDashboard.putNumber(
-          "Shooter/BallsPerSecond",
-          (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
-      // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
-      SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
-      SmartDashboard.putBoolean("Shooter/Boosted", boosted);
-    }
-  }
-
   private void setShooterSpeed(DoubleSupplier speed) {
     shooterMain.setControl(
         requestShooter
@@ -224,7 +195,7 @@ public class Shooter extends SubsystemBase {
     setShooterSpeed(() -> targetVelocity);
   }
 
-  public boolean atShooterSpeed() {
+  private boolean atShooterSpeed() {
     return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
   }
 
@@ -242,14 +213,43 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  private boolean isBeamBlocked() {
+    return !feederBeamBreak.get();
+  }
+
+  public void periodic() {
+    targetVelocity = m_targetSpeed.getAsDouble();
+
+    // Lookup Table Building Override
+    // targetVelocity = shootSpeed.getValue();
+
+    if (Util.logif()) {
+      SmartDashboard.putNumber(
+          "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
+      SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
+      SmartDashboard.putNumber(
+          "Shooter/BallsPerSecond",
+          (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
+      // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
+      SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
+      SmartDashboard.putBoolean("Shooter/Boosted", boosted);
+    }
+  }
+
   public void resetBPS() {
     ballsCount = 0;
     earliestBallTime = 0;
     lastBallTime = 0;
-  }
-
-  private boolean isBeamBlocked() {
-    return !feederBeamBreak.get();
   }
 
   public Command runShooter() {
