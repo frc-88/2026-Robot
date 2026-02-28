@@ -24,7 +24,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.util.LimelightHelpers;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,9 +66,9 @@ public class VisionIOLimelight implements VisionIO {
   public void updateInputs(VisionIOInputs inputs) {
     // Throttle if disabled to save heat
     if (DriverStation.isDisabled()) {
-      LimelightHelpers.SetThrottle(m_name,150);
+      LimelightHelpers.SetThrottle(m_name, 150);
     } else {
-      LimelightHelpers.SetThrottle(m_name,0);
+      LimelightHelpers.SetThrottle(m_name, 0);
     }
 
     // Update connection status based on whether an update has been seen in the last 250ms
