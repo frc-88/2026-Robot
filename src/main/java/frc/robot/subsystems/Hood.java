@@ -82,7 +82,7 @@ public class Hood extends SubsystemBase {
     if (isShooting) {
       m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
-      m_targetPitch = 15.0;
+      m_targetPitch = 14.0;
     }
     // Lookup Table Building Override
     // m_targetPitch = targetPos.getValue();

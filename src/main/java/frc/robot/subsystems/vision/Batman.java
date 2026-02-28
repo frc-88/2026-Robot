@@ -100,7 +100,7 @@ public class Batman extends SubsystemBase {
         currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
       }
     }
-    Logger.recordOutput("Quest/shouldUse", shouldUse);
+    Logger.recordOutput("Quest/ShouldUse", shouldUse);
   }
 
   public void checkPose(Pose2d newPose, double linearStddev, double angularStddev) {
