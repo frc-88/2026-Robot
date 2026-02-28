@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -108,6 +107,14 @@ public class Hood extends SubsystemBase {
     return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
   }
 
+  private void calibrateFirst(double angle) {
+    if (m_calibrated) {
+      setPosition(m_targetPitch);
+    } else {
+      setCalibrate();
+    }
+  }
+
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
   }
@@ -116,7 +123,9 @@ public class Hood extends SubsystemBase {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
-      m_calibrated = true;
+      m_calibrated =
+          Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
+              > 0.2;
     }
   }
 
@@ -143,8 +152,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setPositionTargeting() {
-    return new ConditionalCommand(
-        new RunCommand(() -> setPosition(m_targetPitch), this), calibrate(), () -> m_calibrated);
+    return new RunCommand(() -> calibrateFirst(m_targetPitch), this);
   }
 
   // public Command setPositionManual() {
