@@ -83,7 +83,6 @@ public final class Constants {
   // Robot and Field constants
   public static final double FIELD_WIDTH = 8.07; // meters
   public static final double FIELD_LENGTH = 16.54; // meters
-  public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
 
   public static final Translation2d robotToTurret =
       // new Translation2d(Units.inchesToMeters(-10.431),

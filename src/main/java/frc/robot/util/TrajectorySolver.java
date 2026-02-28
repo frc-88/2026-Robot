@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -21,7 +22,11 @@ public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotPosition = Translation2d.kZero; // m
   public Rotation2d robotYaw = Rotation2d.kZero; // rad
   public Translation2d robotVelocity = Translation2d.kZero; // m/s
+  public Translation2d lastRobotVelocity = Translation2d.kZero;
+  public Timer accelerationTimer = new Timer();
+  public double lastTime = 0.0;
   public double robotRotationalVelocity = 0.0; // rad/s
+  public Translation2d robotAcceleration = Translation2d.kZero; // m/s/s
   public Translation2d targetVelocity = Translation2d.kZero;
 
   private Translation2d turretToCurrentTarget;
@@ -40,6 +45,7 @@ public class TrajectorySolver extends SubsystemBase {
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
     drivePoseSupplier = drivePose;
     velocityPoseSupplier = velocityPose;
+    accelerationTimer.start();
   }
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
@@ -63,12 +69,21 @@ public class TrajectorySolver extends SubsystemBase {
     return target;
   }
 
+  public double getSimTarget() {
+    return turretToProjectedTarget.getAngle().getDegrees();
+  }
+
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
     robotVelocity = velocityPoseSupplier.get().getTranslation();
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
+    robotAcceleration = getAcceleration();
+    lastRobotVelocity = robotVelocity;
+    lastTime = accelerationTimer.get();
+
+    robotVelocity = robotVelocity.plus(robotAcceleration.times(0.02));
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
@@ -158,6 +173,15 @@ public class TrajectorySolver extends SubsystemBase {
     }
 
     return Util.flipIfRed(target);
+  }
+
+  @AutoLogOutput
+  private Translation2d getAcceleration() {
+    double currentTime = accelerationTimer.get();
+    System.out.println(currentTime);
+    double dt = currentTime - lastTime;
+    System.out.println(dt);
+    return robotVelocity.minus(lastRobotVelocity).div(0.02);
   }
 
   public double lookupTime(double distance) {
