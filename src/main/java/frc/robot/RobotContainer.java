@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -55,10 +54,10 @@ public class RobotContainer {
 
   private final Drive drive;
   private final Turret turret;
-  private final Feeder feeder = new Feeder();
+  private final Feeder feeder;
   private final Shooter shooter;
   private final Intake intake = new Intake();
-  private final HotTub hotTub = new HotTub();
+  private final HotTub hotTub;
   private final TrajectorySolver trajectorySolver;
   private final Batman batman = new Batman();
   private final Hood hood;
@@ -132,9 +131,15 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
+            () -> (batman.isConnected() ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getPose, drive::getRate, trajectorySolver::getYaw);
+    turret =
+        new Turret(
+            () -> (batman.isConnected() ? batman.getPose2d() : drive.getPose()),
+            drive::getRate,
+            trajectorySolver::getTurretTarget);
+    feeder = new Feeder(turret::onTarget);
+    hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
@@ -154,6 +159,11 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    SmartDashboard.putData(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
@@ -277,11 +287,8 @@ public class RobotContainer {
   }
 
   public Command shoot() {
-    return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter())
-            .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
-        new ParallelCommandGroup(
-            hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
+    return new ParallelCommandGroup(
+        hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting());
   }
 
   public Command stopShoot() {

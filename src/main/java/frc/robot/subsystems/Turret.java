@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -88,7 +89,10 @@ public class Turret extends SubsystemBase {
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
     p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
 
-    sync();
+    m_cancoder50.setPosition(m_cancoder50.getAbsolutePosition().getValue());
+    m_cancoder66.setPosition(m_cancoder66.getAbsolutePosition().getValue());
+
+    CommandScheduler.getInstance().schedule(syncCommand());
   }
 
   private void configureMotors() {
@@ -232,7 +236,7 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private double getTargetFacing() {
-    return m_targetFacing.getAsDouble() - m_robotPose.get().getRotation().getDegrees();
+    return m_targetFacing.getAsDouble();
   }
 
   private boolean isFacingSafe(double degrees) {
@@ -271,8 +275,11 @@ public class Turret extends SubsystemBase {
     return (degrees / 360.0) * (5 * (100 / 12));
   }
 
+  @AutoLogOutput
   public boolean onTarget() {
-    return !m_targeting || Math.abs(getFacing() - m_target) < 5.0;
+    return m_targeting
+        && !m_circumnavigating
+        && Math.abs(getFacing() - m_target) < 5.0; // TODO: Lower 5.0 threshold
   }
 
   public boolean notMoving() {

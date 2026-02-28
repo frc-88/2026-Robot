@@ -33,19 +33,19 @@ public class Batman extends SubsystemBase {
   @SuppressWarnings("unused")
   private boolean shouldUse = true;
 
-  Transform3d ROBOT_TO_QUEST =
-      new Transform3d(
-          Units.inchesToMeters(-10.431),
-          Units.inchesToMeters(8.992),
-          Units.inchesToMeters(10.667),
-          new Rotation3d(0, Units.degreesToRadians(-5.5), Units.degreesToRadians(180.0)));
-
   // Transform3d ROBOT_TO_QUEST =
   //     new Transform3d(
-  //         Units.inchesToMeters(0.0),
-  //         Units.inchesToMeters(0.0),
-  //         Units.inchesToMeters(0.0),
-  //         new Rotation3d(0, 0, -180.0));
+  //         Units.inchesToMeters(-8.084),
+  //         Units.inchesToMeters(8.992),
+  //         Units.inchesToMeters(10.462),
+  //         new Rotation3d(0.0, Units.degreesToRadians(15.0), Units.degreesToRadians(180.0)));
+
+  Transform3d ROBOT_TO_QUEST =
+      new Transform3d(
+          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(0.0),
+          new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
 
   private QuestNav quest = new QuestNav();
 
@@ -54,11 +54,11 @@ public class Batman extends SubsystemBase {
     hasGlobalized = true;
   }
 
-  @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose3d getPose() {
     return currentPose;
   }
 
+  @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose2d getPose2d() {
     return currentPose.toPose2d();
   }

@@ -52,9 +52,15 @@ public class TrajectorySolver extends SubsystemBase {
     return shootSpeed;
   }
 
-  @AutoLogOutput(key = "Trajectory/Yaw")
-  public double getYaw() {
-    return turretToProjectedTarget.getAngle().getDegrees() - 180.0;
+  @AutoLogOutput(key = "Trajectory/TurretTarget")
+  public double getTurretTarget() {
+    double target = turretToProjectedTarget.getAngle().getDegrees() - 180.0 - robotYaw.getDegrees();
+    if (target >= 215.0) {
+      target -= 360.0;
+    } else if (target <= -215.0) {
+      target += 360.0;
+    }
+    return target;
   }
 
   @Override
@@ -97,6 +103,12 @@ public class TrajectorySolver extends SubsystemBase {
     Logger.recordOutput(
         "Trajectory/ProjectedHub",
         new Pose2d(turretToProjectedTarget.plus(turretPosition), Rotation2d.kZero));
+
+    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
+      Logger.recordOutput("Trajectory/IsExtrapolating", true);
+    } else {
+      Logger.recordOutput("Trajectory/IsExtrapolating", false);
+    }
   }
 
   public void newton() {
@@ -126,12 +138,6 @@ public class TrajectorySolver extends SubsystemBase {
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
-
-    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
-      Logger.recordOutput("Trajectory/IsExtrapolating", true);
-    } else {
-      Logger.recordOutput("Trajectory/IsExtrapolating", false);
-    }
   }
 
   public Translation2d findTargetPosition() {
