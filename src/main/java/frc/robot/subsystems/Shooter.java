@@ -4,11 +4,14 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
@@ -21,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
@@ -32,6 +36,7 @@ public class Shooter extends SubsystemBase {
       new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
   private final TalonFX shooterFollower =
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
+  private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
   private DigitalInput feederBeamBreak = new DigitalInput(0);
   private Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
@@ -81,6 +86,7 @@ public class Shooter extends SubsystemBase {
   public Shooter(DoubleSupplier speed) {
     m_targetSpeed = speed;
     configureTalons();
+    configureCANCoder();
     configureSmartDashboardButtons();
   }
 
@@ -94,6 +100,12 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
+    shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    shooterConfig.Feedback.SensorToMechanismRatio = 1.0;
+    shooterConfig.Feedback.RotorToSensorRatio = 12.8;
+
     shooterMain.getConfigurator().apply(shooterConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
@@ -110,22 +122,28 @@ public class Shooter extends SubsystemBase {
     shooterMain.getVelocity().setUpdateFrequency(100);
   }
 
+  private void configureCANCoder() {
+    CANcoderConfiguration config = new CANcoderConfiguration();
+
+    shooterCANcoder.getConfigurator().apply(config);
+  }
+
   private void configureSmartDashboardButtons() {
     // SmartDashboard.putData("Shooter/RunShooter", runShooter());
     // SmartDashboard.putData("Shooter/StopShooter", stopShooter());
-    // SmartDashboard.putData(
-    //     "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-    // SmartDashboard.putData(
-    //     "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    // SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    // SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   public void periodic() {
     targetVelocity = m_targetSpeed.getAsDouble();
 
     // Lookup Table Building Override
-    //targetVelocity = shootSpeed.getValue();
+    // targetVelocity = shootSpeed.getValue();
 
     if (Util.logif()) {
       SmartDashboard.putNumber(

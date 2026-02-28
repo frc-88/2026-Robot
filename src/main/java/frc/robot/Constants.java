@@ -50,6 +50,7 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
+  public static final int SHOOTER_CANCODER = 7;
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Climber
