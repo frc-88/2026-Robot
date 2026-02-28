@@ -193,7 +193,7 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
+    hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
