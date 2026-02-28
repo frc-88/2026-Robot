@@ -13,29 +13,27 @@ import frc.robot.Constants;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-public class Spinner extends SubsystemBase {
+public class HotTub extends SubsystemBase {
   private final TalonFX spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
-  private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
-  // private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
-  private DoublePreferenceConstant spinnerSpeed =
+  private final VelocityDutyCycle request = new VelocityDutyCycle(0.0);
+
+  private final DoublePreferenceConstant spinnerSpeed =
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 0.0);
-
-  private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
+  private final MotionMagicPIDPreferenceConstants spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors");
 
-  public Spinner() {
-    configureTalons();
-  }
+  private BooleanSupplier m_turretOnTarget;
 
-  public void periodic() {
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
-    }
+  public HotTub(BooleanSupplier turretOnTarget) {
+    m_turretOnTarget = turretOnTarget;
+
+    configureTalons();
+    SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
+    SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
   }
 
   private void configureTalons() {
@@ -57,8 +55,19 @@ public class Spinner extends SubsystemBase {
     spinner.stopMotor();
   }
 
+  public void periodic() {
+    if (Util.logif()) {
+      SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    }
+  }
+
   public Command runSpinner() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> spinnerSpeed.getValue()), this);
+    return new RunCommand(
+        () ->
+            setSpinnerSpeed(() -> m_turretOnTarget.getAsBoolean() ? spinnerSpeed.getValue() : 0.0),
+        this);
   }
 
   public Command stopSpinner() {

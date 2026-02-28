@@ -34,10 +34,11 @@ import java.util.function.DoubleSupplier;
 
 public class Climber extends SubsystemBase {
 
-  private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, CANBus.roboRIO());
-  private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, CANBus.roboRIO());
-  private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, CANBus.roboRIO());
-  private final Pigeon2 pigeon = new Pigeon2(0, CANBus.roboRIO());
+  private final CANBus canbus = new CANBus("Drivetrain");
+  private final TalonFX lift = new TalonFX(Constants.CLIMBER_LIFT, canbus);
+  private final TalonFX pivot = new TalonFX(Constants.CLIMBER_PIVOT, canbus);
+  private final CANrange canRange = new CANrange(Constants.CLIMBER_CANRANGE, canbus);
+  private final Pigeon2 pigeon = new Pigeon2(0, canbus);
   // PowerDistribution pdh = new PowerDistribution();
   // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 
@@ -167,7 +168,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Go Grip", gotoGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
-    SmartDashboard.putData("Climber/Go Ground", gotoStow());
+    SmartDashboard.putData("Climber/Go Stow", gotoStow());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
@@ -334,10 +335,10 @@ public class Climber extends SubsystemBase {
 
   public Command calibrate() {
     return new SequentialCommandGroup(
-            new RunCommand(() -> setCalibrate(), this)
-                .until(() -> lift.getStatorCurrent().getValueAsDouble() > 25.0),
-            new InstantCommand(() -> lift.setPosition(0.0), this))
-        .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
+        new RunCommand(() -> setCalibrate(), this)
+            .until(() -> lift.getStatorCurrent().getValueAsDouble() > 25.0),
+        new InstantCommand(() -> lift.setPosition(0.0), this));
+    //    .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
 
   public Command gotoGrip() {

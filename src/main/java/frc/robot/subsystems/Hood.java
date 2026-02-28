@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -14,21 +15,27 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Util;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
-  private TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+  private final TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
+
+  private final MotionMagicVoltage request = new MotionMagicVoltage(0.0);
+  private final DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  // private DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
-  private MotionMagicVoltage request = new MotionMagicVoltage(0.0);
-  private DutyCycleOut calibrationRequest = new DutyCycleOut(0);
-  private DoubleSupplier m_pitch;
+  private final DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+
+  private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
 
   public boolean isShooting = false;
+
+  private boolean m_calibrated = false;
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
@@ -73,14 +80,18 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = (90 - m_pitch.getAsDouble());
+      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
-      m_targetPitch = 14.0;
+      m_targetPitch = 15.0;
     }
+    // Lookup Table Building Override
+    //m_targetPitch = targetPos.getValue();
 
+    Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
+    Logger.recordOutput("Hood/isShooting", isShooting);
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
+      // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
       SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
       SmartDashboard.putNumber(
           "Hood/CurrentAngle",
@@ -96,15 +107,25 @@ public class Hood extends SubsystemBase {
     return (minionRotations * 360.0) / ((287.0 / 18.0) * (36.0 / 12.0));
   }
 
+  private void calibrateFirst(double angle) {
+    if (m_calibrated) {
+      setPosition(m_targetPitch);
+    } else {
+      setCalibrate();
+    }
+  }
+
   private void setPosition(double angle) {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
-    System.out.println(angle);
   }
 
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    if (hood.getStatorCurrent().getValueAsDouble() > 20.0) {
+    if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
+      m_calibrated =
+          Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
+              < 0.2;
     }
   }
 
@@ -126,12 +147,12 @@ public class Hood extends SubsystemBase {
 
   public Command calibrate() {
     return new RunCommand(() -> setCalibrate(), this)
-        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 60.0)
+        .until(() -> hood.getStatorCurrent().getValueAsDouble() > 10.0)
         .andThen(stopHood());
   }
 
   public Command setPositionTargeting() {
-    return new RunCommand(() -> setPosition(m_targetPitch), this);
+    return new RunCommand(() -> calibrateFirst(m_targetPitch), this);
   }
 
   // public Command setPositionManual() {
