@@ -44,7 +44,7 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
   public double getAngle() {
-    return 90.0 - hoodAngle;
+    return hoodAngle;
   }
 
   @AutoLogOutput(key = "Trajectory/ShooterSpeed")
@@ -149,11 +149,11 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.356672 + 0.0599301 * distance;
+    return 0.71344 + 0.11986 * distance;
   }
 
   public double lookupTimePrime(double distance) {
-    return 0.0599301;
+    return 0.11986;
   }
 
   public double lookupAngle(double distance) {
