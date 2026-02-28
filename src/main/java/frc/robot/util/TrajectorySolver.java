@@ -126,6 +126,12 @@ public class TrajectorySolver extends SubsystemBase {
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
+
+    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
+      Logger.recordOutput("Trajectory/IsExtrapolating", true);
+    } else {
+      Logger.recordOutput("Trajectory/IsExtrapolating", false);
+    }
   }
 
   public Translation2d findTargetPosition() {
