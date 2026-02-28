@@ -340,7 +340,8 @@ public class Drive extends SubsystemBase {
   }
 
   public Pose2d getChassisSpeedsFieldRelative() {
-    ChassisSpeeds res = ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), rawGyroRotation);
+    ChassisSpeeds res =
+        ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), getPose().getRotation());
     return
     // flipIfRed(
     new Pose2d(

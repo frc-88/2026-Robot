@@ -168,7 +168,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Go Grip", gotoGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
-    SmartDashboard.putData("Climber/Go Ground", gotoStow());
+    SmartDashboard.putData("Climber/Go Stow", gotoStow());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(

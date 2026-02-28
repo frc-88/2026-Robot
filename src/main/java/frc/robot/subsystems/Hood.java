@@ -81,12 +81,15 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = MathUtil.clamp(90.0 - m_pitch.getAsDouble(), 14.0, 34.0);
+      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
     } else {
       m_targetPitch = 14.0;
     }
+    // Lookup Table Building Override
+    // m_targetPitch = targetPos.getValue();
 
-    Logger.recordOutput("Hood/AngleSetpoint", m_targetPitch);
+    Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
+    Logger.recordOutput("Hood/isShooting", isShooting);
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());

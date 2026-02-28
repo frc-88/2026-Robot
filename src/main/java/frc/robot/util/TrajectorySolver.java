@@ -54,17 +54,13 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput(key = "Trajectory/Yaw")
   public double getYaw() {
-    return turretToProjectedTarget.getAngle().getDegrees();
+    return turretToProjectedTarget.getAngle().getDegrees() - 180.0;
   }
 
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
     robotVelocity = velocityPoseSupplier.get().getTranslation();
-    if (Constants.currentMode == Mode.REAL) {
-      robotVelocity =
-          robotVelocity.rotateBy(Rotation2d.fromDegrees(-90.0)); // why do we have to do this??
-    }
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
 
@@ -130,6 +126,12 @@ public class TrajectorySolver extends SubsystemBase {
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
+
+    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
+      Logger.recordOutput("Trajectory/IsExtrapolating", true);
+    } else {
+      Logger.recordOutput("Trajectory/IsExtrapolating", false);
+    }
   }
 
   public Translation2d findTargetPosition() {
@@ -153,20 +155,18 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.921749 - 0.0138832 * distance + 0.009373 * (Math.pow(distance, 2.0));
-    // - 0.0249606 * (Math.pow(distance, 3.0));
+    return 0.71344 + 0.11986 * distance;
   }
 
   public double lookupTimePrime(double distance) {
-    return -0.0138832 + 0.0188 * distance;
-    // - 0.0748818 * (Math.pow(distance, 2.0));
+    return 0.11986;
   }
 
   public double lookupAngle(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
-      return 84.15886 - 16.18452 * Math.log(distance);
+      return 9.18 + 3.01 * distance;
       // - 1.11 * (Math.pow(distance, 3.0));
     }
   }
@@ -174,9 +174,8 @@ public class TrajectorySolver extends SubsystemBase {
   public double lookupSpeed(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
-
     } else { // real
-      return 27.71457 + 2.96448 * (distance);
+      return 23.3 + 4.23 * (distance);
     }
     // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));

@@ -85,6 +85,8 @@ public final class Constants {
   public static final Translation2d FIELD_DIMENSIONS = new Translation2d(16.54, 8.07);
 
   public static final Translation2d robotToTurret =
+      // new Translation2d(Units.inchesToMeters(-10.431),
+      //     Units.inchesToMeters(8.992));
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
