@@ -53,6 +53,8 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
+  public static final int SHOOTER_CANCODER = 7;
+  public static final double SHOOTER_GEAR_RATIO = 24.0 / 18.0;
   public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Climber
@@ -90,6 +92,7 @@ public final class Constants {
       // new Translation2d(Units.inchesToMeters(-10.431),
       //     Units.inchesToMeters(8.992));
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
+
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
   public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(1.5, 1.0);
