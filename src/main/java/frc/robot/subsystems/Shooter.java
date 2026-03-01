@@ -72,7 +72,7 @@ public class Shooter extends SubsystemBase {
 
   private double targetVelocity = 0;
 
-  // SysId
+  // SysId routine
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(
