@@ -120,7 +120,7 @@ public class Shooter extends SubsystemBase {
     // boostStarted.onTrue(new InstantCommand(() -> {timeSinceBoostStarted.reset();
     // timeSinceBoostStarted.start();}));
     shooterMain.getVelocity().setUpdateFrequency(100);
-    shooterMain.getMotorVoltage().setUpdateFrequency(1000);
+    shooterMain.getMotorVoltage().setUpdateFrequency(500);
   }
 
   private void configureCANCoder() {
