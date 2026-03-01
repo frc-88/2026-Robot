@@ -9,6 +9,8 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -65,7 +67,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Climber climber = new Climber();
-  private final EmpiricalOffsetFinder offsetFinder = new EmpiricalOffsetFinder(batman::getPose2d);
+  private final EmpiricalOffsetFinder offsetFinder = new EmpiricalOffsetFinder(batman::shouldUse, batman::getPose2d);
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);

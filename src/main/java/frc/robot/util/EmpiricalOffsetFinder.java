@@ -2,6 +2,7 @@ package frc.robot.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -18,12 +19,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class EmpiricalOffsetFinder extends SubsystemBase{
     
     private Supplier<Pose2d> pose;
+    private BooleanSupplier usable;
     private Rotation2d firstRotation;
 
     private List<Translation2d> poses = new ArrayList<Translation2d>();
 
-    public EmpiricalOffsetFinder(Supplier<Pose2d> poseSupplier) {
+    public EmpiricalOffsetFinder(BooleanSupplier shouldUse, Supplier<Pose2d> poseSupplier) {
         pose = poseSupplier;
+        usable = shouldUse;
         SmartDashboard.putData("OffsetFinder/Fit", fitThePoints());
     }
 
@@ -32,8 +35,9 @@ public class EmpiricalOffsetFinder extends SubsystemBase{
             firstRotation = pose.get().getRotation();
             Logger.recordOutput("OffsetFinder/FirstRotation", firstRotation);
         }
-        poses.add(pose.get().getTranslation());
-
+        if (usable.getAsBoolean()) {
+            poses.add(pose.get().getTranslation());
+        }
     }
 
     public record CircleFitResult(
