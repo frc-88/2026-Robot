@@ -11,21 +11,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class EmpiricalOffsetFinder extends SubsystemBase {
 
   private Supplier<Pose2d> pose;
+  private Supplier<Pose2d> otherPose;
   private BooleanSupplier usable;
   private Rotation2d firstRotation;
 
   private List<Translation2d> poses = new ArrayList<Translation2d>();
 
-  public EmpiricalOffsetFinder(BooleanSupplier shouldUse, Supplier<Pose2d> poseSupplier) {
+  public EmpiricalOffsetFinder(
+      BooleanSupplier shouldUse,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> otherPoseSupplier) {
+    otherPose = otherPoseSupplier;
     pose = poseSupplier;
     usable = shouldUse;
-    SmartDashboard.putData("OffsetFinder/Fit", fitThePoints());
+    SmartDashboard.putData("OffsetFinder/Fit", fitThePoints().ignoringDisable(true));
   }
 
   public void periodic() {
@@ -36,12 +40,14 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
     if (usable.getAsBoolean()) {
       poses.add(pose.get().getTranslation());
     }
+    Logger.recordOutput("OffsetFinder/RecentPose", poses.get(poses.size() - 1));
+    Logger.recordOutput("OffsetFinder/Difference", pose.get().relativeTo(otherPose.get()));
   }
 
   public record CircleFitResult(Translation2d center, double radius) {}
 
-  @AutoLogOutput
   private CircleFitResult fit(List<Translation2d> points) {
+    Logger.recordOutput("OffsetFinder/isThisRunning", true);
     int n = points.size();
     if (n < 3) {
       System.out.println("STOPDude");
@@ -79,7 +85,8 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
 
     double denominator = 2 * (C * G - D * D);
     if (Math.abs(denominator) < 1e-12) {
-      throw new RuntimeException("Points are collinear or poorly conditioned");
+      System.out.println("Points are collinear or poorly conditioned");
+      return new CircleFitResult(new Translation2d(0.0, 0.0), 0.0);
     }
 
     double a = (G * E - D * H) / denominator;
@@ -93,6 +100,10 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
       radius += p.getDistance(new Translation2d(cx, cy));
     }
     radius /= n;
+
+    Logger.recordOutput("OffsetFinder/x", cx);
+    Logger.recordOutput("OffsetFinder/y", cy);
+    Logger.recordOutput("OffsetFinder/radius", radius);
 
     return new CircleFitResult(new Translation2d(cx, cy), radius);
   }

@@ -65,8 +65,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Climber climber = new Climber();
-  private final EmpiricalOffsetFinder offsetFinder =
-      new EmpiricalOffsetFinder(batman::shouldUse, batman::getPose2d);
+  private final EmpiricalOffsetFinder offsetFinder;
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
@@ -145,6 +144,7 @@ public class RobotContainer {
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
+    offsetFinder = new EmpiricalOffsetFinder(batman::isTracking, batman::getPose2d, drive::getPose);
 
     NamedCommands.registerCommand("Start Intake", intake.deployIntake());
     NamedCommands.registerCommand("Stop Intake", intake.retractIntake());

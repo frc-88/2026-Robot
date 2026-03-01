@@ -2,8 +2,10 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -33,22 +35,24 @@ public class Batman extends SubsystemBase {
   @SuppressWarnings("unused")
   private boolean shouldUse = true;
 
-  Transform3d ROBOT_TO_QUEST =
-      new Transform3d(
-          Units.inchesToMeters(-8.084),
-          Units.inchesToMeters(8.992),
-          Units.inchesToMeters(10.462),
-          new Rotation3d(
-              Units.degreesToRadians(0.0),
-              Units.degreesToRadians(15.0),
-              Units.degreesToRadians(180.0)));
-
   // Transform3d ROBOT_TO_QUEST =
   //     new Transform3d(
-  //         Units.inchesToMeters(0.0),
-  //         Units.inchesToMeters(0.0),
-  //         Units.inchesToMeters(0.0),
-  //         new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
+  //         Units.inchesToMeters(-8.084),
+  //         Units.inchesToMeters(8.992),
+  //         Units.inchesToMeters(10.462),
+  //         new Rotation3d(
+  //             Units.degreesToRadians(0.0),
+  //             Units.degreesToRadians(15.0),
+  //             Units.degreesToRadians(180.0)));
+
+  private Translation2d offset =
+      new Translation2d(0.32154686648741515, Rotation2d.fromDegrees(90.0 + 36.22));
+  Transform3d ROBOT_TO_QUEST =
+      new Transform3d(
+          offset.getX(),
+          offset.getY(),
+          Units.inchesToMeters(10.462),
+          new Rotation3d(0.0, Units.degreesToRadians(15.0), Units.degreesToRadians(180.0)));
 
   private QuestNav quest = new QuestNav();
 
@@ -58,12 +62,12 @@ public class Batman extends SubsystemBase {
   }
 
   public Pose3d getPose() {
-    return currentPose;
+    return currentPose.transformBy(ROBOT_TO_QUEST.inverse());
   }
 
   @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose2d getPose2d() {
-    return currentPose.toPose2d();
+    return currentPose.transformBy(ROBOT_TO_QUEST.inverse()).toPose2d();
   }
 
   public boolean isTracking() {
@@ -79,6 +83,11 @@ public class Batman extends SubsystemBase {
   }
 
   public void resetPose(Pose3d pose) {
+    pose =
+        new Pose3d(
+            new Pose2d(
+                new Translation2d(Units.inchesToMeters(16.25), Units.inchesToMeters(17.25)),
+                Rotation2d.kZero));
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
   }
@@ -97,7 +106,7 @@ public class Batman extends SubsystemBase {
       PoseFrame[] poses = quest.getAllUnreadPoseFrames();
       if (poses.length > 0) {
         currentPose = poses[poses.length - 1].questPose3d();
-        currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
+        currentPose = currentPose;
       }
     }
     Logger.recordOutput("Quest/ShouldUse", shouldUse);
