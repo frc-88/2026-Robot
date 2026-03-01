@@ -178,9 +178,9 @@ public class TrajectorySolver extends SubsystemBase {
   @AutoLogOutput
   private Translation2d getAcceleration() {
     double currentTime = accelerationTimer.get();
-    System.out.println(currentTime);
+    // System.out.println(currentTime);
     double dt = currentTime - lastTime;
-    System.out.println(dt);
+    // System.out.println(dt);
     return robotVelocity.minus(lastRobotVelocity).div(0.02);
   }
 
