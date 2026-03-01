@@ -15,27 +15,20 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 
-public class Spinner extends SubsystemBase {
+public class HotTub extends SubsystemBase {
   private final TalonFX spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
-  private VelocityDutyCycle request = new VelocityDutyCycle(0.0);
-  // private DutyCycleOut requestcycle = new DutyCycleOut(0.0);
 
-  private DoublePreferenceConstant spinnerSpeed =
+  private final VelocityDutyCycle request = new VelocityDutyCycle(0.0);
+
+  private final DoublePreferenceConstant spinnerSpeed =
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 0.0);
-
-  private MotionMagicPIDPreferenceConstants spinnerConfigConstants =
+  private final MotionMagicPIDPreferenceConstants spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors");
 
-  public Spinner() {
+  public HotTub() {
     configureTalons();
-  }
-
-  public void periodic() {
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
-    }
+    SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
+    SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
   }
 
   private void configureTalons() {
@@ -55,6 +48,14 @@ public class Spinner extends SubsystemBase {
 
   private void stopSpinnerMotors() {
     spinner.stopMotor();
+  }
+
+  public void periodic() {
+    if (Util.logif()) {
+      SmartDashboard.putNumber("Spinner/SpinnerVelocity", spinner.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Spinner/SpinnerCurrent", spinner.getTorqueCurrent().getValueAsDouble());
+    }
   }
 
   public Command runSpinner() {

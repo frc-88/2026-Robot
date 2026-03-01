@@ -145,7 +145,7 @@ public class Intake extends SubsystemBase {
 
   public Command forceRetract() {
     return new RunCommand(() -> hardRetract(), this)
-        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 20.0)
+        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 30.0)
         .andThen(stopIntake());
   }
 
