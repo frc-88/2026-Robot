@@ -30,6 +30,7 @@ import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Shooter extends SubsystemBase {
   private final TalonFX shooterMain =
@@ -210,8 +211,34 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  @AutoLogOutput
   private boolean isBeamBlocked() {
     return !feederBeamBreak.get();
+  }
+
+  @AutoLogOutput
+  private double getVelocity() {
+    return shooterMain.getVelocity().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getPosition() {
+    return shooterMain.getPosition().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getVoltage() {
+    return shooterMain.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getCANcoderVelocity() {
+    return shooterCANcoder.getVelocity().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getCANcoderPosition() {
+    return shooterCANcoder.getPosition().getValueAsDouble();
   }
 
   public void periodic() {
@@ -221,24 +248,11 @@ public class Shooter extends SubsystemBase {
     // targetVelocity = shootSpeed.getValue();
 
     if (Util.logif()) {
-      SmartDashboard.putNumber(
-          "Shooter/ShooterVelocity", shooterMain.getVelocity().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterVoltage", shooterMain.getMotorVoltage().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterMTCurrent", shooterMain.getTorqueCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterMSCurrent", shooterMain.getSupplyCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterFTCurrent", shooterFollower.getTorqueCurrent().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Shooter/ShooterFSCurrent", shooterFollower.getSupplyCurrent().getValueAsDouble());
       SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());
       SmartDashboard.putNumber(
           "Shooter/BallsPerSecond",
           (Math.round((100.0 * ballsPerSecond)) / 100.0)); // round to hundredths
       // SmartDashboard.putNumber("Shooter/TimeSinceBoostStarted", timeSinceBoostStarted.get());
-      SmartDashboard.putBoolean("Shooter/IsBeamBlocked", isBeamBlocked());
       SmartDashboard.putBoolean("Shooter/Boosted", boosted);
     }
   }
