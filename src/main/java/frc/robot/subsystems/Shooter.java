@@ -15,7 +15,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -53,8 +52,8 @@ public class Shooter extends SubsystemBase {
   private final DoublePreferenceConstant increaseDelay =
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
-      new MotionMagicPIDPreferenceConstants("Shooter/ShooterMotors");
-
+      new MotionMagicPIDPreferenceConstants(
+          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
   private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")
@@ -99,6 +98,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
     shooterConfig.Slot0.kD = shooterConfigConstants.getKD().getValue();
     shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
+    shooterConfig.Slot0.kA = shooterConfigConstants.getKA().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
