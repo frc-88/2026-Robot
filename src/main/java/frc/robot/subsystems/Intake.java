@@ -176,7 +176,7 @@ public class Intake extends SubsystemBase {
     return new RunCommand(() -> intakeOut(), this);
   }
 
-    public Command deployJustIntake() {
+  public Command deployJustIntake() {
     // TODO: determine proper deploy angle, put it here
     return new RunCommand(() -> justIntakeOut(), this);
   }
