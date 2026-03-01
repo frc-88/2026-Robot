@@ -84,13 +84,13 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Aim", aim());
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
+    SmartDashboard.putData("Turret/CalibrateEncoderZero", calibrateZero().ignoringDisable(true));
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
     p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
 
     m_cancoder50.setPosition(m_cancoder50.getAbsolutePosition().getValue());
-    m_cancoder66.setPosition(m_cancoder66.getAbsolutePosition().getValue());
 
     CommandScheduler.getInstance().schedule(syncCommand());
   }
@@ -137,23 +137,21 @@ public class Turret extends SubsystemBase {
     // position could cause the turret to move to unsafe positions.
     p_cancoder50offset.setValue(
         -m_cancoder50.getAbsolutePosition().getValueAsDouble() + p_cancoder50offset.getValue());
-    p_cancoder66offset.setValue(
-        -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    // p_cancoder66offset.setValue(
+    // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
     configureCANCoders();
   }
 
   @AutoLogOutput
   private double getCANCoderFacing() {
-    return (m_cancoder66.getPosition().getValueAsDouble()
-            - m_cancoder50.getPosition().getValueAsDouble())
-        * p_proportion.getValue();
+    return (m_cancoder50.getAbsolutePosition().getValueAsDouble() * 1325.0); // TODO: WHY
   }
 
   @AutoLogOutput
   private boolean encodersHealthy() {
-    return m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
-        && m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid
-        && m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+    return // m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+    // && m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid
+    m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
         && m_cancoder50.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 
@@ -315,9 +313,12 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     if (Util.logif()) {
       SmartDashboard.putNumber(
-          "Turret/Cancoder66Position", m_cancoder66.getPosition().getValueAsDouble());
+          "Turret/Cancoder66Position", m_cancoder66.getAbsolutePosition().getValueAsDouble());
       SmartDashboard.putNumber(
-          "Turret/Cancoder50Position", m_cancoder50.getPosition().getValueAsDouble());
+          "Turret/Constant", getFacing() / m_cancoder50.getAbsolutePosition().getValueAsDouble());
+
+      SmartDashboard.putNumber(
+          "Turret/Cancoder50Position", m_cancoder50.getAbsolutePosition().getValueAsDouble());
     }
   }
 }
