@@ -39,7 +39,8 @@ public final class Constants {
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
 
   // Intake
-  public static final int INTAKE_PIVOT = 0;
+  public static final int INTAKE_PIVOT = 2;
+  public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
 
   // Spinner
   public static final int SPINNER_MAIN = 17;

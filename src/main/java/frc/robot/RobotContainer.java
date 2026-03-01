@@ -143,8 +143,8 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Start Intake", intake.forceDeploy());
-    NamedCommands.registerCommand("Stop Intake", intake.forceRetract());
+    NamedCommands.registerCommand("Start Intake", intake.deployIntake());
+    NamedCommands.registerCommand("Stop Intake", intake.retractIntake());
     NamedCommands.registerCommand("Start Shooter", shoot());
     NamedCommands.registerCommand("Stop Shooter", stopShoot());
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
@@ -255,8 +255,8 @@ public class RobotContainer {
     // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
     buttons.button(5).onTrue(climber.gotoStow());
-    buttons.button(6).onTrue(intake.forceDeploy());
-    buttons.button(7).onTrue(intake.forceRetract());
+    buttons.button(6).onTrue(intake.deployIntake());
+    buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
