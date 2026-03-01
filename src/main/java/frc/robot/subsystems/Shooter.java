@@ -103,7 +103,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
     shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     shooterConfig.Feedback.SensorToMechanismRatio = 1.0;
-    shooterConfig.Feedback.RotorToSensorRatio = 12.8; // TODO - determine real value
+    shooterConfig.Feedback.RotorToSensorRatio = Constants.SHOOTER_GEAR_RATIO;
     // TODO Run SysId to re-characterize with CANCoder on flywheel shaft
 
     shooterMain.getConfigurator().apply(shooterConfig);
