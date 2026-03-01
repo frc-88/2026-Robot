@@ -200,7 +200,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
+    intake.setDefaultCommand(intake.retractIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
@@ -245,9 +245,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
-    controller.leftBumper().onTrue(intake.deployIntake()).onFalse(intake.retractIntake());
+    controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
-    controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
+    controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
   }
 
   public void configureButtonBox() {

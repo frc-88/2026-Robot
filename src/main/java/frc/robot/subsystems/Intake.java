@@ -74,6 +74,7 @@ public class Intake extends SubsystemBase {
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("Intake/Calibrate", calibrateIntake());
+    SmartDashboard.putData("Intake/JustPivot", deployJustIntake());
     SmartDashboard.putData("Intake/SetPosition", pivotGoToPosition());
     SmartDashboard.putData("Intake/SetRotations", pivotGoToRotations());
     SmartDashboard.putData("Intake/Retract", retractIntake());
@@ -134,6 +135,11 @@ public class Intake extends SubsystemBase {
     stopSpinner();
   }
 
+  private void justIntakeOut() {
+    goToRotations(23.0); // TODO
+    stopSpinner();
+  }
+
   public Command zeroIntake() {
     return new InstantCommand(() -> intakePivot.setPosition(0.0));
   }
@@ -168,5 +174,10 @@ public class Intake extends SubsystemBase {
   public Command deployIntake() {
     // TODO: determine proper deploy angle, put it here
     return new RunCommand(() -> intakeOut(), this);
+  }
+
+    public Command deployJustIntake() {
+    // TODO: determine proper deploy angle, put it here
+    return new RunCommand(() -> justIntakeOut(), this);
   }
 }
