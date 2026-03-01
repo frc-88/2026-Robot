@@ -93,11 +93,11 @@ public class Intake extends SubsystemBase {
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
-    return (pivotAngle / 360.0) * (48.0/16.0);
+    return (pivotAngle / 360.0) * Constants.INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS;
   }
 
   private double intakePivotRotationsToAngle(double minionRotations) { // inverse of ^^
-    return (minionRotations * 360) / (48.0/16.0);
+    return (minionRotations * 360) / Constants.INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS;
   }
 
   private void goToRotations(double minionRotations) {

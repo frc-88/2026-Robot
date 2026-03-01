@@ -41,6 +41,7 @@ public final class Constants {
   // Intake
   public static final int INTAKE_PIVOT = 2;
   public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
+  public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS = (28.0/12.0) * (3.0) * (4.0) * (48.0/16.0);
 
   // Spinner
   public static final int SPINNER_MAIN = 17;
