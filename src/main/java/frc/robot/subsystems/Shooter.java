@@ -198,7 +198,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private boolean atShooterSpeed() {
-    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
+    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - (targetVelocity * Constants.SHOOTER_GEAR_RATIO)) < 10.0;
   }
 
   // This should eventually be moved to utils in base or something
