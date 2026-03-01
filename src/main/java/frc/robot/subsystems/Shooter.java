@@ -190,7 +190,7 @@ public class Shooter extends SubsystemBase {
   }
 
   private void setShooterSpeed() {
-    setShooterSpeed(() -> targetVelocity);
+    setShooterSpeed(() -> targetVelocity * Constants.SHOOTER_GEAR_RATIO);
   }
 
   private boolean atShooterSpeed() {
