@@ -245,6 +245,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
+    controller.leftBumper().onTrue(intake.deployIntake()).onFalse(intake.retractIntake());
 
     controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
   }

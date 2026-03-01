@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
     // rollerConfig.Slot0.kD = intakeRollerConfigConstants.getKD().getValue();
     // rollerConfig.Slot0.kV = intakeRollerConfigConstants.getKV().getValue();
     // rollerConfig.Slot0.kS = intakeRollerConfigConstants.getKS().getValue();
-    rollerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO
+    rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     intakeRoller.getConfigurator().apply(rollerConfig);
   }
 
@@ -125,12 +125,12 @@ public class Intake extends SubsystemBase {
   }
 
   private void intakeOut() {
-    goToRotations(0.0); // TODO
+    goToRotations(23.0); // TODO
     setSpinnerSpeed(() -> speed.getValue());
   }
 
   private void intakeIn() {
-    goToRotations(0.0);
+    goToRotations(0.6);
     stopSpinner();
   }
 
