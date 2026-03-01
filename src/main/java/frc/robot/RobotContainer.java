@@ -40,6 +40,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.EmpiricalOffsetFinder;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -64,6 +65,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Climber climber = new Climber();
+  private final EmpiricalOffsetFinder offsetFinder = new EmpiricalOffsetFinder(batman::getPose2d);
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
