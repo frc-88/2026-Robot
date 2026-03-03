@@ -1,7 +1,6 @@
 package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,7 +17,8 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
   private Supplier<Pose2d> pose;
   private Supplier<Pose2d> otherPose;
   private BooleanSupplier usable;
-  private Rotation2d firstRotation;
+  private Pose2d firstPose;
+  private boolean shouldAdd = false;
 
   private List<Translation2d> poses = new ArrayList<Translation2d>();
 
@@ -30,17 +30,19 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
     pose = poseSupplier;
     usable = shouldUse;
     SmartDashboard.putData("OffsetFinder/Fit", fitThePoints().ignoringDisable(true));
+    SmartDashboard.putData("OffsetFinder/Start", start().ignoringDisable(true));
+    SmartDashboard.putData("OffsetFinder/Stop", stop().ignoringDisable(true));
   }
 
   public void periodic() {
     if (poses.size() == 0) {
-      firstRotation = pose.get().getRotation();
-      Logger.recordOutput("OffsetFinder/FirstRotation", firstRotation);
+      firstPose = pose.get();
+      Logger.recordOutput("OffsetFinder/FirstRotation", firstPose);
     }
     if (usable.getAsBoolean()) {
-      poses.add(pose.get().getTranslation());
+      if (shouldAdd) poses.add(pose.get().getTranslation());
+      Logger.recordOutput("OffsetFinder/RecentPose", pose.get());
     }
-    Logger.recordOutput("OffsetFinder/RecentPose", poses.get(poses.size() - 1));
     Logger.recordOutput("OffsetFinder/Difference", pose.get().relativeTo(otherPose.get()));
   }
 
@@ -105,10 +107,23 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
     Logger.recordOutput("OffsetFinder/y", cy);
     Logger.recordOutput("OffsetFinder/radius", radius);
 
+    Translation2d center = new Translation2d(cx, cy);
+
+    Logger.recordOutput(
+        "OffsetFinder/Rotation", firstPose.getTranslation().minus(center).getAngle().getDegrees());
+
     return new CircleFitResult(new Translation2d(cx, cy), radius);
   }
 
   public Command fitThePoints() {
     return new InstantCommand(() -> fit(poses));
+  }
+
+  public Command start() {
+    return new InstantCommand(() -> shouldAdd = true);
+  }
+
+  public Command stop() {
+    return new InstantCommand(() -> shouldAdd = false);
   }
 }
