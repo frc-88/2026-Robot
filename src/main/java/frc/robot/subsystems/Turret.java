@@ -208,8 +208,13 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getFacing() {
+  public double getFacing() {
     return turretEncoderPositionToFacing(getPosition());
+  }
+
+  @AutoLogOutput(key = "Turret/Velocity")
+  public double getFacingOmega() {
+    return turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble());
   }
 
   @AutoLogOutput

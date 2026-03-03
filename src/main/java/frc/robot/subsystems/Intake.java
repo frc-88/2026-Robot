@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -25,6 +26,8 @@ public class Intake extends SubsystemBase {
   private DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
 
   private DutyCycleOut rollerRequest = new DutyCycleOut(0);
+  private boolean isDoingTheThing = false;
+  private double lastTimestamp = 0.0;
 
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants("Intake/IntakePivotMotor");
@@ -135,6 +138,24 @@ public class Intake extends SubsystemBase {
     stopSpinner();
   }
 
+  private void theThing() {
+    double toUse = 0.0;
+    if (isDoingTheThing) {
+      toUse = lastTimestamp;
+    } else {
+      isDoingTheThing = true;
+      lastTimestamp = Timer.getFPGATimestamp();
+      toUse = lastTimestamp;
+    }
+
+    double setpoint =
+        (((21.0 + 0.6) / 2.0) / 2.0)
+                * Math.sin(Math.PI * 2.0 * (Timer.getFPGATimestamp() - toUse - (Math.PI / 2.0)))
+            + ((21.0 + 0.6) / 2.0);
+    goToRotations(setpoint);
+    setSpinnerSpeed(() -> speed.getValue());
+  }
+
   private void justIntakeOut() {
     goToRotations(23.0); // TODO
     stopSpinner();
@@ -179,5 +200,9 @@ public class Intake extends SubsystemBase {
   public Command deployJustIntake() {
     // TODO: determine proper deploy angle, put it here
     return new RunCommand(() -> justIntakeOut(), this);
+  }
+
+  public Command doTheThing() {
+    return new RunCommand(() -> theThing(), this).finallyDo(() -> isDoingTheThing = false);
   }
 }

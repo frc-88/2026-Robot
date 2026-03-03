@@ -28,6 +28,7 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Retractomatic;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Simulation;
 import frc.robot.subsystems.Turret;
@@ -65,6 +66,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Climber climber = new Climber();
+  private final Retractomatic retractomatic;
   private final EmpiricalOffsetFinder offsetFinder;
 
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -144,6 +146,7 @@ public class RobotContainer {
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
+    retractomatic = new Retractomatic(turret::getFacing, turret::getFacingOmega);
     offsetFinder = new EmpiricalOffsetFinder(batman::isTracking, batman::getPose2d, drive::getPose);
 
     NamedCommands.registerCommand("Start Intake", intake.deployIntake());
@@ -210,6 +213,7 @@ public class RobotContainer {
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
+    retractomatic.setDefaultCommand(retractomatic.setDefualtCommand());
   }
 
   public void disabledInit() {
@@ -251,6 +255,7 @@ public class RobotContainer {
     controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
     controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
+    controller.rightBumper().onTrue(intake.doTheThing());
   }
 
   public void configureButtonBox() {

@@ -74,7 +74,7 @@ public final class Constants {
   public static final double TURRET_COUNTS_PER_REV = 1;
 
   // Retractomatic
-  public static final int RETRACTOMATIC = 6;
+  public static final int RETRACTOMATIC = 25;
 
   // Drive
   public static final int BASE_PIGEON = 0;
