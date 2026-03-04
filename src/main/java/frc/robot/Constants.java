@@ -67,14 +67,12 @@ public final class Constants {
 
   // Turret
   public static final int TURRET_MOTOR_ID = 6;
-  public static final int TURRET_CANCODER_ID1 = 15;
+  public static final int TURRET_RETRACTOMATIC_ID = 25;
+  public static final int TURRET_CANCODER_ID1 = 15; // TODO Remove
   public static final int TURRET_CANCODER_ID2 = 12;
   public static final int TURRET_CANCODER_GEAR_RATIO = 1;
   public static final int TURRET_GEAR_RATIO = 1;
   public static final double TURRET_COUNTS_PER_REV = 1;
-
-  // Retractomatic
-  public static final int RETRACTOMATIC = 25;
 
   // Drive
   public static final int BASE_PIGEON = 0;
