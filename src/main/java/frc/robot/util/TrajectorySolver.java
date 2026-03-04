@@ -83,6 +83,10 @@ public class TrajectorySolver extends SubsystemBase {
     lastRobotVelocity = robotVelocity;
     lastTime = accelerationTimer.get();
 
+    robotPosition =
+        robotPosition
+            .plus(robotVelocity.times(0.02))
+            .plus(robotAcceleration.times(0.02 * 0.02 * (1.0 / 2.0)));
     robotVelocity = robotVelocity.plus(robotAcceleration.times(0.02));
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
