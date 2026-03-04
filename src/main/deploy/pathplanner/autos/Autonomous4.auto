@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "DriveFromStart"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "Auto4_01StartToTower"
           }
         },
         {
@@ -25,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 3.0
           }
         },
         {
@@ -33,11 +27,29 @@
           "data": {
             "name": "Stop Shooter"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Grab Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
+          }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

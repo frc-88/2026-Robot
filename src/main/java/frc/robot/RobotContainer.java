@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -139,10 +140,27 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Start Intake", intake.deployIntake());
-    NamedCommands.registerCommand("Stop Intake", intake.retractIntake());
-    NamedCommands.registerCommand("Start Shooter", shoot());
-    NamedCommands.registerCommand("Stop Shooter", stopShoot());
+    NamedCommands.registerCommand("Deploy Intake", intake.forceDeploy());
+    NamedCommands.registerCommand("Retract Intake", intake.forceRetract());
+
+    NamedCommands.registerCommand("Start Intake", intake.runIntake()); // TODO: Test intake commands
+    NamedCommands.registerCommand("Stop Intake", intake.stopIntake());
+
+    NamedCommands.registerCommand("Start Shooter", new WaitCommand(0.5)); // shoot());
+    NamedCommands.registerCommand(
+        "Stop Shooter",
+        new WaitCommand(
+            0.5)); // TODO: Fix this command, the stop shoot command does not appear to be in this
+    // branch.
+
+    NamedCommands.registerCommand(
+        "Climb Grab Right",
+        climber.gotoGrip()); // TODO: Test climber commands and change them if needed
+    NamedCommands.registerCommand("Climb Grab Left", climber.gotoGrip());
+    NamedCommands.registerCommand("Climb L1", climber.gotoL1());
+    NamedCommands.registerCommand("Climb Left Flip", climber.leftFlip());
+    NamedCommands.registerCommand("Climb Right Flip", climber.rightFlip());
+
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
 
