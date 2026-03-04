@@ -118,11 +118,11 @@ public class Turret extends SubsystemBase {
   }
 
   private void configureCANCoder() {
-    CANcoderConfiguration config50 = new CANcoderConfiguration();
+    CANcoderConfiguration canCoderCfg = new CANcoderConfiguration();
 
-    config50.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
+    canCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
 
-    m_CANcoder.getConfigurator().apply(config50);
+    m_CANcoder.getConfigurator().apply(canCoderCfg);
   }
 
   private void sync() {
