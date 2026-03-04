@@ -85,7 +85,6 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
     SmartDashboard.putData("Turret/CalibrateEncoderZero", calibrateZero().ignoringDisable(true));
-    SmartDashboard.putData("Turret/GoToZero", goToZero());
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
@@ -93,7 +92,7 @@ public class Turret extends SubsystemBase {
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
-    CommandScheduler.getInstance().schedule(syncCommand());
+    CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 
   private void configureMotors() {
@@ -148,6 +147,11 @@ public class Turret extends SubsystemBase {
   private double getCANCoderFacing() {
     return turretEncoderPositionToFacing(
         m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0));
+  }
+
+  @AutoLogOutput
+  private double getCANCoderPosition() {
+    return m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0);
   }
 
   @AutoLogOutput
