@@ -1,6 +1,7 @@
 package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +17,7 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
 
   private Supplier<Pose2d> pose;
   private Supplier<Pose2d> otherPose;
+  private Rotation2d initialRotation;
   private BooleanSupplier usable;
   private Pose2d firstPose;
   private boolean shouldAdd = false;
@@ -37,6 +39,7 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
   public void periodic() {
     if (poses.size() == 0) {
       firstPose = pose.get();
+      initialRotation = otherPose.get().getRotation();
       Logger.recordOutput("OffsetFinder/FirstRotation", firstPose);
     }
     if (usable.getAsBoolean()) {
@@ -48,12 +51,10 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
 
   public record CircleFitResult(Translation2d center, double radius) {}
 
-  private CircleFitResult fit(List<Translation2d> points) {
-    Logger.recordOutput("OffsetFinder/isThisRunning", true);
+  private void fit(List<Translation2d> points) {
     int n = points.size();
     if (n < 3) {
       System.out.println("STOPDude");
-      return new CircleFitResult(new Translation2d(0.0, 0.0), 0.0);
     }
 
     double sumX = 0, sumY = 0;
@@ -87,8 +88,7 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
 
     double denominator = 2 * (C * G - D * D);
     if (Math.abs(denominator) < 1e-12) {
-      System.out.println("Points are collinear or poorly conditioned");
-      return new CircleFitResult(new Translation2d(0.0, 0.0), 0.0);
+      System.out.println("Points suck");
     }
 
     double a = (G * E - D * H) / denominator;
@@ -103,16 +103,18 @@ public class EmpiricalOffsetFinder extends SubsystemBase {
     }
     radius /= n;
 
-    Logger.recordOutput("OffsetFinder/x", cx);
-    Logger.recordOutput("OffsetFinder/y", cy);
     Logger.recordOutput("OffsetFinder/radius", radius);
 
     Translation2d center = new Translation2d(cx, cy);
 
+    Rotation2d offsetRotation = firstPose.getTranslation().minus(center).getAngle().plus(initialRotation);
     Logger.recordOutput(
-        "OffsetFinder/Rotation", firstPose.getTranslation().minus(center).getAngle().getDegrees());
+        "OffsetFinder/Rotation", offsetRotation);
 
-    return new CircleFitResult(new Translation2d(cx, cy), radius);
+    Translation2d offset =
+        new Translation2d(radius, offsetRotation);
+    Logger.recordOutput("OffsetFinder/x", offset.getX());
+    Logger.recordOutput("OffsetFinder/y", offset.getY());
   }
 
   public Command fitThePoints() {
