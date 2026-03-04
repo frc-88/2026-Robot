@@ -328,11 +328,6 @@ public class Turret extends SubsystemBase {
     return (degrees / 360.0) * (5.0 * (100.0 / 12.0));
   }
 
-  public void tetherIn() {
-    double sign = -1.0 * Math.signum(getFacing());
-    m_retractomatic.setControl(dutyCycleRequest.withOutput(sign * 0.1));
-  }
-
   @AutoLogOutput
   public boolean onTarget() {
     return m_targeting
@@ -367,10 +362,6 @@ public class Turret extends SubsystemBase {
 
   public Command stopTargeting() {
     return new InstantCommand(() -> m_targeting = false);
-  }
-
-  public Command goToZero() {
-    return new RunCommand(() -> tetherIn(), this);
   }
 
   @Override
