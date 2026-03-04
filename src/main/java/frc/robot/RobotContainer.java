@@ -140,29 +140,18 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Deploy Intake", new WaitCommand(0.5)); // intake.forceDeploy());
+    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake()); // intake.forceDeploy());
     NamedCommands.registerCommand(
-        "Retract Intake", new WaitCommand(0.5)); // intake.forceRetract());
+        "Retract Intake", intake.retractIntake()); // intake.forceRetract());
 
-    NamedCommands.registerCommand(
-        "Start Intake", new WaitCommand(0.5)); // intake.runIntake()); // TODO: Test intake commands
-    NamedCommands.registerCommand("Stop Intake", new WaitCommand(0.5)); // intake.stopIntake());
-
-    NamedCommands.registerCommand("Start Shooter", new WaitCommand(0.5)); // shoot());
-    NamedCommands.registerCommand(
-        "Stop Shooter",
-        new WaitCommand(
-            0.5)); // TODO: Fix this command, the stop shoot command does not appear to be in this
-    // branch.
+    NamedCommands.registerCommand("Start Shooter", shoot()); // shoot());
+    NamedCommands.registerCommand("Stop Shooter", stopShoot());
 
     NamedCommands.registerCommand(
         "Climb Grab Right",
         climber.gotoGrip()); // TODO: Test climber commands and change them if needed
-    NamedCommands.registerCommand("Climb Grab Left", new WaitCommand(0.5)); // climber.gotoGrip());
-    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.5)); // climber.gotoL1());
-    NamedCommands.registerCommand("Climb Left Flip", new WaitCommand(0.5)); // climber.leftFlip());
-    NamedCommands.registerCommand(
-        "Climb Right Flip", new WaitCommand(0.5)); // climber.rightFlip());
+    NamedCommands.registerCommand("Climb Grab Left", new WaitCommand(0.1)); // climber.gotoGrip());
+    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
