@@ -79,12 +79,12 @@ public class Turret extends SubsystemBase {
     configureMotors();
     configureCANCoder();
 
-    SmartDashboard.putData("Turret/Calibrate", calibrateZero().ignoringDisable(true));
-    SmartDashboard.putData("Turret/Sync", syncCommand().ignoringDisable(true));
+    SmartDashboard.putData("Turret/SyncTurretToEncoder", syncCommand().ignoringDisable(true));
     SmartDashboard.putData("Turret/Aim", aim());
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
-    SmartDashboard.putData("Turret/CalibrateEncoderZero", calibrateZero().ignoringDisable(true));
+    SmartDashboard.putData(
+        "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
@@ -131,17 +131,18 @@ public class Turret extends SubsystemBase {
     m_turret.setPosition(turretFacingToFalconEncoderPosition(getCANCoderFacing()));
   }
 
-  private void calibrate() {
+  private void calibrateEncoder() {
     // This is only necessary if the CANcoders are moved or adjusted.
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    m_turret.setPosition(0.0);
-    // p_CANcoderOffset.setValue(
-    //     -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
+    // m_turret.setPosition(0.0);
+    p_CANcoderOffset.setValue(
+        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
     // // p_cancoder66offset.setValue(
     // // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
-    // configureCANCoder();
+    configureCANCoder();
+    CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 
   @AutoLogOutput
@@ -340,8 +341,8 @@ public class Turret extends SubsystemBase {
         && Math.abs(getFacing() - m_target) < 5.0; // TODO: Lower 5.0 threshold
   }
 
-  public Command calibrateZero() {
-    return new InstantCommand(() -> calibrate(), this);
+  public Command calibrateEncoderCommand() {
+    return new InstantCommand(() -> calibrateEncoder(), this);
   }
 
   public Command syncCommand() {
