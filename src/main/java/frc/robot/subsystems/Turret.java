@@ -146,7 +146,8 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private double getCANCoderFacing() {
-    return (m_CANcoder.getAbsolutePosition().getValueAsDouble() * 1325.0); // TODO: WHY
+    return turretEncoderPositionToFacing(
+        m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0));
   }
 
   @AutoLogOutput
@@ -327,9 +328,9 @@ public class Turret extends SubsystemBase {
     return (degrees / 360.0) * (5.0 * (100.0 / 12.0));
   }
 
-  private void goZero() {
+  public void tetherIn() {
     double sign = -1.0 * Math.signum(getFacing());
-    m_turret.setControl(dutyCycleRequest.withOutput(sign * 0.01));
+    m_retractomatic.setControl(dutyCycleRequest.withOutput(sign * 0.1));
   }
 
   @AutoLogOutput
@@ -369,7 +370,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command goToZero() {
-    return new RunCommand(() -> goZero(), this).until(() -> Math.abs(getFacing()) < 3.0);
+    return new RunCommand(() -> tetherIn(), this);
   }
 
   @Override
