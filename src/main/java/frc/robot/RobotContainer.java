@@ -150,7 +150,8 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Climb Grab Right",
         climber.gotoGrip()); // TODO: Test climber commands and change them if needed
-    NamedCommands.registerCommand("Climb Grab Left", new WaitCommand(0.1)); // climber.gotoGrip());
+    NamedCommands.registerCommand("Climb Chin Strap Grip", climber.goToChinStrap());
+    NamedCommands.registerCommand("Climb Grip", climber.gotoGrip()); // climber.gotoGrip());
     NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
