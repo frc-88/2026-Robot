@@ -271,11 +271,11 @@ public class Turret extends SubsystemBase {
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
-    return (turretPosition / (5 * (100 / 12)) * 360.0);
+    return (turretPosition / (5.0 * (100.0 / 12.0)) * 360.0);
   }
 
   private double turretFacingToFalconEncoderPosition(double degrees) {
-    return (degrees / 360.0) * (5 * (100 / 12));
+    return (degrees / 360.0) * (5.0 * (100.0 / 12.0));
   }
 
   @AutoLogOutput
