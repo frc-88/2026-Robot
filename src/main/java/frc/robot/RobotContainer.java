@@ -140,8 +140,8 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Deploy Intake", intake.forceDeploy());
-    NamedCommands.registerCommand("Retract Intake", intake.forceRetract());
+    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake());
+    NamedCommands.registerCommand("Retract Intake", intake.retractIntake());
 
     NamedCommands.registerCommand("Start Intake", intake.runIntake()); // TODO: Test intake commands
     NamedCommands.registerCommand("Stop Intake", intake.stopIntake());
