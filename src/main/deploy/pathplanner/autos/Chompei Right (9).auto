@@ -42,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Shooter"
+                  "name": "Retract Intake"
                 }
               },
               {
@@ -50,65 +50,21 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "deadline",
+                      "type": "wait",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 1.0
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Start Shooter"
-                            }
-                          }
-                        ]
+                        "waitTime": 1.0
                       }
                     },
                     {
-                      "type": "deadline",
+                      "type": "named",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 2.0
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Start Intake"
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Start Shooter"
-                            }
-                          }
-                        ]
+                        "name": "Start Shooter"
                       }
                     }
                   ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Start Shooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Retract Intake"
           }
         },
         {
