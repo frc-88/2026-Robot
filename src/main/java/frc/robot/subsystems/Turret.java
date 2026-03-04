@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -35,6 +36,7 @@ public class Turret extends SubsystemBase {
   private final CANcoder m_CANcoder = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
   private final MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
+  private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0.0);
   private final TorqueCurrentFOC torqueReq = new TorqueCurrentFOC(0.0);
 
   // Preferences
@@ -83,6 +85,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
     SmartDashboard.putData("Turret/CalibrateEncoderZero", calibrateZero().ignoringDisable(true));
+    SmartDashboard.putData("Turret/GoToZero", goToZero());
 
     p_turretPID.addChangeHandler((Double unused) -> configureMotors());
     p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
@@ -324,6 +327,11 @@ public class Turret extends SubsystemBase {
     return (degrees / 360.0) * (5.0 * (100.0 / 12.0));
   }
 
+  private void goZero() {
+    double sign = -1.0 * Math.signum(getFacing());
+    m_turret.setControl(dutyCycleRequest.withOutput(sign * 0.01));
+  }
+
   @AutoLogOutput
   public boolean onTarget() {
     return m_targeting
@@ -358,6 +366,10 @@ public class Turret extends SubsystemBase {
 
   public Command stopTargeting() {
     return new InstantCommand(() -> m_targeting = false);
+  }
+
+  public Command goToZero() {
+    return new RunCommand(() -> goZero(), this).until(() -> Math.abs(getFacing()) < 3.0);
   }
 
   @Override
