@@ -136,11 +136,12 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    p_CANcoderOffset.setValue(
-        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
-    // p_cancoder66offset.setValue(
-    // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
-    configureCANCoder();
+    m_turret.setPosition(0.0);
+    // p_CANcoderOffset.setValue(
+    //     -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
+    // // p_cancoder66offset.setValue(
+    // // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    // configureCANCoder();
   }
 
   @AutoLogOutput
@@ -325,11 +326,11 @@ public class Turret extends SubsystemBase {
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
-    return (turretPosition / (5.0 * (100.0 / 12.0)) * 360.0);
+    return (turretPosition / (7.0 * (68.0 / 12.0)) * 360.0);
   }
 
   private double turretFacingToFalconEncoderPosition(double degrees) {
-    return (degrees / 360.0) * (5.0 * (100.0 / 12.0));
+    return (degrees / 360.0) * (7.0 * (68.0 / 12.0));
   }
 
   @AutoLogOutput
