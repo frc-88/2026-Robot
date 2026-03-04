@@ -147,11 +147,16 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean encodersHealthy() {
-    return // m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
-    // && m_cancoder66.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid
-    m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+  private boolean encoderHealthy() {
+    return m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
         && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
+  }
+
+  private boolean motorsHealthy() {
+    return m_turret.isConnected()
+        && m_turret.isAlive()
+        && m_retractomatic.isConnected()
+        && m_retractomatic.isAlive();
   }
 
   private void retractomatic() {
@@ -214,17 +219,21 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToPosition(double position, boolean spinCompensation) {
-    if (spinCompensation) {
-      m_turret.setControl(
-          motionMagicReq
-              .withPosition(position)
-              .withFeedForward(p_spinCompensation.getValue() * m_robotYawRate.getAsDouble()));
-    } else {
-      m_turret.setControl(motionMagicReq.withPosition(position));
+    if (motorsHealthy()) {
+      if (spinCompensation) {
+        m_turret.setControl(
+            motionMagicReq
+                .withPosition(position)
+                .withFeedForward(p_spinCompensation.getValue() * m_robotYawRate.getAsDouble()));
+      } else {
+        m_turret.setControl(motionMagicReq.withPosition(position));
+      }
+      // run the retractomatic whenever we move the turret
+      retractomatic();
+    } else { // if both motors aren't healthy, don't move
+      m_turret.stopMotor();
+      m_retractomatic.stopMotor();
     }
-
-    // run the retractomatic whenever we move the turret
-    retractomatic();
   }
 
   private double calcCircumnavigationTarget(double origin) {
