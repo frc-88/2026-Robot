@@ -224,7 +224,7 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput
   private double getVelocity() {
-    return shooterMain.getVelocity().getValueAsDouble();
+    return shooterMain.getVelocity().getValueAsDouble() / Constants.SHOOTER_GEAR_RATIO;
   }
 
   @AutoLogOutput
