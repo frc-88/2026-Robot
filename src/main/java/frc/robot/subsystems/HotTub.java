@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class HotTub extends SubsystemBase {
@@ -25,7 +26,11 @@ public class HotTub extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors");
 
-  public HotTub() {
+  private BooleanSupplier m_turretOnTarget;
+
+  public HotTub(BooleanSupplier turretOnTarget) {
+    m_turretOnTarget = turretOnTarget;
+
     configureTalons();
     SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
     SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
@@ -59,7 +64,10 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command runSpinner() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> spinnerSpeed.getValue()), this);
+    return new RunCommand(
+        () ->
+            setSpinnerSpeed(() -> m_turretOnTarget.getAsBoolean() ? spinnerSpeed.getValue() : 0.0),
+        this);
   }
 
   public Command stopSpinner() {

@@ -35,17 +35,20 @@ public class Batman extends SubsystemBase {
 
   Transform3d ROBOT_TO_QUEST =
       new Transform3d(
-          Units.inchesToMeters(-9.005),
-          Units.inchesToMeters(13.537),
-          Units.inchesToMeters(10.451),
-          new Rotation3d(0, Units.degreesToRadians(7.0), Units.degreesToRadians(180.0)));
+          Units.inchesToMeters(-7.846),
+          Units.inchesToMeters(8.992),
+          Units.inchesToMeters(10.905),
+          new Rotation3d(
+              Units.degreesToRadians(0.0),
+              Units.degreesToRadians(0.0),
+              Units.degreesToRadians(180.0)));
 
   // Transform3d ROBOT_TO_QUEST =
   //     new Transform3d(
   //         Units.inchesToMeters(0.0),
   //         Units.inchesToMeters(0.0),
   //         Units.inchesToMeters(0.0),
-  //         new Rotation3d(0, 0, -180.0));
+  //         new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
 
   private QuestNav quest = new QuestNav();
 
@@ -54,11 +57,11 @@ public class Batman extends SubsystemBase {
     hasGlobalized = true;
   }
 
-  @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose3d getPose() {
     return currentPose;
   }
 
+  @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose2d getPose2d() {
     return currentPose.toPose2d();
   }
@@ -97,7 +100,7 @@ public class Batman extends SubsystemBase {
         currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
       }
     }
-    Logger.recordOutput("Quest/shouldUse", shouldUse);
+    Logger.recordOutput("Quest/ShouldUse", shouldUse);
   }
 
   public void checkPose(Pose2d newPose, double linearStddev, double angularStddev) {

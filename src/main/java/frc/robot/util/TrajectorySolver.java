@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -21,7 +22,11 @@ public class TrajectorySolver extends SubsystemBase {
   public Translation2d robotPosition = Translation2d.kZero; // m
   public Rotation2d robotYaw = Rotation2d.kZero; // rad
   public Translation2d robotVelocity = Translation2d.kZero; // m/s
+  public Translation2d lastRobotVelocity = Translation2d.kZero;
+  public Timer accelerationTimer = new Timer();
+  public double lastTime = 0.0;
   public double robotRotationalVelocity = 0.0; // rad/s
+  public Translation2d robotAcceleration = Translation2d.kZero; // m/s/s
   public Translation2d targetVelocity = Translation2d.kZero;
 
   private Translation2d turretToCurrentTarget;
@@ -40,6 +45,7 @@ public class TrajectorySolver extends SubsystemBase {
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
     drivePoseSupplier = drivePose;
     velocityPoseSupplier = velocityPose;
+    accelerationTimer.start();
   }
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
@@ -52,8 +58,18 @@ public class TrajectorySolver extends SubsystemBase {
     return shootSpeed;
   }
 
-  @AutoLogOutput(key = "Trajectory/Yaw")
-  public double getYaw() {
+  @AutoLogOutput(key = "Trajectory/TurretTarget")
+  public double getTurretTarget() {
+    double target = turretToProjectedTarget.getAngle().getDegrees() - 180.0 - robotYaw.getDegrees();
+    if (target >= 215.0) {
+      target -= 360.0;
+    } else if (target <= -215.0) {
+      target += 360.0;
+    }
+    return target;
+  }
+
+  public double getSimTarget() {
     return turretToProjectedTarget.getAngle().getDegrees();
   }
 
@@ -61,12 +77,17 @@ public class TrajectorySolver extends SubsystemBase {
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();
     robotVelocity = velocityPoseSupplier.get().getTranslation();
-    if (Constants.currentMode == Mode.REAL) {
-      robotVelocity =
-          robotVelocity.rotateBy(Rotation2d.fromDegrees(-90.0)); // why do we have to do this??
-    }
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
+    robotAcceleration = getAcceleration();
+    lastRobotVelocity = robotVelocity;
+    lastTime = accelerationTimer.get();
+
+    robotPosition =
+        robotPosition
+            .plus(robotVelocity.times(0.02))
+            .plus(robotAcceleration.times(0.02 * 0.02 * (1.0 / 2.0)));
+    robotVelocity = robotVelocity.plus(robotAcceleration.times(0.02));
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
@@ -101,6 +122,12 @@ public class TrajectorySolver extends SubsystemBase {
     Logger.recordOutput(
         "Trajectory/ProjectedHub",
         new Pose2d(turretToProjectedTarget.plus(turretPosition), Rotation2d.kZero));
+
+    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
+      Logger.recordOutput("Trajectory/IsExtrapolating", true);
+    } else {
+      Logger.recordOutput("Trajectory/IsExtrapolating", false);
+    }
   }
 
   public void newton() {
@@ -152,21 +179,28 @@ public class TrajectorySolver extends SubsystemBase {
     return Util.flipIfRed(target);
   }
 
+  @AutoLogOutput
+  private Translation2d getAcceleration() {
+    double currentTime = accelerationTimer.get();
+    // System.out.println(currentTime);
+    double dt = currentTime - lastTime;
+    // System.out.println(dt);
+    return robotVelocity.minus(lastRobotVelocity).div(0.02);
+  }
+
   public double lookupTime(double distance) {
-    return 0.921749 - 0.0138832 * distance + 0.009373 * (Math.pow(distance, 2.0));
-    // - 0.0249606 * (Math.pow(distance, 3.0));
+    return 0.71344 + 0.11986 * distance;
   }
 
   public double lookupTimePrime(double distance) {
-    return -0.0138832 + 0.0188 * distance;
-    // - 0.0748818 * (Math.pow(distance, 2.0));
+    return 0.11986;
   }
 
   public double lookupAngle(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
-      return 84.15886 - 16.18452 * Math.log(distance);
+      return 9.18 + 3.01 * distance;
       // - 1.11 * (Math.pow(distance, 3.0));
     }
   }
@@ -174,9 +208,8 @@ public class TrajectorySolver extends SubsystemBase {
   public double lookupSpeed(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
-
     } else { // real
-      return 27.71457 + 2.96448 * (distance);
+      return 23.3 + 4.23 * (distance);
     }
     // + 0.0279446 * (Math.pow(distance, 2.0));
     // - 0.0514 * (Math.pow(distance, 3.0));

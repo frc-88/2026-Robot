@@ -50,7 +50,7 @@ public class Simulation extends SubsystemBase {
         } else {
           double speed = trajectorySolver.getShootSpeed();
           double angle = trajectorySolver.getAngle();
-          double yaw = trajectorySolver.getYaw();
+          double yaw = trajectorySolver.getSimTarget();
           fuel.setTrajectory(
               sim.simulate(
                   drivePose1.get().getTranslation(),
@@ -69,7 +69,7 @@ public class Simulation extends SubsystemBase {
         if (!fuel.setPose()) {
           double speed = trajectorySolver.getShootSpeed();
           double angle = trajectorySolver.getAngle();
-          double yaw = trajectorySolver.getYaw();
+          double yaw = trajectorySolver.getSimTarget();
           fuel.setTrajectory(
               sim.simulate(
                   drivePose1

@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -56,10 +56,10 @@ public class RobotContainer {
 
   private final Drive drive;
   private final Turret turret;
-  private final Feeder feeder = new Feeder();
+  private final Feeder feeder;
   private final Shooter shooter;
   private final Intake intake = new Intake();
-  private final HotTub hotTub = new HotTub();
+  private final HotTub hotTub;
   private final TrajectorySolver trajectorySolver;
   private final Batman batman = new Batman();
   private final Hood hood;
@@ -99,7 +99,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
         simulation = null;
-        // turret = new Turret(gyro);
         break;
 
       case SIM:
@@ -112,7 +111,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        // turret = new Turret(gyro);
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -131,42 +129,37 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
         simulation = null;
-        // turret = new Turret(gyro);
         break;
     }
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> batman.isConnected() ? batman.getPose2d() : drive.getPose(),
+            () -> (batman.isConnected() ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getPose, drive::getRate, trajectorySolver::getYaw);
+    turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
+    feeder = new Feeder(turret::onTarget);
+    hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Start Intake", intake.forceDeploy());
-    NamedCommands.registerCommand("Stop Intake", intake.forceRetract());
-    NamedCommands.registerCommand("Start Shooter", shoot());
+    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake()); // intake.forceDeploy());
+    NamedCommands.registerCommand(
+        "Retract Intake", intake.retractIntake()); // intake.forceRetract());
+
+    NamedCommands.registerCommand("Start Shooter", shoot()); // shoot());
     NamedCommands.registerCommand("Stop Shooter", stopShoot());
+
+    NamedCommands.registerCommand(
+        "Climb Grab Right",
+        climber.gotoGrip()); // TODO: Test climber commands and change them if needed
+    NamedCommands.registerCommand("Climb Chin Strap Grip", climber.goToChinStrap());
+    NamedCommands.registerCommand("Climb Grip", climber.gotoGrip()); // climber.gotoGrip());
+    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
+
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
-    // Set up SysId routines
-    // autoChooser.addOption(
-    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     configureSmartDashboardButtons();
     configureDefaultCommands();
@@ -175,12 +168,16 @@ public class RobotContainer {
   }
 
   private void configureSmartDashboardButtons() {
+    SmartDashboard.putData(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    SmartDashboard.putData(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
       SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
       SmartDashboard.putData("RunShooter", shooter.runShooter());
       SmartDashboard.putData("StopShooter", shooter.stopShooter());
-      // SmartDashboard.putData("RunShooterVoltage", shooter.runShooterVoltage());
       SmartDashboard.putData("RunIntake", intake.runIntake());
       SmartDashboard.putData("StopIntake", intake.stopIntake());
       SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
@@ -207,17 +204,16 @@ public class RobotContainer {
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
       SmartDashboard.putData("Prepclimb", prepClimber());
     }
-    SmartDashboard.putData( // DO NOT FLIP IF RED
-        "Batman/SetPose", resetBatman());
+    SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.stopIntake()); // TODO calibrate first?
+    intake.setDefaultCommand(intake.retractIntake()); // TODO calibrate first?
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
-    hood.setDefaultCommand(hood.setPositionTargeting()); // TODO calibration first
-    turret.setDefaultCommand(turret.aim()); // TODO calibration first
+    hood.setDefaultCommand(hood.setPositionTargeting());
+    turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRotateAroundTurretCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
@@ -258,8 +254,10 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
+    controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
-    controller.leftTrigger().onTrue(intake.runIntake()).onFalse(intake.stopIntake());
+    controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
+    controller.rightBumper().onTrue(intake.doTheThing());
   }
 
   public void configureButtonBox() {
@@ -268,8 +266,8 @@ public class RobotContainer {
     // buttons.button(3).onTrue(climber.rightFlip());
     buttons.button(4).onTrue(climber.gotoL1());
     buttons.button(5).onTrue(climber.gotoStow());
-    buttons.button(6).onTrue(intake.forceDeploy());
-    buttons.button(7).onTrue(intake.forceRetract());
+    buttons.button(6).onTrue(intake.deployIntake());
+    buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
@@ -279,7 +277,7 @@ public class RobotContainer {
     return climber.calibrate().withTimeout(0.5).andThen(climber.gotoGrip());
   }
 
-  public Command resetBatman() {
+  public Command resetBatman() { // DO NOT FLIP IF RED
     return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
   }
 
@@ -300,11 +298,8 @@ public class RobotContainer {
   }
 
   public Command shoot() {
-    return new SequentialCommandGroup(
-        new ParallelCommandGroup(shooter.runShooter())
-            .until(() -> true), // () -> turret.onTarget() && shooter.atShooterSpeed()
-        new ParallelCommandGroup(
-            hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting()));
+    return new ParallelCommandGroup(
+        hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting());
   }
 
   public Command stopShoot() {
