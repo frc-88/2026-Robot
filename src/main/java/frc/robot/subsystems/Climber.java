@@ -49,9 +49,11 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant liftTestTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
   private final DoublePreferenceConstant liftGripTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 92.5);
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 90);
+  private final DoublePreferenceConstant liftChinStrapTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/ChinStrap", 86.0);
   private final DoublePreferenceConstant liftTuckTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 30.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 33.0);
   private final DoublePreferenceConstant liftDownTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Down", 0.5);
   private final DoublePreferenceConstant pivotTestTarget =
@@ -168,7 +170,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
     SmartDashboard.putData("Climber/Go Grip", gotoGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
-    SmartDashboard.putData("Climber/Go Ground", gotoStow());
+    SmartDashboard.putData("Climber/Go Stow", gotoStow());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
@@ -343,6 +345,10 @@ public class Climber extends SubsystemBase {
 
   public Command gotoGrip() {
     return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
+  }
+
+  public Command goToChinStrap() {
+    return new RunCommand(() -> liftGotoPosition(liftChinStrapTarget.getValue()), this);
   }
 
   public Command gotoL1() {

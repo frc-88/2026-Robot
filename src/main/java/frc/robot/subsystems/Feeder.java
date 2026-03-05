@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -46,7 +47,10 @@ public class Feeder extends SubsystemBase {
               (state) -> SignalLogger.writeString("state", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
-  public Feeder() {
+  private BooleanSupplier m_turretOnTarget;
+
+  public Feeder(BooleanSupplier turretOnTarget) {
+    m_turretOnTarget = turretOnTarget;
     configureTalons();
 
     SmartDashboard.putData("Feeder/RunFeeder", runFeeder());
@@ -103,7 +107,9 @@ public class Feeder extends SubsystemBase {
   public void periodic() {}
 
   public Command runFeeder() {
-    return new RunCommand(() -> setFeederSpeed(() -> feedSpeed.getValue()), this);
+    return new RunCommand(
+        () -> setFeederSpeed(() -> m_turretOnTarget.getAsBoolean() ? feedSpeed.getValue() : 0.0),
+        this);
   }
 
   public Command stopFeeder() {
