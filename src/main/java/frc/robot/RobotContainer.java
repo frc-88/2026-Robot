@@ -140,22 +140,28 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake()); // intake.forceDeploy());
+    
+    // Intake:
+    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake());
     NamedCommands.registerCommand(
-        "Retract Intake", intake.retractIntake()); // intake.forceRetract());
+        "Retract Intake", intake.retractIntake());
 
-    NamedCommands.registerCommand("Start Shooter", shoot()); // shoot());
+    NamedCommands.registerCommand("Start Intake", new WaitCommand(0.5));
+    NamedCommands.registerCommand("Stop Intake", new WaitCommand(0.5));
+
+    // Shooter:
+    NamedCommands.registerCommand("Start Shooter", shoot());
     NamedCommands.registerCommand("Stop Shooter", stopShoot());
 
-    NamedCommands.registerCommand(
-        "Climb Grab Right",
-        climber.gotoGrip()); // TODO: Test climber commands and change them if needed
+    // Climb:
     NamedCommands.registerCommand("Climb Chin Strap Grip", climber.goToChinStrap());
-    NamedCommands.registerCommand("Climb Grip", climber.gotoGrip()); // climber.gotoGrip());
+    NamedCommands.registerCommand("Climb Grip", climber.gotoGrip());
     NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
 
+    // Other:
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
+
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
