@@ -30,7 +30,8 @@ public class HotTub extends SubsystemBase {
   private final DoublePreferenceConstant p_spinnerSpeed =
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
-      new MotionMagicPIDPreferenceConstants("Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.01, 0., 0.);
+      new MotionMagicPIDPreferenceConstants(
+          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.01, 0., 0.);
 
   private final BooleanSupplier m_turretOnTarget;
 
