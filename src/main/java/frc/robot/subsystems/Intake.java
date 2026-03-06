@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,26 +17,29 @@ import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Intake extends SubsystemBase {
-
+  // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
-  private TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
+  private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
 
-  private MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
-  private DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
+  // output requests
+  private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
+  private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
+  private final DutyCycleOut rollerRequest = new DutyCycleOut(0);
 
-  private DutyCycleOut rollerRequest = new DutyCycleOut(0);
-  private boolean isDoingTheThing = false;
-  private double lastTimestamp = 0.0;
-
+  // preferences
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants("Intake/IntakePivotMotor");
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants("Intake/IntakeRollerMotor");
-  private DoublePreferenceConstant targetPos =
+  private final DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Intake/PivotTarget", 0);
-  private DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
+  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
+
+  private boolean isDoingTheThing = false;
+  private double lastTimestamp = 0.0;
 
   public Intake() {
     configureTalons();
@@ -86,14 +90,33 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Intake/Current", intakePivot.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber(
         "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPos.getValue()));
-    SmartDashboard.putNumber(
-        "Intake/CurrentPosition", intakePivot.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Intake/CurrentAngle",
-        intakePivotRotationsToAngle(intakePivot.getPosition().getValueAsDouble()));
+  }
+
+  @AutoLogOutput
+  private Current getPivotCurrent() {
+    return intakePivot.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private double getPivotPosition() {
+    return intakePivot.getPosition().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getPivotAngle() {
+    return intakePivotRotationsToAngle(getPivotPosition());
+  }
+
+  @AutoLogOutput
+  private Current getRollerCurrent() {
+    return intakeRoller.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private double getRollerVelocity() {
+    return intakeRoller.getVelocity().getValueAsDouble();
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
