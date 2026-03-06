@@ -223,11 +223,11 @@ public class Climber extends SubsystemBase {
   }
 
   public boolean isPartiallyOnPole() {
-    return true; //TODO
+    return true; // TODO
   }
 
   public boolean isFullyOnPole() {
-    return true; //TODO
+    return true; // TODO
   }
 
   private void stop() {
@@ -360,7 +360,12 @@ public class Climber extends SubsystemBase {
   }
 
   public Command getOnPole() {
-    return new RunCommand(() -> goToChinStrap().until(() -> isPartiallyOnPole()).andThen(goToGrip()).until(() -> isFullyOnPole()));
+    return new RunCommand(
+        () ->
+            goToChinStrap()
+                .until(() -> isPartiallyOnPole())
+                .andThen(goToGrip())
+                .until(() -> isFullyOnPole()));
   }
 
   public Command gotoL1() {
