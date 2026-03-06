@@ -222,6 +222,14 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  public boolean isPartiallyOnPole() {
+    return true; //TODO
+  }
+
+  public boolean isFullyOnPole() {
+    return true; //TODO
+  }
+
   private void stop() {
     lift.setControl(new DutyCycleOut(0));
     pivot.setControl(new DutyCycleOut(0));
@@ -352,7 +360,7 @@ public class Climber extends SubsystemBase {
   }
 
   public Command getOnPole() {
-    goToChinStrap().until(Chud.get()).andThen();
+    return new RunCommand(() -> goToChinStrap().until(() -> isPartiallyOnPole()).andThen(goToGrip()).until(() -> isFullyOnPole()));
   }
 
   public Command gotoL1() {
