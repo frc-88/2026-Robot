@@ -168,7 +168,7 @@ public class Climber extends SubsystemBase {
     // SmartDashboard.putData("Climber/FullSend", fullSend());
     SmartDashboard.putData("Climber/Flip Left", leftFlip());
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
-    SmartDashboard.putData("Climber/Go Grip", gotoGrip());
+    SmartDashboard.putData("Climber/Go Grip", goToGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
 
@@ -343,12 +343,16 @@ public class Climber extends SubsystemBase {
     //    .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
 
-  public Command gotoGrip() {
+  public Command goToGrip() {
     return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
   }
 
   public Command goToChinStrap() {
     return new RunCommand(() -> liftGotoPosition(liftChinStrapTarget.getValue()), this);
+  }
+
+  public Command getOnPole() {
+    goToChinStrap().until(Chud.get()).andThen();
   }
 
   public Command gotoL1() {
