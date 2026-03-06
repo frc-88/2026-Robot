@@ -90,7 +90,7 @@ public class Feeder extends SubsystemBase {
 
   @AutoLogOutput(key = "Feeder/Current")
   private Current getCurrent() {
-    return feeder.getStatorCurrent().getValue();
+    return feeder.getTorqueCurrent().getValue();
   }
 
   @AutoLogOutput(key = "Feeder/Velocity")
