@@ -83,17 +83,17 @@ public class Feeder extends SubsystemBase {
     feeder.getVelocity().setUpdateFrequency(100);
   }
 
-  @AutoLogOutput(key = "Feeder/Voltage")
+  @AutoLogOutput
   private Voltage getVoltage() {
     return feeder.getMotorVoltage().getValue();
   }
 
-  @AutoLogOutput(key = "Feeder/Current")
+  @AutoLogOutput
   private Current getCurrent() {
     return feeder.getTorqueCurrent().getValue();
   }
 
-  @AutoLogOutput(key = "Feeder/Velocity")
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
     return feeder.getVelocity().getValue();
   }
