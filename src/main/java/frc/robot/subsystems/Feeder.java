@@ -25,13 +25,19 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
-public class Feeder extends SubsystemBase {
+// so much fuel goes by
+// suddenly I realize
+// saw that one before
 
+public class Feeder extends SubsystemBase {
+  // motors & devices
   private final TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
 
+  // output requests
   private final VelocityVoltage request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+  // preferences
   private final DoublePreferenceConstant feedSpeed =
       new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
   private final MotionMagicPIDPreferenceConstants feederConfigConstants =
