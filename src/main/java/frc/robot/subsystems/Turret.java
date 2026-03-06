@@ -210,7 +210,10 @@ public class Turret extends SubsystemBase {
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
 
-    if (m_circumnavigating && !isFacingSafe(target)) {
+    if (isPositionSafe(target)) {
+      m_circumnavigating = false;
+      goToPosition(turretFacingToFalconEncoderPosition(target), spinCompensation);
+    } else if (m_circumnavigating && !isFacingSafe(target)) {
       // if we are circumnavigating, ignore the input and keep doing that until we get there
       goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);
       m_circumnavigating = Math.abs(m_circumnavigationTarget - getFacing()) > 5.0;
