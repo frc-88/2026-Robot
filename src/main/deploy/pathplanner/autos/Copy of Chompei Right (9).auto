@@ -9,22 +9,9 @@
           "data": {
             "commands": [
               {
-                "type": "parallel",
+                "type": "wait",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Deploy Intake"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 1.5
-                      }
-                    }
-                  ]
+                  "waitTime": 1.0
                 }
               },
               {
@@ -51,9 +38,35 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "path",
+                      "type": "deadline",
                       "data": {
-                        "pathName": "Auto9_01StartToCenter"
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "Auto9_01StartToCenter"
+                            }
+                          },
+                          {
+                            "type": "sequential",
+                            "data": {
+                              "commands": [
+                                {
+                                  "type": "wait",
+                                  "data": {
+                                    "waitTime": 1.1
+                                  }
+                                },
+                                {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Deploy Intake"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -67,19 +80,32 @@
                             }
                           },
                           {
+                            "type": "deadline",
+                            "data": {
+                              "commands": [
+                                {
+                                  "type": "wait",
+                                  "data": {
+                                    "waitTime": 2.5
+                                  }
+                                },
+                                {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Deploy Intake"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
                             "type": "sequential",
                             "data": {
                               "commands": [
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 1.0
-                                  }
-                                },
-                                {
-                                  "type": "wait",
-                                  "data": {
-                                    "waitTime": 1.2
+                                    "waitTime": 2.2
                                   }
                                 },
                                 {
@@ -119,7 +145,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Intake"
+                  "name": "Deploy Intake"
                 }
               }
             ]
