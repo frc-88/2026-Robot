@@ -212,7 +212,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRotateAroundTurretCenter());
+    drive.setDefaultCommand(driveRebuilt());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
 
@@ -293,6 +293,15 @@ public class RobotContainer {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
+  }
+
+  public Command driveRebuilt() {
+    return DriveCommands.rebuiltDrive(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX(),
+        () -> false);
   }
 
   public Command shoot() {

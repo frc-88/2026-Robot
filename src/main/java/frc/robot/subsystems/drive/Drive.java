@@ -130,7 +130,7 @@ public class Drive extends SubsystemBase {
         this::getPose,
         this::setPose,
         this::getChassisSpeeds,
-        this::runVelocity,
+        this::runVelocityAroundCenter,
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)),
         PP_CONFIG,
@@ -238,14 +238,34 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Runs the drive at the desired velocity.
+   * Runs the drive at the desired velocity while rotating around the robot's center
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds) {
+  public void runVelocityAroundCenter(ChassisSpeeds speeds) {
+    runVelocity(speeds, false);
+  }
+
+  /**
+   * Runs the drive at the desired velocity while rotating around the turret's center
+   *
+   * @param speeds Speeds in meters/sec
+   */
+  public void runVelocityAroundTurret(ChassisSpeeds speeds) {
+    runVelocity(speeds, true);
+  }
+
+  /**
+   * Runs the drive at the desired velocity.
+   *
+   * @param speeds Speeds in meters/sec
+   * @param turretRotation true to rotate around turret
+   */
+  public void runVelocity(ChassisSpeeds speeds, boolean turretRotation) {
     // Calculate module setpoints
+    SwerveDriveKinematics runKinematics = turretRotation ? kinematicsTurret : kinematics;
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveModuleState[] setpointStates = runKinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
@@ -265,18 +285,6 @@ public class Drive extends SubsystemBase {
     }
   }
 
-  public void runVelocityAroundTurret(ChassisSpeeds speeds) {
-    // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematicsTurret.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
-
-    // Send setpoints to modules
-    for (int i = 0; i < 4; i++) {
-      modules[i].runSetpoint(setpointStates[i]);
-    }
-  }
-
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {
     for (int i = 0; i < 4; i++) {
@@ -286,7 +294,7 @@ public class Drive extends SubsystemBase {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds());
+    runVelocityAroundCenter(new ChassisSpeeds());
   }
 
   /**
