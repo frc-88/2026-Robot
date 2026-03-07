@@ -317,7 +317,7 @@ public class RobotContainer {
   }
 
   public Command driveRebuiltTwo() {
-    return DriveCommands.rebuiltDrive(
+    return DriveCommands.rebuiltDriveTwo(
         drive,
         () ->
             shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
@@ -330,7 +330,7 @@ public class RobotContainer {
   private double angleSupplier() {
     Translation2d rotationControl =
         DriveCommands.getLinearVelocityFromJoysticks(
-            -controller.getRightX(), -controller.getRightY());
+            -controller.getRightY(), -controller.getRightX());
     return rotationControl.getNorm() < 0.1
         ? drive.getRotation().getRadians()
         : rotationControl.getAngle().getRadians();

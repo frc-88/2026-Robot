@@ -76,12 +76,6 @@
                       }
                     },
                     {
-                      "type": "named",
-                      "data": {
-                        "name": "Retract Intake"
-                      }
-                    },
-                    {
                       "type": "sequential",
                       "data": {
                         "commands": [
@@ -98,6 +92,12 @@
                             }
                           }
                         ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Deploy Intake"
                       }
                     }
                   ]

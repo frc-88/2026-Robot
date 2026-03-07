@@ -136,11 +136,15 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    // m_turret.setPosition(0.0);
-    p_CANcoderOffset.setValue(
-        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
-    // // p_cancoder66offset.setValue(
-    // // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    double newOffset =
+        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue();
+    if (newOffset > 1.0) {
+      newOffset -= 1.0;
+    } else if (newOffset < -1.0) {
+      newOffset += 1.0;
+    }
+
+    p_CANcoderOffset.setValue(newOffset);
     configureCANCoder();
     CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
@@ -153,7 +157,7 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private double getCANCoderPosition() {
-    return m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0);
+    return m_CANcoder.getAbsolutePosition().getValueAsDouble();
   }
 
   @AutoLogOutput

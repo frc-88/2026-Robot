@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 7.681,
-        "y": 3.171
+        "y": 5.171
       },
       "prevControl": null,
       "nextControl": {
         "x": 7.098624469763083,
-        "y": 1.9420174729655084
+        "y": 3.942017472965509
       },
       "isLocked": false,
       "linkedName": "Auto9_01End"
@@ -48,12 +48,12 @@
     },
     {
       "anchor": {
-        "x": 0.6236455696202523,
-        "y": 0.7436591604854277
+        "x": 0.5662405063291129,
+        "y": 4.861632911392405
       },
       "prevControl": {
-        "x": 0.680055979726466,
-        "y": 0.5001065673322262
+        "x": 0.6226509164353267,
+        "y": 4.618080318239204
       },
       "nextControl": null,
       "isLocked": false,
@@ -97,7 +97,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 178.63607246839692
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
