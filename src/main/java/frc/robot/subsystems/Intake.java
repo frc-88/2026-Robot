@@ -44,7 +44,12 @@ public class Intake extends SubsystemBase {
   public Intake() {
     configureTalons();
     configureSmartDashboardButtons();
-    intakePivot.setPosition(0);
+    // TODO CHANGE THIS THING
+    // TODO CHANGE THIS THING
+    // TODO CHANGE THIS THING
+    // TODO CHANGE THIS THING
+    // TODO CHANGE THIS THING
+    intakePivot.setPosition(23.0);
   }
 
   private void configureTalons() {

@@ -13,6 +13,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -212,7 +213,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.retractIntake()); // TODO calibrate first?
+    intake.setDefaultCommand(intake.deployJustIntake()); // TODO calibrate first. THIS
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
@@ -303,9 +304,14 @@ public class RobotContainer {
   public Command driveRebuilt() {
     return DriveCommands.rebuiltDrive(
         drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
-        () -> -controller.getRightX(),
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
+        () ->
+            shooting
+                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
+                : -controller.getRightX(),
         this::turretRotSupplier);
   }
 
