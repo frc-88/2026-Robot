@@ -341,7 +341,7 @@ public class Turret extends SubsystemBase {
   public boolean onTarget() {
     return m_targeting
         && !m_circumnavigating
-        && Math.abs(getFacing() - m_target) < 5.0; // TODO: Lower 5.0 threshold
+        && Math.abs(getFacing() - m_target) < 7.0; // TODO: Lower 5.0 threshold
   }
 
   public Command calibrateEncoderCommand() {

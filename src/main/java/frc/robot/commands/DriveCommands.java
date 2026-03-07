@@ -158,7 +158,7 @@ public class DriveCommands {
             ANGLE_KD,
             new TrapezoidProfile.Constraints(
                 ANGLE_MAX_VELOCITY * 0.5, ANGLE_MAX_ACCELERATION * 0.5));
-    angleController.enableContinuousInput(-Math.PI, Math.PI);
+    angleControllerSlow.enableContinuousInput(-Math.PI, Math.PI);
 
     return Commands.run(
         () -> {
@@ -182,6 +182,8 @@ public class DriveCommands {
           } else {
             // Square rotation value for more precise control
             omega = Math.copySign(omega * omega, omega);
+            angleController.reset(drive.getRotation().getRadians());
+            angleControllerSlow.reset(drive.getRotation().getRadians());
           }
 
           // Convert to field relative speeds & send command

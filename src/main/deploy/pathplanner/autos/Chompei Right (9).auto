@@ -72,7 +72,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Auto9_02CenterToTower"
+                        "pathName": "CenterToOutpost"
                       }
                     },
                     {
@@ -123,6 +123,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Shooter"
           }
         }
       ]
