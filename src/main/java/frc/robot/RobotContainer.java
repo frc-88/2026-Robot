@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -70,6 +71,7 @@ public class RobotContainer {
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
   private final LoggedDashboardChooser<Command> autoChooser;
+  private boolean shooting = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -301,17 +303,31 @@ public class RobotContainer {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX(),
-        () -> false);
+        this::turretRotSupplier);
+  }
+
+  private boolean turretRotSupplier() {
+    return shooting
+        && Util.flipIfRed(drive.getPose()).getTranslation().getX() < Constants.HUB_POSITION.getX();
   }
 
   public Command shoot() {
     return new ParallelCommandGroup(
-        hotTub.runSpinner(), feeder.runFeeder(), shooter.runShooter(), hood.setIsShooting());
+        setShooting(true),
+        hotTub.runSpinner(),
+        feeder.runFeeder(),
+        shooter.runShooter(),
+        hood.setIsShooting());
+  }
+
+  private Command setShooting(boolean shoot) {
+    return new InstantCommand(() -> shooting = shoot);
   }
 
   public Command stopShoot() {
     return shooter
         .stopShooter()
+        .alongWith(setShooting(false))
         .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
         .alongWith(hood.setNotShooting());
