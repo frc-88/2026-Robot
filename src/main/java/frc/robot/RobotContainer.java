@@ -333,7 +333,7 @@ public class RobotContainer {
         .alongWith(setShooting(false))
         .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
-        .alongWith(hood.setNotShooting().andThen(hood.setPositionTargeting()));
+        .alongWith(hood.setNotShooting());
   }
 
   // /**
