@@ -182,6 +182,8 @@ public class DriveCommands {
           } else {
             // Square rotation value for more precise control
             omega = Math.copySign(omega * omega, omega);
+            angleController.reset(drive.getRotation().getRadians());
+            angleControllerSlow.reset(drive.getRotation().getRadians());
           }
 
           // Convert to field relative speeds & send command

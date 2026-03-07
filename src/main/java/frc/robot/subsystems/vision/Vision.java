@@ -24,6 +24,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
@@ -148,8 +149,10 @@ public class Vision extends SubsystemBase {
         if (observation.type() == PoseObservationType.MEGATAG_1) {
           currentPose = observation.pose();
         }
-        // Send vision observation also to batman
-        // batman.checkPose(observation.pose().toPose2d(), linearStdDev, angularStdDev);
+
+        if (DriverStation.isDisabled()) {
+          batman.resetPose(observation.pose());
+        }
 
         consumer.accept(
             observation.pose().toPose2d(),
