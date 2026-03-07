@@ -17,6 +17,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -313,6 +314,26 @@ public class RobotContainer {
                 ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveRebuiltTwo() {
+    return DriveCommands.rebuiltDrive(
+        drive,
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
+        this::angleSupplier,
+        this::turretRotSupplier);
+  }
+
+  private double angleSupplier() {
+    Translation2d rotationControl =
+        DriveCommands.getLinearVelocityFromJoysticks(
+            -controller.getRightX(), -controller.getRightY());
+    return rotationControl.getNorm() < 0.1
+        ? drive.getRotation().getRadians()
+        : rotationControl.getAngle().getRadians();
   }
 
   private boolean turretRotSupplier() {

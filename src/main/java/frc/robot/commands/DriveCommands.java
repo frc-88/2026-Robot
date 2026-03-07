@@ -44,7 +44,7 @@ public class DriveCommands {
 
   private DriveCommands() {}
 
-  private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
+  public static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
@@ -183,6 +183,65 @@ public class DriveCommands {
             // Square rotation value for more precise control
             omega = Math.copySign(omega * omega, omega);
           }
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec());
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()),
+              turretRotSupplier.getAsBoolean());
+        },
+        drive);
+  }
+
+  public static Command rebuiltDriveTwo(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier angleSupplier,
+      BooleanSupplier turretRotSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController angleControllerSlow =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(
+                ANGLE_MAX_VELOCITY * 0.5, ANGLE_MAX_ACCELERATION * 0.5));
+    angleControllerSlow.enableContinuousInput(-Math.PI, Math.PI);
+
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          double omegaFast =
+              angleController.calculate(
+                  drive.getRotation().getRadians(), angleSupplier.getAsDouble());
+          double omegaSlow =
+              angleControllerSlow.calculate(
+                  drive.getRotation().getRadians(), angleSupplier.getAsDouble());
+          double omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
