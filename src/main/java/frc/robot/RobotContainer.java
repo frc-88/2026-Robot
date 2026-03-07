@@ -151,9 +151,9 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "Climb Grab Right",
-        climber.gotoGrip()); // TODO: Test climber commands and change them if needed
+        climber.goToGrip()); // TODO: Test climber commands and change them if needed
     NamedCommands.registerCommand("Climb Chin Strap Grip", climber.goToChinStrap());
-    NamedCommands.registerCommand("Climb Grip", climber.gotoGrip()); // climber.gotoGrip());
+    NamedCommands.registerCommand("Climb Grip", climber.goToGrip()); // climber.gotoGrip());
     NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
@@ -274,7 +274,7 @@ public class RobotContainer {
   }
 
   public Command prepClimber() {
-    return climber.calibrate().withTimeout(0.5).andThen(climber.gotoGrip());
+    return climber.calibrate().withTimeout(0.5).andThen(climber.goToGrip());
   }
 
   public Command resetBatman() { // DO NOT FLIP IF RED

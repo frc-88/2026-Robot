@@ -5,7 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -40,19 +40,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Auto9_01StartToCenter"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Start Shooter"
+                        "pathName": "RightStartToCenter"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "Deploy Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Stop Shooter"
                       }
                     }
                   ]
@@ -88,7 +88,7 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 1.0
+                              "waitTime": 2.5
                             }
                           },
                           {
@@ -107,7 +107,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
