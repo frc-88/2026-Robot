@@ -8,6 +8,7 @@
 package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -97,7 +98,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
+                new VisionIOLimelight(camera0Name, drive::getRotation),
+                new VisionIOLimelight(camera1Name, drive::getRotation));
         simulation = null;
         break;
 
@@ -127,7 +129,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation));
+                new VisionIOLimelight(camera0Name, drive::getRotation),
+                new VisionIOLimelight(camera1Name, drive::getRotation));
         simulation = null;
         break;
     }
@@ -330,7 +333,7 @@ public class RobotContainer {
         .alongWith(setShooting(false))
         .alongWith(hotTub.stopSpinner())
         .alongWith(feeder.stopFeeder())
-        .alongWith(hood.setNotShooting());
+        .alongWith(hood.setNotShooting().andThen(hood.setPositionTargeting()));
   }
 
   // /**
