@@ -17,13 +17,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Shooter"
+                  "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Deploy Intake"
+                  "name": "Intake Out"
                 }
               }
             ]
@@ -46,13 +46,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Deploy Intake"
+                        "name": "Intake Out"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "Stop Shooter"
+                        "name": "Don't Shoot"
                       }
                     }
                   ]
@@ -88,7 +88,7 @@
                           {
                             "type": "named",
                             "data": {
-                              "name": "Start Shooter"
+                              "name": "Shoot"
                             }
                           }
                         ]
@@ -97,7 +97,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Deploy Intake"
+                        "name": "Intake Out"
                       }
                     }
                   ]
@@ -113,22 +113,16 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 5.0
+                  "waitTime": 3.0
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Stop Shooter"
+                  "name": "Shoot"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Start Shooter"
           }
         }
       ]

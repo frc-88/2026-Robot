@@ -11,13 +11,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Deploy Intake"
+                  "name": "Intake Out"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Shooter"
+                  "name": "Shoot"
                 }
               }
             ]
@@ -52,7 +52,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Intake"
+                        "name": "Intake In"
                       }
                     },
                     {
@@ -64,13 +64,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Stop Intake"
+                        "name": "Just Intake Out"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Shooter"
+                        "name": "Shoot"
                       }
                     }
                   ]
@@ -88,13 +88,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
+            "name": "Don't Shoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Start Intake"
+            "name": "Intake In"
           }
         },
         {
@@ -120,7 +120,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Stop Intake"
+                        "name": "Just Intake Out"
                       }
                     },
                     {
@@ -132,7 +132,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Shooter"
+                        "name": "Shoot"
                       }
                     }
                   ]
@@ -150,7 +150,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
+            "name": "Don't Shoot"
           }
         },
         {

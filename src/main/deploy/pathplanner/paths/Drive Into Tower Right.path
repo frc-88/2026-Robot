@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.5662405063291129,
-        "y": 4.861632911392405
+        "x": 0.698746438746439,
+        "y": 0.6369800569800577
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.5483174447439547,
-        "y": 5.257091295702667
+        "x": 0.6808233771612808,
+        "y": 1.032438441290319
       },
       "isLocked": false,
       "linkedName": "Tower Right Approach"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Start Shooter"
+            "name": "Shoot"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
+            "name": "Don't Shoot"
           }
         },
         {
