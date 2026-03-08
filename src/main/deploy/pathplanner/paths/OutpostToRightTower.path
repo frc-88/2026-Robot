@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.4309285714285721,
-        "y": 5.762619047619048
+        "x": 0.698746438746439,
+        "y": 0.6369800569800577
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.4130055098434139,
-        "y": 6.15807743192931
+        "x": 0.8483145215569845,
+        "y": 0.8373032673286787
       },
       "isLocked": false,
-      "linkedName": "Tower Right Approach"
+      "linkedName": "Outpost"
     },
     {
       "anchor": {
-        "x": 1.0615528171839335,
-        "y": 2.8484058995621924
+        "x": 1.057190476190477,
+        "y": 2.56652380952381
       },
       "prevControl": {
-        "x": 1.0615758315525696,
-        "y": 2.4560134023602087
+        "x": 1.0719437910259186,
+        "y": 2.316959509790522
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -89.15747573925957
+    "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

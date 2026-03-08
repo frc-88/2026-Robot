@@ -7,13 +7,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Start Shooter"
+            "name": "Shoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Deploy Intake"
+            "name": "Intake Out"
           }
         },
         {
@@ -29,7 +29,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto8_01StartToCenter"
+                  "pathName": "LeftStartToCenter"
                 }
               },
               {
@@ -45,7 +45,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Stop Shooter"
+                        "name": "Don't Shoot"
                       }
                     },
                     {
@@ -57,7 +57,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Intake"
+                        "name": "Intake In"
                       }
                     }
                   ]
@@ -73,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto8_02CenterToTower"
+                  "pathName": "LeftCenterToDepot"
                 }
               },
               {
@@ -89,7 +89,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Stop Intake"
+                        "name": "Just Intake Out"
                       }
                     },
                     {
@@ -101,7 +101,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Shooter"
+                        "name": "Shoot"
                       }
                     }
                   ]
@@ -119,13 +119,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
+            "name": "Don't Shoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Climb Grab Left"
+            "name": "Get On Pole"
           }
         },
         {

@@ -147,12 +147,12 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Deploy Intake", intake.deployIntake()); // intake.forceDeploy());
+    NamedCommands.registerCommand("Intake Out", intake.deployIntake()); // intake.forceDeploy());
     NamedCommands.registerCommand(
-        "Retract Intake", intake.retractIntake()); // intake.forceRetract());
+        "Intake In", intake.retractIntake()); // intake.forceRetract());
 
-    NamedCommands.registerCommand("Start Shooter", shoot()); // shoot());
-    NamedCommands.registerCommand("Stop Shooter", stopShoot());
+    NamedCommands.registerCommand("Shoot", shoot()); // shoot());
+    NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
     NamedCommands.registerCommand(
         "Climb Grab Right",
