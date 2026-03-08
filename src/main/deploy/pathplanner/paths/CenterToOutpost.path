@@ -12,7 +12,7 @@
         "y": 2.1491954600341776
       },
       "isLocked": false,
-      "linkedName": "Auto9_01End"
+      "linkedName": "RightCenter"
     },
     {
       "anchor": {
@@ -41,7 +41,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Right Approach"
+      "linkedName": "Outpost"
     }
   ],
   "rotationTargets": [
