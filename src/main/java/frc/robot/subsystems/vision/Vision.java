@@ -151,9 +151,13 @@ public class Vision extends SubsystemBase {
         }
 
         if (DriverStation.isDisabled()) {
-          batman.resetPose(observation.pose());
+          if (!batman.hasGlobalized()) {
+            batman.resetPose(observation.pose());
+          }
         }
 
+        Logger.recordOutput("LinearStddev", linearStdDev);
+        Logger.recordOutput("AngularStddev", angularStdDev);
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),

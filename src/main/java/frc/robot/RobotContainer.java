@@ -262,7 +262,7 @@ public class RobotContainer {
     controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
     controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
-    controller.rightBumper().onTrue(intake.doTheThing());
+    controller.rightBumper().toggleOnTrue(intake.doTheThing());
   }
 
   public void configureButtonBox() {
