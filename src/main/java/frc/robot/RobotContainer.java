@@ -156,10 +156,10 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Intake Out", intake.deployIntake());
-    NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
-    NamedCommands.registerCommand(
-        "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
+    //NamedCommands.registerCommand("Intake Out", intake.deployIntake());
+    //NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
+    //NamedCommands.registerCommand(
+    //    "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
@@ -398,19 +398,19 @@ public class RobotContainer {
 
   public Command goToLeftApproachPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, Constants.FIELD_WIDTH - 2.10, Rotation2d.fromDegrees(90.0)),
+        new Pose2d(1.025, 5.33, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(1.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToLeftClimbPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, Constants.FIELD_WIDTH - 3.00, Rotation2d.fromDegrees(90.0)),
+        new Pose2d(1.025, 4.60, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
   public Command getOffPoleLeft() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, Constants.FIELD_WIDTH - 2.10, Rotation2d.fromDegrees(90.0)),
+        new Pose2d(1.025, 5.33, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 

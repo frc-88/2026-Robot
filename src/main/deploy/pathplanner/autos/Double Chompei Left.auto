@@ -134,6 +134,12 @@
                 "data": {
                   "name": "Shoot"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake The Thing"
+                }
               }
             ]
           }
@@ -141,7 +147,33 @@
         {
           "type": "parallel",
           "data": {
-            "commands": []
+            "commands": [
+              {
+                "type": "deadline",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LeftUnloadToLeftDeepCenter"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Don't Shoot"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
