@@ -48,16 +48,16 @@
     },
     {
       "anchor": {
-        "x": 1.025,
-        "y": 2.5
+        "x": 0.4399493670886069,
+        "y": 5.5160506329113925
       },
       "prevControl": {
-        "x": 1.0429767270175943,
-        "y": 3.0225078592330963
+        "x": 0.4514303797468347,
+        "y": 6.158987341772152
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Right Approach"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
@@ -70,7 +70,7 @@
       "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 2.0340248962655583,
+      "waypointRelativePos": 2.0,
       "rotationDegrees": -88.89829388479357
     }
   ],
@@ -78,7 +78,7 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 1.1642679900744441,
-      "maxWaypointRelativePos": 3.0,
+      "maxWaypointRelativePos": 2.5,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 0.5,

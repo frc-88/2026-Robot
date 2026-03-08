@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.025,
-        "y": 2.5
+        "x": 0.5497023809523818,
+        "y": 5.584936708860759
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.0070769384148417,
-        "y": 2.8954583843102615
+        "x": 0.5317793193672236,
+        "y": 5.980395093171021
       },
       "isLocked": false,
       "linkedName": "Tower Right Approach"

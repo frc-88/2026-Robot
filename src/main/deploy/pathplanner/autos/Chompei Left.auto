@@ -46,7 +46,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightStartToCenter"
+                        "pathName": "LeftStartToCenter"
                       }
                     },
                     {
@@ -78,7 +78,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightCenterToOutpost"
+                        "pathName": "LeftCenterToDepot"
                       }
                     },
                     {
@@ -88,7 +88,7 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 2.2
+                              "waitTime": 2.5
                             }
                           },
                           {
@@ -188,7 +188,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Climb L1"
+                  "name": "Don't Shoot"
                 }
               },
               {
