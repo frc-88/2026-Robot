@@ -29,7 +29,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto8_01StartToCenter"
+                  "pathName": "LeftStartToCenter"
                 }
               },
               {
@@ -73,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Auto8_02CenterToTower"
+                  "pathName": "LeftCenterToDepot"
                 }
               },
               {
