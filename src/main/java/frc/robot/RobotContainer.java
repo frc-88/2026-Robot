@@ -13,6 +13,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -96,7 +98,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFX(TunerConstants.BackRight),
+                this::getPoseBatman);
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -114,7 +117,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new ModuleIOSim(TunerConstants.BackRight),
+                this::getPoseBatman);
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -127,7 +131,12 @@ public class RobotContainer {
         gyro = new GyroIO() {};
         drive =
             new Drive(
-                gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                gyro,
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                this::getPoseBatman);
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -139,7 +148,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> (batman.isConnected() ? batman.getPose2d() : drive.getPose()),
+            () -> (batman.shouldUse() ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
     feeder = new Feeder(turret::onTarget);
@@ -147,22 +156,27 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
 
-    NamedCommands.registerCommand("Intake Out", intake.deployIntake()); // intake.forceDeploy());
-    NamedCommands.registerCommand(
-        "Intake In", intake.retractIntake()); // intake.forceRetract());
+    NamedCommands.registerCommand("Intake Out", intake.deployIntake());
+    NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
 
-    NamedCommands.registerCommand("Shoot", shoot()); // shoot());
+    NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
     NamedCommands.registerCommand(
         "Climb Grab Right",
         climber.goToGrip()); // TODO: Test climber commands and change them if needed
     NamedCommands.registerCommand("Climb Chin Strap Grip", climber.goToChinStrap());
-    NamedCommands.registerCommand("Climb Grip", climber.goToGrip()); // climber.gotoGrip());
-    NamedCommands.registerCommand("Climb L1", new WaitCommand(0.1)); // climber.gotoL1());
+    NamedCommands.registerCommand("Climb Grip", climber.goToGrip());
+    NamedCommands.registerCommand("Climb L1", climber.gotoL1());
+    NamedCommands.registerCommand(
+        "Go To Climb Approach Right",
+        new ParallelDeadlineGroup(goToRightApproachPose(), climber.goToChinStrap()));
+    NamedCommands.registerCommand(
+        "Get On Pole", goToRightClimbPose().alongWith(climber.getOnPole()));
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
+    NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -189,6 +203,15 @@ public class RobotContainer {
       SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
+      SmartDashboard.putData("goToRightApproachPose", goToRightApproachPose());
+      SmartDashboard.putData(
+          "goToRightClimbPose", goToRightClimbPose().alongWith(climber.getOnPole()));
+      SmartDashboard.putData(
+          "GetOffPoleRight",
+          new ParallelDeadlineGroup(getOffPoleRight().alongWith(climber.goToGrip()))
+              .andThen(climber.gotoStow()));
+      SmartDashboard.putData("AntiJam", antiJam());
+
       //   SmartDashboard.putData(
       //       "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
       //   SmartDashboard.putData(
@@ -219,7 +242,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRebuiltTwo());
+    drive.setDefaultCommand(driveRotateAroundRobotCenter());
     climber.setDefaultCommand(climber.stopall()); // TODO calibration
   }
 
@@ -230,12 +253,12 @@ public class RobotContainer {
   private void configureDriverController() {
     controller
         .a()
-        .whileTrue(
+        .toggleOnTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
+                () -> 0.0,
                 () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+                () -> Rotation2d.fromDegrees(-90.0)));
 
     // Switch to X pattern when X button is pressed
     controller
@@ -276,6 +299,10 @@ public class RobotContainer {
     buttons.button(8).onTrue(driveRotateAroundRobotCenter());
     buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
+  }
+
+  public Pose2d getPoseBatman() {
+    return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
   }
 
   public Command prepClimber() {
@@ -341,6 +368,24 @@ public class RobotContainer {
         && Util.flipIfRed(drive.getPose()).getTranslation().getX() < Constants.HUB_POSITION.getX();
   }
 
+  public Command goToRightApproachPose() {
+    return AutoBuilder.pathfindToPose(
+        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
+        new PathConstraints(1.5, 3.0, 12.5, 20.0));
+  }
+
+  public Command goToRightClimbPose() {
+    return AutoBuilder.pathfindToPose(
+        new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0)),
+        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+  }
+
+  public Command getOffPoleRight() {
+    return AutoBuilder.pathfindToPose(
+        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
+        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+  }
+
   public Command shoot() {
     return new ParallelCommandGroup(
         setShooting(true),
@@ -363,6 +408,13 @@ public class RobotContainer {
         .alongWith(hood.setNotShooting());
   }
 
+  public Command antiJam() {
+    return shooter
+        .stopShooter()
+        .alongWith(setShooting(false))
+        .alongWith(hotTub.antiJamSpinner())
+        .alongWith(feeder.stopFeeder());
+  }
   // /**
   //  * Use this to pass the autonomous command to the main {@link Robot} class.
   //  *

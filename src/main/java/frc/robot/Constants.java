@@ -60,7 +60,7 @@ public final class Constants {
   // Climber
   public static final int CLIMBER_LIFT = 18;
   public static final int CLIMBER_PIVOT = 16;
-  public static final int CLIMBER_CANRANGE = 8;
+  public static final int CLIMBER_CANRANGE = 7;
   public static final int CLIMBER_PIGEON = 20;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
   public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);

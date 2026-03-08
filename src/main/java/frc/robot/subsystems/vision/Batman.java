@@ -70,6 +70,10 @@ public class Batman extends SubsystemBase {
     return quest.isTracking();
   }
 
+  public boolean shouldUse() {
+    return shouldUse;
+  }
+
   public boolean isConnected() {
     return quest.isConnected();
   }

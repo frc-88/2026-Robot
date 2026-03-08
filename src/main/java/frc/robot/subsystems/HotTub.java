@@ -87,6 +87,10 @@ public class HotTub extends SubsystemBase {
         this);
   }
 
+  public Command antiJamSpinner() {
+    return new RunCommand(() -> setSpinnerSpeed(() -> -p_spinnerSpeed.getValue()), this);
+  }
+
   public Command stopSpinner() {
     return new RunCommand(() -> stopSpinnerMotors(), this);
   }

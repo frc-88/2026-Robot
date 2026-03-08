@@ -31,6 +31,7 @@ import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Climber extends SubsystemBase {
 
@@ -171,6 +172,8 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Go Grip", goToGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
+    SmartDashboard.putData("Climber/Go Chinstrap", goToChinStrap());
+    SmartDashboard.putData("Climber/Go pole", getOnPole());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
@@ -222,12 +225,14 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  @AutoLogOutput
   public boolean isPartiallyOnPole() {
-    return true; // TODO
+    return getDistance() < 0.272 && getDistance() > 0.195; // TODO
   }
 
+  @AutoLogOutput
   public boolean isFullyOnPole() {
-    return true; // TODO
+    return getDistance() < 0.195; // TODO
   }
 
   private void stop() {
@@ -298,6 +303,10 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  public double getDistance() {
+    return f.calculate(canRange.getDistance().getValueAsDouble());
+  }
+
   public void periodic() {
     SmartDashboard.putNumber(
         "Climber/CANrange/Distance", f.calculate(canRange.getDistance().getValueAsDouble()));
@@ -360,12 +369,10 @@ public class Climber extends SubsystemBase {
   }
 
   public Command getOnPole() {
-    return new RunCommand(
-        () ->
-            goToChinStrap()
-                .until(() -> isPartiallyOnPole())
-                .andThen(goToGrip())
-                .until(() -> isFullyOnPole()));
+    return goToChinStrap()
+        .until(() -> isPartiallyOnPole())
+        .andThen(goToGrip())
+        .until(() -> isFullyOnPole());
   }
 
   public Command gotoL1() {

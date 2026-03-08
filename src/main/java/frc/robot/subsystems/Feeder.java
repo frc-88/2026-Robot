@@ -119,6 +119,10 @@ public class Feeder extends SubsystemBase {
         this);
   }
 
+  public Command antiJamFeeder() {
+    return new RunCommand(() -> setFeederSpeed(() -> -p_feedSpeed.getValue()), this);
+  }
+
   public Command stopFeeder() {
     return new RunCommand(() -> stopFeederMotors(), this);
   }

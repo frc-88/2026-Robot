@@ -65,7 +65,7 @@ public class Turret extends SubsystemBase {
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
 
-  private boolean m_targeting = true;
+  private boolean m_targeting = false;
   private double m_target = 0;
 
   private boolean m_circumnavigating = false;
