@@ -215,9 +215,9 @@ public class RobotContainer {
               .andThen(climber.gotoStow()));
 
       SmartDashboard.putData(
-                "GetOffPoleLeft",
-                new ParallelDeadlineGroup(getOffPoleLeft().alongWith(climber.goToGrip()))
-                    .andThen(climber.gotoStow()));
+          "GetOffPoleLeft",
+          new ParallelDeadlineGroup(getOffPoleLeft().alongWith(climber.goToGrip()))
+              .andThen(climber.gotoStow()));
       SmartDashboard.putData("AntiJam", antiJam());
 
       //   SmartDashboard.putData(
