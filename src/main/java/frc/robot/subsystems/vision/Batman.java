@@ -83,6 +83,10 @@ public class Batman extends SubsystemBase {
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
   }
 
+  public boolean hasGlobalized() {
+    return hasGlobalized;
+  }
+
   @Override
   public void periodic() {
     quest.commandPeriodic();
@@ -104,6 +108,6 @@ public class Batman extends SubsystemBase {
   }
 
   public Command resetQuestPose(Supplier<Pose3d> pose) {
-    return new InstantCommand(() -> resetPose(pose.get()));
+    return new InstantCommand(() -> globalize(pose.get()));
   }
 }
