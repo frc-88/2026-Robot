@@ -28,6 +28,7 @@ public class Intake extends SubsystemBase {
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
   private final DutyCycleOut rollerRequest = new DutyCycleOut(0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0);
 
   // preferences
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
@@ -187,6 +188,14 @@ public class Intake extends SubsystemBase {
   private void justIntakeOut() {
     goToRotations(23.0); // TODO
     stopSpinner();
+  }
+
+  private void antiJam() {
+    setSpinnerSpeed(() -> -speed.getValue());
+  }
+
+  public Command antiJamIntake() {
+    return new InstantCommand(() -> antiJam());
   }
 
   public Command zeroIntake() {

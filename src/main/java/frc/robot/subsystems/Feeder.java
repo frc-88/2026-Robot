@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -36,6 +37,7 @@ public class Feeder extends SubsystemBase {
   // output requests
   private final VelocityVoltage m_request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
   private final DoublePreferenceConstant p_feedSpeed =
@@ -111,6 +113,10 @@ public class Feeder extends SubsystemBase {
     m_feeder.stopMotor();
   }
 
+  private void antiJam() {
+    m_feeder.setControl(antiJamRequest.withOutput(-1.0));
+  }
+
   public void periodic() {}
 
   public Command runFeeder() {
@@ -120,7 +126,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public Command antiJamFeeder() {
-    return new RunCommand(() -> setFeederSpeed(() -> -p_feedSpeed.getValue()), this);
+    return new RunCommand(() -> antiJam(), this);
   }
 
   public Command stopFeeder() {

@@ -450,7 +450,8 @@ public class RobotContainer {
         .stopShooter()
         .alongWith(setShooting(false))
         .alongWith(hotTub.antiJamSpinner())
-        .alongWith(feeder.stopFeeder());
+        .alongWith(feeder.antiJamFeeder()
+        .alongWith(intake.antiJamIntake()));
   }
   // /**
   //  * Use this to pass the autonomous command to the main {@link Robot} class.
