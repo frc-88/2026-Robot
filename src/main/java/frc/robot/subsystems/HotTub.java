@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -37,6 +38,7 @@ public class HotTub extends SubsystemBase {
   // output requests
   private final VelocityDutyCycle m_request = new VelocityDutyCycle(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
   private final DoublePreferenceConstant p_spinnerSpeed =
@@ -109,6 +111,10 @@ public class HotTub extends SubsystemBase {
     m_spinner.stopMotor();
   }
 
+  private void antiJam() {
+    m_spinner.setControl(antiJamRequest.withOutput(-1.0));
+  }
+
   public void periodic() {}
 
   public Command runSpinner() {
@@ -120,7 +126,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command antiJamSpinner() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> -p_spinnerSpeed.getValue()), this);
+    return new RunCommand(() -> antiJam(), this);
   }
 
   public Command stopSpinner() {
