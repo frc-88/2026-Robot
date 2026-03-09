@@ -44,9 +44,11 @@ public class Climber extends SubsystemBase {
   // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 
   private final MotionMagicPIDPreferenceConstants liftPID =
-      new MotionMagicPIDPreferenceConstants("Climber/LiftPID", 88., 400., 1000., 40., 0., 0., 0.11047, 0.23, 0.);
+      new MotionMagicPIDPreferenceConstants(
+          "Climber/LiftPID", 88., 400., 1000., 40., 0., 0., 0.11047, 0.23, 0.);
   private final MotionMagicPIDPreferenceConstants pivotPID =
-      new MotionMagicPIDPreferenceConstants("Climber/PivotPID", 500., 10000., 0., 10., 0., 0., 0.11048, 0.0, 0.0195);
+      new MotionMagicPIDPreferenceConstants(
+          "Climber/PivotPID", 500., 10000., 0., 10., 0., 0., 0.11048, 0.0, 0.0195);
   private final DoublePreferenceConstant liftTestTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
   private final DoublePreferenceConstant liftGripTarget =
