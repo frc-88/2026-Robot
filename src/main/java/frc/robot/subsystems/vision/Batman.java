@@ -8,7 +8,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import java.util.function.Supplier;
@@ -17,10 +16,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
-  public Pose2d drivePose;
-  public Pose3d visionPose;
-  private DoublePreferenceConstant rotationWeight =
-      new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
+
+  // private DoublePreferenceConstant rotationWeight =
+  //    new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
 
   @SuppressWarnings("unused")
   private boolean hasGlobalized = false;

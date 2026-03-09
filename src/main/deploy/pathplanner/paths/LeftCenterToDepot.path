@@ -24,7 +24,7 @@
         "y": 7.43156681324424
       },
       "nextControl": {
-        "x": 1.050210940750067,
+        "x": 1.050210940750068,
         "y": 7.381355148793392
       },
       "isLocked": false,
@@ -57,7 +57,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "DepotEnd"
     }
   ],
   "rotationTargets": [
