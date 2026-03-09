@@ -160,7 +160,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
     NamedCommands.registerCommand(
-       "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
+        "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
@@ -313,11 +313,11 @@ public class RobotContainer {
   }
 
   public void periodic() {
-        if (DriverStation.isDisabled()) {
-          if (!batman.hasGlobalized()) {
-            batman.resetPose(new Pose3d(drive.getPose()));
-          }
-        }
+    if (DriverStation.isDisabled()) {
+      if (!batman.hasGlobalized()) {
+        batman.resetPose(new Pose3d(drive.getPose()));
+      }
+    }
   }
 
   public Pose2d getPoseBatman() {
