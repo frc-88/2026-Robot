@@ -41,14 +41,14 @@ public class Turret extends SubsystemBase {
 
   // Preferences
   private final DoublePreferenceConstant p_proportion =
-      new DoublePreferenceConstant("Turret/Conversion Constant", -262.0588);
+      new DoublePreferenceConstant("Turret/Conversion Constant", -260.0);
   private final DoublePreferenceConstant p_limitBuffer =
       new DoublePreferenceConstant("Turret/Limit Buffer", 10.0);
   private final DoublePreferenceConstant p_syncThreshold =
-      new DoublePreferenceConstant("Turret/Sync Threshold", 5.0);
+      new DoublePreferenceConstant("Turret/Sync Threshold", 0.75);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 40.0, 20.0, 0.0, 3.2, 0.0, 0.0, 0.01, 0.0, 0);
+          "Turret/PID", 100.0, 300.0, 0.0, 1.0, 0.0, 0.0, 0.01, 0.0, 0);
   private final DoublePreferenceConstant p_forwardLimit =
       new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
