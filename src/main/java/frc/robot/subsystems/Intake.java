@@ -21,6 +21,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   // motors & devices
@@ -109,6 +110,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber(
         "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPos.getValue()));
+    Logger.recordOutput("Intake/IsShooting", isShooting);
   }
 
   @AutoLogOutput

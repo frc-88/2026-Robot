@@ -56,11 +56,11 @@ public class Turret extends SubsystemBase {
   private final DoublePreferenceConstant p_spinCompensation =
       new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
-      new DoublePreferenceConstant("Turret/CANCoder50 Offset", 0.0); // TODO Rename and recalibrate
+      new DoublePreferenceConstant("Turret/CANCoder50 Offset", -0.143311);
   private final DoublePreferenceConstant p_goingOutCurrent =
       new DoublePreferenceConstant("Turret/Out Current", 0.0);
   private final DoublePreferenceConstant p_goingInCurrent =
-      new DoublePreferenceConstant("Turret/In Current", -40.0);
+      new DoublePreferenceConstant("Turret/In Current", -9.0);
 
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
