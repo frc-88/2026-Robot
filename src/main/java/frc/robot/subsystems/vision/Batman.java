@@ -8,7 +8,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import java.util.function.Supplier;
@@ -17,10 +16,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
-  public Pose2d drivePose;
-  public Pose3d visionPose;
-  private DoublePreferenceConstant rotationWeight =
-      new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
+
+  // private DoublePreferenceConstant rotationWeight =
+  //    new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
 
   @SuppressWarnings("unused")
   private boolean hasGlobalized = false;
@@ -33,19 +31,22 @@ public class Batman extends SubsystemBase {
   @SuppressWarnings("unused")
   private boolean shouldUse = true;
 
-  // Transform3d ROBOT_TO_QUEST =
-  //     new Transform3d(
-  //         Units.inchesToMeters(-8.084),
-  //         Units.inchesToMeters(8.992),
-  //         Units.inchesToMeters(10.462),
-  //         new Rotation3d(0.0, Units.degreesToRadians(15.0), Units.degreesToRadians(180.0)));
-
   Transform3d ROBOT_TO_QUEST =
       new Transform3d(
-          Units.inchesToMeters(0.0),
-          Units.inchesToMeters(0.0),
-          Units.inchesToMeters(0.0),
-          new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
+          Units.inchesToMeters(-7.846),
+          Units.inchesToMeters(8.992),
+          Units.inchesToMeters(10.905),
+          new Rotation3d(
+              Units.degreesToRadians(0.0),
+              Units.degreesToRadians(0.0),
+              Units.degreesToRadians(180.0)));
+
+  // Transform3d ROBOT_TO_QUEST =
+  //     new Transform3d(
+  //         Units.inchesToMeters(0.0),
+  //         Units.inchesToMeters(0.0),
+  //         Units.inchesToMeters(0.0),
+  //         new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
 
   private QuestNav quest = new QuestNav();
 
@@ -67,6 +68,10 @@ public class Batman extends SubsystemBase {
     return quest.isTracking();
   }
 
+  public boolean shouldUse() {
+    return shouldUse;
+  }
+
   public boolean isConnected() {
     return quest.isConnected();
   }
@@ -78,6 +83,10 @@ public class Batman extends SubsystemBase {
   public void resetPose(Pose3d pose) {
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+  }
+  
+  public boolean hasGlobalized() {
+    return hasGlobalized;
   }
 
   @Override
@@ -97,24 +106,10 @@ public class Batman extends SubsystemBase {
         currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
       }
     }
-    Logger.recordOutput("Quest/shouldUse", shouldUse);
+    Logger.recordOutput("Quest/ShouldUse", shouldUse);
   }
-
-  public void checkPose(Pose2d newPose, double linearStddev, double angularStddev) {
-    // Pose2d newPoseDiff = newPose.relativeTo(drivePose);
-    // double score = linearStddev + rotationWeight.getValue() * angularStddev;
-    // score =
-    //     score
-    //         + newPoseDiff.getX()
-    //         + newPoseDiff.getY()
-    //         + rotationWeight.getValue() * newPoseDiff.getRotation().getRadians();
-    // if (bestScore == 0 || score < bestScore) {
-    //   bestScore = score;
-    //   resetPose(visionPose);
-  }
-  // }
 
   public Command resetQuestPose(Supplier<Pose3d> pose) {
-    return new InstantCommand(() -> resetPose(pose.get()));
+    return new InstantCommand(() -> globalize(pose.get()));
   }
 }

@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Auto5_01StartToTower"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Don't Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Get On Pole Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

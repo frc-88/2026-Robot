@@ -7,37 +7,49 @@
         {
           "type": "path",
           "data": {
-            "pathName": "DriveFromStart"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "Auto4_01StartToTower"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Start Shooter"
+            "name": "Shoot"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 3.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
+            "name": "Don't Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive Into Tower Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Get On Pole Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb L1"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

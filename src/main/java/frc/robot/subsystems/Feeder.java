@@ -1,10 +1,12 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,22 +27,30 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
+// so much fuel goes by
+// suddenly I realize
+// saw that one before
+
 public class Feeder extends SubsystemBase {
+  // motors & devices
+  private final TalonFX m_feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
 
-  private final TalonFX feeder = new TalonFX(Constants.FEEDER_MAIN, CANBus.roboRIO());
-
-  private final VelocityVoltage request = new VelocityVoltage(0.0);
+  // output requests
+  private final VelocityVoltage m_request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
-  private final DoublePreferenceConstant feedSpeed =
-      new DoublePreferenceConstant("Feeder/FeedSpeed", 0.0);
-  private final MotionMagicPIDPreferenceConstants feederConfigConstants =
-      new MotionMagicPIDPreferenceConstants("Feeder/MotorPID");
+  // preferences
+  private final DoublePreferenceConstant p_feedSpeed =
+      new DoublePreferenceConstant("Feeder/FeedSpeed", 105.0);
+  private final MotionMagicPIDPreferenceConstants p_feederConfigConstants =
+      new MotionMagicPIDPreferenceConstants(
+          "Feeder/MotorPID", 0., 0., 0., 0., 0., 0., 0.0988, 0., 0.);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(
-              null, // Use default ramp rate (1 V/s)
+              Volts.of(0.5).per(Second), // lower default ramp rate to 0.5 V/s
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
@@ -66,50 +76,58 @@ public class Feeder extends SubsystemBase {
   private void configureTalons() {
     TalonFXConfiguration feederConfig = new TalonFXConfiguration();
 
-    feederConfig.Slot0.kP = feederConfigConstants.getKP().getValue();
-    feederConfig.Slot0.kI = feederConfigConstants.getKI().getValue();
-    feederConfig.Slot0.kD = feederConfigConstants.getKD().getValue();
-    feederConfig.Slot0.kV = feederConfigConstants.getKV().getValue();
-    feederConfig.Slot0.kS = feederConfigConstants.getKS().getValue();
+    feederConfig.Slot0.kP = p_feederConfigConstants.getKP().getValue();
+    feederConfig.Slot0.kI = p_feederConfigConstants.getKI().getValue();
+    feederConfig.Slot0.kD = p_feederConfigConstants.getKD().getValue();
+    feederConfig.Slot0.kV = p_feederConfigConstants.getKV().getValue();
+    feederConfig.Slot0.kS = p_feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    feeder.getConfigurator().apply(feederConfig);
+    m_feeder.getConfigurator().apply(feederConfig);
 
-    feeder.getVelocity().setUpdateFrequency(100);
+    m_feeder.getVelocity().setUpdateFrequency(100);
   }
 
-  @AutoLogOutput(key = "Feeder/Voltage")
+  @AutoLogOutput
   private Voltage getVoltage() {
-    return feeder.getMotorVoltage().getValue();
+    return m_feeder.getMotorVoltage().getValue();
   }
 
-  @AutoLogOutput(key = "Feeder/Current")
+  @AutoLogOutput
   private Current getCurrent() {
-    return feeder.getStatorCurrent().getValue();
+    return m_feeder.getTorqueCurrent().getValue();
   }
 
-  @AutoLogOutput(key = "Feeder/Velocity")
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
-    return feeder.getVelocity().getValue();
+    return m_feeder.getVelocity().getValue();
   }
 
   private void setVoltage(Voltage volts) {
-    feeder.setControl(m_voltReq.withOutput(volts));
+    m_feeder.setControl(m_voltReq.withOutput(volts));
   }
 
   private void setFeederSpeed(DoubleSupplier speed) {
-    feeder.setControl(request.withVelocity(speed.getAsDouble()));
+    m_feeder.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
   private void stopFeederMotors() {
-    feeder.stopMotor();
+    m_feeder.stopMotor();
+  }
+
+  private void antiJam() {
+    m_feeder.setControl(antiJamRequest.withOutput(-1.0));
   }
 
   public void periodic() {}
 
   public Command runFeeder() {
     return new RunCommand(
-        () -> setFeederSpeed(() -> m_turretOnTarget.getAsBoolean() ? feedSpeed.getValue() : 0.0),
+        () -> setFeederSpeed(() -> m_turretOnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0),
         this);
+  }
+
+  public Command antiJamFeeder() {
+    return new RunCommand(() -> antiJam(), this);
   }
 
   public Command stopFeeder() {

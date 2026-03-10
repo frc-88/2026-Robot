@@ -31,6 +31,8 @@ import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
 
@@ -43,29 +45,33 @@ public class Climber extends SubsystemBase {
   // private final Pigeon2 basePigeon = new Pigeon2(Constants.BASE_PIGEON, CANBus.roboRIO());
 
   private final MotionMagicPIDPreferenceConstants liftPID =
-      new MotionMagicPIDPreferenceConstants("Climber/LiftPID");
+      new MotionMagicPIDPreferenceConstants(
+          "Climber/LiftPID", 88., 400., 1000., 40., 0., 0., 0.11047, 0.23, 0.);
   private final MotionMagicPIDPreferenceConstants pivotPID =
-      new MotionMagicPIDPreferenceConstants("Climber/PivotPID");
+      new MotionMagicPIDPreferenceConstants(
+          "Climber/PivotPID", 500., 10000., 0., 10., 0., 0., 0.11048, 0.0, 0.0195);
   private final DoublePreferenceConstant liftTestTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
   private final DoublePreferenceConstant liftGripTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 92.5);
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 91.0);
+  private final DoublePreferenceConstant liftChinStrapTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/ChinStrap", 86.0);
   private final DoublePreferenceConstant liftTuckTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 30.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 33.0);
   private final DoublePreferenceConstant liftDownTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Down", 0.5);
+      new DoublePreferenceConstant("Climber/Lift/Target/Down", 1.0);
   private final DoublePreferenceConstant pivotTestTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
   private final DoublePreferenceConstant pivotLeftFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 300.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 296.0);
   private final DoublePreferenceConstant pivotLeftFlipDelay =
-      new DoublePreferenceConstant("Climber/Pivot/Target/LeftDelay", 65.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/LeftDelay", 35.0);
   private final DoublePreferenceConstant pivotRightFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", 310.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", -305.0);
   private final DoublePreferenceConstant pivotRightFlipDelay =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightDelay", 45.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightDelay", 35.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
   private final MotionMagicVoltage pivotMotionMagic =
@@ -166,9 +172,11 @@ public class Climber extends SubsystemBase {
     // SmartDashboard.putData("Climber/FullSend", fullSend());
     SmartDashboard.putData("Climber/Flip Left", leftFlip());
     SmartDashboard.putData("Climber/Flip Right", rightFlip());
-    SmartDashboard.putData("Climber/Go Grip", gotoGrip());
+    SmartDashboard.putData("Climber/Go Grip", goToGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
+    SmartDashboard.putData("Climber/Go Chinstrap", goToChinStrap());
+    SmartDashboard.putData("Climber/Go pole", getOnPole());
 
     SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
@@ -220,12 +228,24 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  @AutoLogOutput
+  public boolean isPartiallyOnPole() {
+    return getDistance() < 0.272 && getDistance() > 0.195; // TODO
+  }
+
+  @AutoLogOutput
+  public boolean isFullyOnPole() {
+    return getDistance() < 0.195
+        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.67;
+  }
+
   private void stop() {
     lift.setControl(new DutyCycleOut(0));
     pivot.setControl(new DutyCycleOut(0));
   }
 
   private void liftGotoPosition(double position) {
+    Logger.recordOutput("Climber/LiftPositionSetpoint", position);
     lift.setControl(liftMotionMagic.withPosition(position));
   }
 
@@ -260,7 +280,8 @@ public class Climber extends SubsystemBase {
   private void flip(boolean flipRight) {
     if (lift.getPosition().getValueAsDouble()
         < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
-      pivotGotoPositionMotion(flipRight);
+      pivotGotoPosition(
+          flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
     }
 
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
@@ -285,6 +306,20 @@ public class Climber extends SubsystemBase {
       liftGotoPosition(liftGripTarget.getValue());
     } else {
       liftGotoPosition(liftTuckTarget.getValue());
+    }
+  }
+
+  public double getDistance() {
+    return f.calculate(canRange.getDistance().getValueAsDouble());
+  }
+
+  private void liftGetOnPole() {
+    if (isPartiallyOnPole()) {
+      goToGrip();
+    } else if (isPartiallyOnPole() == false) {
+      goToChinStrap();
+    } else {
+      goToGrip();
     }
   }
 
@@ -341,8 +376,16 @@ public class Climber extends SubsystemBase {
     //    .andThen(new RunCommand(() -> lift.setControl(new DutyCycleOut(0.0)), this));
   }
 
-  public Command gotoGrip() {
+  public Command goToGrip() {
     return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
+  }
+
+  public Command goToChinStrap() {
+    return new RunCommand(() -> liftGotoPosition(liftChinStrapTarget.getValue()), this);
+  }
+
+  public Command getOnPole() {
+    return new RunCommand(() -> liftGetOnPole(), this);
   }
 
   public Command gotoL1() {

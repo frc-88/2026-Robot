@@ -148,9 +148,9 @@ public class Vision extends SubsystemBase {
         if (observation.type() == PoseObservationType.MEGATAG_1) {
           currentPose = observation.pose();
         }
-        // Send vision observation also to batman
-        // batman.checkPose(observation.pose().toPose2d(), linearStdDev, angularStdDev);
 
+        Logger.recordOutput("LinearStddev", linearStdDev);
+        Logger.recordOutput("AngularStddev", angularStdDev);
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),

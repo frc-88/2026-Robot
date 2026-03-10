@@ -27,8 +27,10 @@ public class Hood extends SubsystemBase {
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
-      new MotionMagicPIDPreferenceConstants("Hood/HoodMotor");
-  private final DoublePreferenceConstant targetPos = new DoublePreferenceConstant("Hood/Target", 0);
+      new MotionMagicPIDPreferenceConstants(
+          "Hood/HoodMotor", 100., 250., 0., 0.5, 0., 0., 0.11, 0.2, 0.);
+  private final DoublePreferenceConstant targetPos =
+      new DoublePreferenceConstant("Hood/Target", 20.5);
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
@@ -80,7 +82,7 @@ public class Hood extends SubsystemBase {
 
   public void periodic() {
     if (isShooting) {
-      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 14.0, 34.0);
+      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 15.0, 34.0);
     } else {
       m_targetPitch = 15.0;
     }
@@ -121,11 +123,11 @@ public class Hood extends SubsystemBase {
 
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
-    if (hood.getStatorCurrent().getValueAsDouble() > 10.0) {
+    if (hood.getStatorCurrent().getValueAsDouble() > 25.0) {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
       m_calibrated =
           Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
-              < 0.2;
+              < 1.0;
     }
   }
 

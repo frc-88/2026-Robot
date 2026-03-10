@@ -23,19 +23,22 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.Util;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 5.0;
-  private static final double ANGLE_KD = 0.4;
-  private static final double ANGLE_MAX_VELOCITY = 8.0;
-  private static final double ANGLE_MAX_ACCELERATION = 20.0;
+  private static final double ANGLE_KP = 0.9;
+  private static final double ANGLE_KD = 0.04;
+  private static final double ANGLE_MAX_VELOCITY = 100.0;
+  private static final double ANGLE_MAX_ACCELERATION = 100.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -43,7 +46,7 @@ public class DriveCommands {
 
   private DriveCommands() {}
 
-  private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
+  public static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
@@ -87,7 +90,7 @@ public class DriveCommands {
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
-          drive.runVelocity(
+          drive.runVelocityAroundCenter(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
@@ -134,6 +137,143 @@ public class DriveCommands {
         drive);
   }
 
+  public static Command rebuiltDrive(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier,
+      BooleanSupplier turretRotSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController angleControllerSlow =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(
+                ANGLE_MAX_VELOCITY * 0.5, ANGLE_MAX_ACCELERATION * 0.5));
+    angleControllerSlow.enableContinuousInput(-Math.PI, Math.PI);
+
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+          if (omega == 0.0 && linearVelocity.getNorm() > DEADBAND) {
+            // rotate in direction of translation
+            Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
+            double omegaFast =
+                angleController.calculate(
+                    Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                    linearVelocity.getAngle().getRadians());
+
+            double omegaSlow =
+                angleControllerSlow.calculate(
+                    Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                    linearVelocity.getAngle().getRadians());
+            omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
+            omega *= Math.sqrt(linearVelocity.getNorm());
+          } else {
+            // Square rotation value for more precise control
+            // Logger.recordOutput("Heading", 400.0);
+            omega = Math.copySign(omega * omega, omega);
+            angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+            angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+          }
+
+          Logger.recordOutput("OmegaTarget", omega);
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec());
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()),
+              turretRotSupplier.getAsBoolean());
+        },
+        drive);
+  }
+
+  public static Command rebuiltDriveTwo(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier angleSupplier,
+      BooleanSupplier turretRotSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController angleControllerSlow =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(
+                ANGLE_MAX_VELOCITY * 0.5, ANGLE_MAX_ACCELERATION * 0.5));
+    angleControllerSlow.enableContinuousInput(-Math.PI, Math.PI);
+
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          double omegaFast =
+              angleController.calculate(
+                  drive.getRotation().getRadians(), angleSupplier.getAsDouble());
+          double omegaSlow =
+              angleControllerSlow.calculate(
+                  drive.getRotation().getRadians(), angleSupplier.getAsDouble());
+          double omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec());
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()),
+              turretRotSupplier.getAsBoolean());
+        },
+        drive);
+  }
+
   /**
    * Field relative drive command using joystick for linear control and PID for angular control.
    * Possible use cases include snapping to an angle, aiming at a vision target, or controlling
@@ -175,7 +315,7 @@ public class DriveCommands {
               boolean isFlipped =
                   DriverStation.getAlliance().isPresent()
                       && DriverStation.getAlliance().get() == Alliance.Red;
-              drive.runVelocity(
+              drive.runVelocityAroundCenter(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
@@ -269,7 +409,7 @@ public class DriveCommands {
             Commands.run(
                 () -> {
                   double speed = limiter.calculate(WHEEL_RADIUS_MAX_VELOCITY);
-                  drive.runVelocity(new ChassisSpeeds(0.0, 0.0, speed));
+                  drive.runVelocityAroundCenter(new ChassisSpeeds(0.0, 0.0, speed));
                 },
                 drive)),
 
