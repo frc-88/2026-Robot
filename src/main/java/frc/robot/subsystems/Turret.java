@@ -65,7 +65,7 @@ public class Turret extends SubsystemBase {
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
 
-  private boolean m_targeting = false;
+  private boolean m_targeting = true;
   private double m_target = 0;
 
   private boolean m_circumnavigating = false;
@@ -92,6 +92,7 @@ public class Turret extends SubsystemBase {
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
+    sync();
     CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 

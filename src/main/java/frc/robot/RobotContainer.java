@@ -64,7 +64,7 @@ public class RobotContainer {
   private final Turret turret;
   private final Feeder feeder;
   private final Shooter shooter;
-  private final Intake intake = new Intake();
+  private final Intake intake;
   private final HotTub hotTub;
   private final TrajectorySolver trajectorySolver;
   private final Batman batman = new Batman();
@@ -156,6 +156,7 @@ public class RobotContainer {
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
+    intake = new Intake(drive::getSpeed);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
@@ -170,7 +171,9 @@ public class RobotContainer {
         "Go To Climb Approach Right",
         new ParallelDeadlineGroup(goToRightApproachPose(), climber.goToChinStrap()));
     NamedCommands.registerCommand(
-        "Get On Pole Right", goToRightClimbPose().alongWith(climber.getOnPole()));
+        "Get On Pole Right",
+        new ParallelCommandGroup(
+            climber.getOnPole(), goToRightClimbPose())); // .until(() -> climber.isFullyOnPole()));
 
     NamedCommands.registerCommand(
         "Go To Climb Approach Left",
@@ -210,6 +213,7 @@ public class RobotContainer {
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
       SmartDashboard.putData("goToRightApproachPose", goToRightApproachPose());
+      SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
       SmartDashboard.putData(
           "goToRightClimbPose", goToRightClimbPose().alongWith(climber.getOnPole()));
       SmartDashboard.putData(
@@ -296,7 +300,7 @@ public class RobotContainer {
     controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
     controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
-    controller.rightBumper().toggleOnTrue(intake.doTheThing());
+    controller.rightBumper().onTrue(intake.doTheThing()).onFalse(intake.deployIntake());
   }
 
   public void configureButtonBox() {
@@ -389,37 +393,37 @@ public class RobotContainer {
 
   public Command goToRightApproachPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
+        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
         new PathConstraints(1.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToRightClimbPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0)),
+        Util.flipIfRed(new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0))),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
   public Command getOffPoleRight() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
+        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToLeftApproachPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 5.33, Rotation2d.fromDegrees(90.0)),
+        Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
         new PathConstraints(1.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToLeftClimbPose() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 4.60, Rotation2d.fromDegrees(90.0)),
+        Util.flipIfRed(new Pose2d(1.1, 4.60, Rotation2d.fromDegrees(90.0))),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
   public Command getOffPoleLeft() {
     return AutoBuilder.pathfindToPose(
-        new Pose2d(1.025, 5.33, Rotation2d.fromDegrees(90.0)),
+        Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
@@ -450,8 +454,7 @@ public class RobotContainer {
         .stopShooter()
         .alongWith(setShooting(false))
         .alongWith(hotTub.antiJamSpinner())
-        .alongWith(feeder.antiJamFeeder()
-        .alongWith(intake.antiJamIntake()));
+        .alongWith(feeder.antiJamFeeder().alongWith(intake.antiJamIntake()));
   }
   // /**
   //  * Use this to pass the autonomous command to the main {@link Robot} class.

@@ -4,8 +4,11 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +30,7 @@ public class Intake extends SubsystemBase {
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
-  private final DutyCycleOut rollerRequest = new DutyCycleOut(0);
+  private final VelocityVoltage rollerRequest = new VelocityVoltage(0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0);
 
   // preferences
@@ -42,7 +45,10 @@ public class Intake extends SubsystemBase {
   private boolean isDoingTheThing = false;
   private double lastTimestamp = 0.0;
 
-  public Intake() {
+  DoubleSupplier m_drivespeed;
+
+  public Intake(DoubleSupplier speed) {
+    m_drivespeed = speed;
     configureTalons();
     configureSmartDashboardButtons();
     // TODO CHANGE THIS THING
@@ -76,11 +82,11 @@ public class Intake extends SubsystemBase {
     intakePivot.getConfigurator().apply(pivotConfig);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
-    // rollerConfig.Slot0.kP = intakeRollerConfigConstants.getKP().getValue();
-    // rollerConfig.Slot0.kI = intakeRollerConfigConstants.getKI().getValue();
-    // rollerConfig.Slot0.kD = intakeRollerConfigConstants.getKD().getValue();
-    // rollerConfig.Slot0.kV = intakeRollerConfigConstants.getKV().getValue();
-    // rollerConfig.Slot0.kS = intakeRollerConfigConstants.getKS().getValue();
+    rollerConfig.Slot0.kP = intakeRollerConfigConstants.getKP().getValue();
+    rollerConfig.Slot0.kI = intakeRollerConfigConstants.getKI().getValue();
+    rollerConfig.Slot0.kD = intakeRollerConfigConstants.getKD().getValue();
+    rollerConfig.Slot0.kV = intakeRollerConfigConstants.getKV().getValue();
+    rollerConfig.Slot0.kS = intakeRollerConfigConstants.getKS().getValue();
     rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     intakeRoller.getConfigurator().apply(rollerConfig);
   }
@@ -138,12 +144,11 @@ public class Intake extends SubsystemBase {
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
-    intakeRoller.setControl(rollerRequest.withOutput(speed.getAsDouble()));
+    intakeRoller.setControl(rollerRequest.withVelocity(speed.getAsDouble()));
   }
 
   private void stopSpinner() {
     intakeRoller.stopMotor();
-    ;
   }
 
   private void setPosition(double angle) {
@@ -159,7 +164,10 @@ public class Intake extends SubsystemBase {
 
   private void intakeOut() {
     goToRotations(23.0); // TODO
-    setSpinnerSpeed(() -> speed.getValue());
+    setSpinnerSpeed(
+        () ->
+            MathUtil.clamp(
+                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 40.0, 120.0));
   }
 
   private void intakeIn() {
@@ -203,7 +211,11 @@ public class Intake extends SubsystemBase {
   }
 
   public Command runIntake() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> speed.getValue()), this);
+    return new RunCommand(
+        () ->
+            setSpinnerSpeed(
+                () -> (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1)))),
+        this);
   }
 
   public Command stopIntake() {

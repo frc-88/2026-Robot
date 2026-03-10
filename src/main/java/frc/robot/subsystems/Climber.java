@@ -32,6 +32,7 @@ import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
 
@@ -232,7 +233,8 @@ public class Climber extends SubsystemBase {
 
   @AutoLogOutput
   public boolean isFullyOnPole() {
-    return getDistance() < 0.195; // TODO
+    return getDistance() < 0.195
+        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.67;
   }
 
   private void stop() {
@@ -241,6 +243,7 @@ public class Climber extends SubsystemBase {
   }
 
   private void liftGotoPosition(double position) {
+    Logger.recordOutput("Climber/LiftPositionSetpoint", position);
     lift.setControl(liftMotionMagic.withPosition(position));
   }
 
@@ -275,7 +278,8 @@ public class Climber extends SubsystemBase {
   private void flip(boolean flipRight) {
     if (lift.getPosition().getValueAsDouble()
         < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
-      pivotGotoPositionMotion(flipRight);
+      pivotGotoPosition(
+          flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
     }
 
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
@@ -305,6 +309,16 @@ public class Climber extends SubsystemBase {
 
   public double getDistance() {
     return f.calculate(canRange.getDistance().getValueAsDouble());
+  }
+
+  private void liftGetOnPole() {
+    if (isPartiallyOnPole()) {
+      goToGrip();
+    } else if (isPartiallyOnPole() == false) {
+      goToChinStrap();
+    } else {
+      goToGrip();
+    }
   }
 
   public void periodic() {
@@ -369,10 +383,7 @@ public class Climber extends SubsystemBase {
   }
 
   public Command getOnPole() {
-    return goToChinStrap()
-        .until(() -> isPartiallyOnPole())
-        .andThen(goToGrip())
-        .until(() -> isFullyOnPole());
+    return new RunCommand(() -> liftGetOnPole(), this);
   }
 
   public Command gotoL1() {

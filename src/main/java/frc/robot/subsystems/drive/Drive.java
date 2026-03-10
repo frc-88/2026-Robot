@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -131,12 +132,12 @@ public class Drive extends SubsystemBase {
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
-        m_batmanPoseSupplier,
+        this::getPose,
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocityAroundCenter,
         new PPHolonomicDriveController(
-            new PIDConstants(10.0, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)),
+            new PIDConstants(10.0, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)), // drive: 6.0
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -296,6 +297,15 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void pointForwards() {
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(90)));
+    }
+  }
+
+  public Command pointForwardsCommand() {
+    return new RunCommand(() -> pointForwards(), this);
+  }
   /** Stops the drive. */
   public void stop() {
     runVelocityAroundCenter(new ChassisSpeeds());
@@ -369,6 +379,10 @@ public class Drive extends SubsystemBase {
       values[i] = modules[i].getWheelRadiusCharacterizationPosition();
     }
     return values;
+  }
+
+  public double getSpeed() {
+    return getChassisSpeedsFieldRelative().getTranslation().getNorm();
   }
 
   /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */

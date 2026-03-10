@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.Util;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -30,13 +31,14 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 1.0;
-  private static final double ANGLE_KD = 0.0;
-  private static final double ANGLE_MAX_VELOCITY = 24.0;
-  private static final double ANGLE_MAX_ACCELERATION = 48.0;
+  private static final double ANGLE_KP = 0.9;
+  private static final double ANGLE_KD = 0.04;
+  private static final double ANGLE_MAX_VELOCITY = 100.0;
+  private static final double ANGLE_MAX_ACCELERATION = 100.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -171,20 +173,27 @@ public class DriveCommands {
 
           if (omega == 0.0 && linearVelocity.getNorm() > DEADBAND) {
             // rotate in direction of translation
+            Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
             double omegaFast =
                 angleController.calculate(
-                    drive.getRotation().getRadians(), linearVelocity.getAngle().getRadians());
+                    Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                    linearVelocity.getAngle().getRadians());
 
             double omegaSlow =
                 angleControllerSlow.calculate(
-                    drive.getRotation().getRadians(), linearVelocity.getAngle().getRadians());
+                    Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                    linearVelocity.getAngle().getRadians());
             omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
+            omega *= Math.sqrt(linearVelocity.getNorm());
           } else {
             // Square rotation value for more precise control
+            // Logger.recordOutput("Heading", 400.0);
             omega = Math.copySign(omega * omega, omega);
-            angleController.reset(drive.getRotation().getRadians());
-            angleControllerSlow.reset(drive.getRotation().getRadians());
+            angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+            angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
           }
+
+          Logger.recordOutput("OmegaTarget", omega);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
