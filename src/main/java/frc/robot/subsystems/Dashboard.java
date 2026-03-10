@@ -21,8 +21,11 @@ public class Dashboard extends SubsystemBase {
     double gameTime = DriverStation.getMatchTime();
 
     double gameTimeInt = Math.floor(gameTime); // Round the seconds down
+    double gameMinsInt = gameTimeInt / 60;
     String gameTimeString =
-        String.valueOf(Math.floor(gameTimeInt / 60)) + insertZero(String.valueOf(gameTimeInt % 60));
+        String.valueOf(Math.floor(gameMinsInt)) + ":" + insertZero(String.valueOf(gameTimeInt % 60));
+      
+    //gameTimeString = String.format("%1$:%2$02.0", gameMinsInt); // Not sure how to use this properly
 
     SmartDashboard.putString("Driver Dashboard/Match Time", gameTimeString);
 
