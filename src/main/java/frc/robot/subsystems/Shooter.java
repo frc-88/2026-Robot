@@ -46,7 +46,7 @@ public class Shooter extends SubsystemBase {
   private final VoltageOut sysIdReq = new VoltageOut(0.0);
 
   private final DoublePreferenceConstant shootSpeed =
-      new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+      new DoublePreferenceConstant("Shooter/ShootSpeed", 37.3);
   private final DoublePreferenceConstant increaseDuration =
       new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
   private final DoublePreferenceConstant increaseDelay =

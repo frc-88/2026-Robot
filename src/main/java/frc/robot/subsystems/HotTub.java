@@ -1,9 +1,14 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -13,6 +18,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -20,12 +27,17 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
+// yellow ball party
+// conga line around and up
+// rainbow to the hub
+
 public class HotTub extends SubsystemBase {
   // motors & devices
   private final TalonFX m_spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
 
   // output requests
   private final VelocityDutyCycle m_request = new VelocityDutyCycle(0.0);
+  private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
@@ -35,6 +47,16 @@ public class HotTub extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants(
           "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.01, 0., 0.);
 
+  private final SysIdRoutine m_sysIdRoutine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              Volts.of(0.5).per(Second), // lower default ramp rate to 0.5 V/s
+              Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+              null, // Use default timeout (10 s)
+              // Log state with Phoenix SignalLogger class
+              (state) -> SignalLogger.writeString("state", state.toString())),
+          new SysIdRoutine.Mechanism(this::setVoltage, null, this));
+
   private final BooleanSupplier m_turretOnTarget;
 
   public HotTub(BooleanSupplier turretOnTarget) {
@@ -43,6 +65,12 @@ public class HotTub extends SubsystemBase {
     configureTalons();
     SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
     SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
+    SmartDashboard.putData(
+        "Spinner/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    SmartDashboard.putData(
+        "Spinner/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    SmartDashboard.putData("Spinner/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    SmartDashboard.putData("Spinner/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   private void configureTalons() {
@@ -69,6 +97,10 @@ public class HotTub extends SubsystemBase {
   @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_spinner.getVelocity().getValue();
+  }
+
+  private void setVoltage(Voltage volts) {
+    m_spinner.setControl(m_voltReq.withOutput(volts));
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
@@ -99,5 +131,13 @@ public class HotTub extends SubsystemBase {
 
   public Command stopSpinner() {
     return new RunCommand(() -> stopSpinnerMotors(), this);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.dynamic(direction);
   }
 }
