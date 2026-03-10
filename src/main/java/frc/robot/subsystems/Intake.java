@@ -197,9 +197,10 @@ public class Intake extends SubsystemBase {
   private void justIntakeOut() {
     if (isShooting) {
       doTheThing();
+    } else {
+      goToRotations(23.0); // TODO
+      stopSpinner();
     }
-    goToRotations(23.0); // TODO
-    stopSpinner();
   }
 
   private void antiJam() {
