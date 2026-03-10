@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
@@ -69,6 +70,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Climber climber = new Climber();
+  private final Dashboard dashboard = new Dashboard();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
