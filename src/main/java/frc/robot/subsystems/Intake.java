@@ -36,13 +36,15 @@ public class Intake extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
+          "Intake/IntakePivotMotor", 50., 1000., 0., 0.,
+           0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakeRollerMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
+          "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0.,
+           0.098, 0., 0.);
   private final DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
-  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
+  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 100.0);
 
   private boolean isDoingTheThing = false;
   private boolean isShooting = false;

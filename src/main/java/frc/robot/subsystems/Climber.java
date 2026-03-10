@@ -53,7 +53,7 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant liftTestTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
   private final DoublePreferenceConstant liftGripTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 90.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 91.0);
   private final DoublePreferenceConstant liftChinStrapTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/ChinStrap", 86.0);
   private final DoublePreferenceConstant liftTuckTarget =
@@ -67,7 +67,7 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant pivotLeftFlipDelay =
       new DoublePreferenceConstant("Climber/Pivot/Target/LeftDelay", 35.0);
   private final DoublePreferenceConstant pivotRightFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", -310.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", -305.0);
   private final DoublePreferenceConstant pivotRightFlipDelay =
       new DoublePreferenceConstant("Climber/Pivot/Target/RightDelay", 35.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
