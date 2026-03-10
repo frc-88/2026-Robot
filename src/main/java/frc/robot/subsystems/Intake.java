@@ -43,6 +43,7 @@ public class Intake extends SubsystemBase {
   private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 0.8);
 
   private boolean isDoingTheThing = false;
+  private boolean isShooting = false;
   private double lastTimestamp = 0.0;
 
   DoubleSupplier m_drivespeed;
@@ -194,12 +195,23 @@ public class Intake extends SubsystemBase {
   }
 
   private void justIntakeOut() {
+    if (isShooting) {
+      doTheThing();
+    }
     goToRotations(23.0); // TODO
     stopSpinner();
   }
 
   private void antiJam() {
     setSpinnerSpeed(() -> -speed.getValue());
+  }
+
+  public Command setNotShooting() {
+    return new InstantCommand(() -> isShooting = false);
+  }
+
+  public Command setShooting() {
+    return new InstantCommand(() -> isShooting = true);
   }
 
   public Command antiJamIntake() {

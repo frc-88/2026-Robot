@@ -431,10 +431,11 @@ public class RobotContainer {
   public Command shoot() {
     return new ParallelCommandGroup(
         setShooting(true),
+        shooter.runShooter(),
         hotTub.runSpinner(),
         feeder.runFeeder(),
-        shooter.runShooter(),
-        hood.setIsShooting());
+        hood.setIsShooting(),
+        intake.setShooting());
   }
 
   private Command setShooting(boolean shoot) {
@@ -442,12 +443,13 @@ public class RobotContainer {
   }
 
   public Command stopShoot() {
-    return shooter
-        .stopShooter()
-        .alongWith(setShooting(false))
-        .alongWith(hotTub.stopSpinner())
-        .alongWith(feeder.stopFeeder())
-        .alongWith(hood.setNotShooting());
+    return new ParallelCommandGroup(
+      setShooting(false), 
+      shooter.stopShooter(),
+        hotTub.stopSpinner(),
+        feeder.stopFeeder(),
+        hood.setNotShooting(),
+        intake.setNotShooting());
   }
 
   public Command antiJam() {
