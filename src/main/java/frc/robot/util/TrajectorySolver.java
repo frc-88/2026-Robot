@@ -82,8 +82,8 @@ public class TrajectorySolver extends SubsystemBase {
     robotAcceleration = getAcceleration();
     lastRobotVelocity = robotVelocity;
     lastTime = accelerationTimer.get();
- 
-    //TODO tune number
+
+    // TODO tune number
     robotPosition =
         robotPosition
             .plus(robotVelocity.times(0.02))

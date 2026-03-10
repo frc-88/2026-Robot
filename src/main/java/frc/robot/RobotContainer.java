@@ -424,8 +424,7 @@ public class RobotContainer {
   public Command getOffPoleLeft() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(0.5, 3.0,
-         12.5, 20.0));
+        new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
   public Command shoot() {
@@ -444,8 +443,8 @@ public class RobotContainer {
 
   public Command stopShoot() {
     return new ParallelCommandGroup(
-      setShooting(false), 
-      shooter.stopShooter(),
+        setShooting(false),
+        shooter.stopShooter(),
         hotTub.stopSpinner(),
         feeder.stopFeeder(),
         hood.setNotShooting(),
