@@ -37,15 +37,14 @@ public class Intake extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakePivotMotor", 50., 1000., 0., 0.,
-           0., 0., 0.11, 0., 0.);
+          "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0.,
-           0.098, 0., 0.);
+          "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
   private final DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
-  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 100.0);
+  private final DoublePreferenceConstant speed =
+      new DoublePreferenceConstant("Intake/Speed", 100.0);
 
   private boolean isDoingTheThing = false;
   private boolean isShooting = false;
@@ -171,6 +170,10 @@ public class Intake extends SubsystemBase {
 
   private void intakeOut() {
     goToRotations(23.0); // TODO
+    setSpinnerSpeed();
+  }
+
+  public void setSpinnerSpeed() {
     setSpinnerSpeed(
         () ->
             MathUtil.clamp(
@@ -202,7 +205,8 @@ public class Intake extends SubsystemBase {
 
   private void justIntakeOut() {
     if (isShooting) {
-      doTheThing();
+      goToRotations(23.0); // TODO
+      setSpinnerSpeed();
     } else {
       goToRotations(23.0); // TODO
       stopSpinner();

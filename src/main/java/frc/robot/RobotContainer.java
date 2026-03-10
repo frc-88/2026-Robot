@@ -299,8 +299,8 @@ public class RobotContainer {
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
-    controller.leftTrigger().onTrue(intake.deployIntake()).onFalse(intake.stopIntake());
-    controller.rightBumper().onTrue(intake.doTheThing()).onFalse(intake.deployIntake());
+    controller.leftTrigger().whileTrue(intake.deployIntake());
+    controller.rightBumper().whileTrue(intake.doTheThing());
   }
 
   public void configureButtonBox() {
