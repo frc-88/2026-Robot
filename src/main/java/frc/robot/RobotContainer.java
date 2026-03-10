@@ -400,13 +400,13 @@ public class RobotContainer {
   public Command goToRightClimbPose() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+        new PathConstraints(0.5, 3.0, 5.0, 10.0));
   }
 
   public Command getOffPoleRight() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+        new PathConstraints(0.5, 3.0, 5.0, 10.0));
   }
 
   public Command goToLeftApproachPose() {
@@ -424,7 +424,8 @@ public class RobotContainer {
   public Command getOffPoleLeft() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+        new PathConstraints(0.5, 3.0,
+         12.5, 20.0));
   }
 
   public Command shoot() {
