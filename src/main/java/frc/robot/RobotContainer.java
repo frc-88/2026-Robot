@@ -50,6 +50,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -76,7 +77,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private final LoggedDashboardChooser<Command> autoChooser;
+  public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -266,14 +267,15 @@ public class RobotContainer {
   }
 
   private void configureDriverController() {
-    controller
-        .a()
-        .toggleOnTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> 0.0,
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.fromDegrees(-90.0)));
+    // controller
+    //     .a()
+    //     .toggleOnTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> 0.0,
+    //             () -> -controller.getLeftX(),
+    //             () -> Rotation2d.fromDegrees(-90.0)));
+    controller.a().toggleOnTrue(driveRebuilt());
 
     // Switch to X pattern when X button is pressed
     controller
@@ -322,6 +324,8 @@ public class RobotContainer {
         batman.resetPose(new Pose3d(drive.getPose()));
       }
     }
+
+    Logger.recordOutput("AutoName", autoChooser.get().getName());
   }
 
   public Pose2d getPoseBatman() {
