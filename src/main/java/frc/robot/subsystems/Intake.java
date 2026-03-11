@@ -177,7 +177,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intakeIn() {
-    goToRotations(0.6);
+    goToRotations(0.0);
     stopSpinner();
   }
 
