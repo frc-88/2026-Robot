@@ -19,6 +19,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -104,6 +106,8 @@ public class Climber extends SubsystemBase {
   private final LinearFilter f = LinearFilter.singlePoleIIR(0.1, 0.02);
   private final Debouncer debouncer = new Debouncer(0.15);
   private boolean below = false;
+  private double lastTime = 0.0;
+  private double currentTime = 1.0;
 
   public Climber() {
     configureCANrange();
@@ -206,31 +210,9 @@ public class Climber extends SubsystemBase {
         "Climber/Pivot/SysId/Pivot Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
   }
 
-  public boolean isDetected() {
-    double distance = f.calculate(canRange.getDistance().getValueAsDouble());
-    if (debouncer.calculate(canRange.getSignalStrength().getValueAsDouble() > 50000) == false) {
-      below = false;
-      return false; // unknown state
-    } else if (distance > 0.12) {
-      below = false;
-      return false; // too far
-    } else if (distance < 0.08) {
-      below = true;
-      return true;
-    } else if (distance < 0.12 && distance > 0.08) {
-      if (below) {
-        return true; // it was below .08 before
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
   @AutoLogOutput
   public boolean isPartiallyOnPole() {
-    return getDistance() < 0.272 && getDistance() > 0.195; // TODO
+    return debouncer.calculate(getDistance() < 0.272 && getDistance() > 0.195); // TODO
   }
 
   @AutoLogOutput
@@ -314,34 +296,39 @@ public class Climber extends SubsystemBase {
   }
 
   private void liftGetOnPole() {
-    if (isPartiallyOnPole()) {
-      goToGrip();
-    } else if (isPartiallyOnPole() == false) {
-      goToChinStrap();
+    if (isPartiallyOnPole()
+        || (lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5)) {
+      liftGotoPosition(liftGripTarget.getValue());
     } else {
-      goToGrip();
+      liftGotoPosition(liftChinStrapTarget.getValue());
     }
   }
 
   public void periodic() {
-    SmartDashboard.putNumber(
-        "Climber/CANrange/Distance", f.calculate(canRange.getDistance().getValueAsDouble()));
-    SmartDashboard.putBoolean("Climber/CANrange/Detected", isDetected());
-    SmartDashboard.putNumber("Climber/Lift/Position", lift.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Lift/Velocity", lift.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Lift/Voltage", lift.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Lift/Current", lift.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Pivot/Position", pivot.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Pivot/Velocity", pivot.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Pivot/Voltage", pivot.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber(
-        "Climber/TargetRotations",
-        Math.abs(
-            pivot.getPosition().getValueAsDouble()
-                - (Math.signum(pigeon.getRoll().getValueAsDouble())
-                    * (((180.0 - Math.abs(pigeon.getRoll().getValueAsDouble())) / 360.0) * 592))));
-    SmartDashboard.putNumber("Climber/PigeonRoll", pigeon.getRoll().getValueAsDouble());
+    currentTime = Timer.getFPGATimestamp();
+    if (Util.logif()) {
+      SmartDashboard.putNumber(
+          "Climber/CANrange/Distance", f.calculate(canRange.getDistance().getValueAsDouble()));
+      SmartDashboard.putNumber("Climber/Lift/Position", lift.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Lift/Velocity", lift.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Lift/Voltage", lift.getMotorVoltage().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Lift/Current", lift.getStatorCurrent().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Pivot/Position", pivot.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Pivot/Velocity", pivot.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber("Climber/Pivot/Voltage", pivot.getMotorVoltage().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Climber/Pivot/Current", pivot.getStatorCurrent().getValueAsDouble());
+      SmartDashboard.putNumber(
+          "Climber/TargetRotations",
+          Math.abs(
+              pivot.getPosition().getValueAsDouble()
+                  - (Math.signum(pigeon.getRoll().getValueAsDouble())
+                      * (((180.0 - Math.abs(pigeon.getRoll().getValueAsDouble())) / 360.0)
+                          * 592))));
+      SmartDashboard.putNumber("Climber/PigeonRoll", pigeon.getRoll().getValueAsDouble());
+    }
+    Logger.recordOutput("Fast", 1.0 / (currentTime - lastTime));
+    lastTime = currentTime;
   }
 
   public Command liftGoto(DoubleSupplier target) {

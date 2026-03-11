@@ -35,7 +35,10 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 10.0;
+  private static final double ANGLE_KP_FAST = 15.0;
+  private static final double ANGLE_KD_FAST = 0.04;
+
+  private static final double ANGLE_KP = 8.0;
   private static final double ANGLE_KD = 0.04;
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
@@ -318,7 +321,8 @@ public class DriveCommands {
               // Calculate angular speed
               double omega =
                   angleController.calculate(
-                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+                      Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                      rotationSupplier.get().getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
@@ -339,7 +343,9 @@ public class DriveCommands {
             drive)
 
         // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+        .beforeStarting(
+            () ->
+                angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
   }
 
   /**
