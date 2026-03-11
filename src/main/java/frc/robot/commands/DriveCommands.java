@@ -35,7 +35,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 0.9;
+  private static final double ANGLE_KP = 10.0;
   private static final double ANGLE_KD = 0.04;
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
@@ -81,6 +81,7 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
+          Logger.recordOutput("RegularOmega", omega);
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
               new ChassisSpeeds(
@@ -173,25 +174,38 @@ public class DriveCommands {
 
           if (omega == 0.0 && linearVelocity.getNorm() > DEADBAND) {
             // rotate in direction of translation
-            Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
+            // Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
             double omegaFast =
                 angleController.calculate(
                     Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
                     linearVelocity.getAngle().getRadians());
+            omegaFast =
+                MathUtil.clamp(
+                    omegaFast,
+                    -drive.getMaxAngularSpeedRadPerSec(),
+                    drive.getMaxAngularSpeedRadPerSec());
 
             double omegaSlow =
                 angleControllerSlow.calculate(
                     Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
                     linearVelocity.getAngle().getRadians());
+            omegaSlow =
+                MathUtil.clamp(
+                    omegaSlow,
+                    -drive.getMaxAngularSpeedRadPerSec(),
+                    drive.getMaxAngularSpeedRadPerSec());
             omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
-            omega *= Math.sqrt(linearVelocity.getNorm());
+            // omega *= Math.sqrt(linearVelocity.getNorm());
           } else {
             // Square rotation value for more precise control
             // Logger.recordOutput("Heading", 400.0);
             omega = Math.copySign(omega * omega, omega);
+            omega *= drive.getMaxAngularSpeedRadPerSec();
             angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
             angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
           }
+
+          // omega = MathUtil.clamp(omega, -1.0, 1.0);
 
           Logger.recordOutput("OmegaTarget", omega);
 
@@ -200,7 +214,7 @@ public class DriveCommands {
               new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+                  omega);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
