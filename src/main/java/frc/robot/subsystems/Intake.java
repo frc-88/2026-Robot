@@ -56,12 +56,8 @@ public class Intake extends SubsystemBase {
     m_drivespeed = speed;
     configureTalons();
     configureSmartDashboardButtons();
-    // TODO CHANGE THIS THING
-    // TODO CHANGE THIS THING
-    // TODO CHANGE THIS THING
-    // TODO CHANGE THIS THING
-    // TODO CHANGE THIS THING
-    intakePivot.setPosition(23.0);
+
+    intakePivot.setPosition(0.0);
   }
 
   private void configureTalons() {
