@@ -22,7 +22,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -50,6 +50,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -213,18 +214,12 @@ public class RobotContainer {
       SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
       SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-      SmartDashboard.putData("goToRightApproachPose", goToRightApproachPose());
+      SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
       SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
+      SmartDashboard.putData("goToClimbPose", goToClimbPose().alongWith(climber.getOnPole()));
       SmartDashboard.putData(
-          "goToRightClimbPose", goToRightClimbPose().alongWith(climber.getOnPole()));
-      SmartDashboard.putData(
-          "GetOffPoleRight",
-          new ParallelDeadlineGroup(getOffPoleRight().alongWith(climber.goToGrip()))
-              .andThen(climber.gotoStow()));
-
-      SmartDashboard.putData(
-          "GetOffPoleLeft",
-          new ParallelDeadlineGroup(getOffPoleLeft().alongWith(climber.goToGrip()))
+          "GetOffTower",
+          new ParallelDeadlineGroup(getOffTower().alongWith(climber.goToGrip().withTimeout(0.5)))
               .andThen(climber.gotoStow()));
       SmartDashboard.putData("AntiJam", antiJam());
 
@@ -275,29 +270,43 @@ public class RobotContainer {
     //             () -> 0.0,
     //             () -> -controller.getLeftX(),
     //             () -> Rotation2d.fromDegrees(-90.0)));
-    controller.a().toggleOnTrue(driveRebuilt());
+    // controller.a().toggleOnTrue(driveRebuilt());
 
     // Switch to X pattern when X button is pressed
     controller
         .x()
         .onTrue(
-            intake
-                .stopIntake()
-                .alongWith(driveRotateAroundTurretCenter())
-                .alongWith(shooter.stopShooter())
-                .alongWith(hotTub.stopSpinner())
-                .alongWith(feeder.stopFeeder()));
+            driveAtAngle(() -> Rotation2d.fromDegrees(90.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    // Reset gyro to 0° when B button is pressed
+    controller
+        .a()
+        .onTrue(
+            driveAtAngle(() -> Rotation2d.fromDegrees(180.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
     controller
         .b()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+            driveAtAngle(() -> Rotation2d.fromDegrees(-90.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
+    controller
+        .y()
+        .onTrue(
+            driveAtAngle(() -> Rotation2d.fromDegrees(0.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
+    // Reset gyro to 0° when B button is pressed
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
 
@@ -381,6 +390,11 @@ public class RobotContainer {
         this::turretRotSupplier);
   }
 
+  public Command driveAtAngle(Supplier<Rotation2d> angle) {
+    return DriveCommands.joystickDriveAtAngle(
+        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), angle);
+  }
+
   private double angleSupplier() {
     Translation2d rotationControl =
         DriveCommands.getLinearVelocityFromJoysticks(
@@ -404,7 +418,7 @@ public class RobotContainer {
   public Command goToRightClimbPose() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(0.5, 3.0, 5.0, 10.0));
+        new PathConstraints(0.25, 3.0, 5.0, 10.0));
   }
 
   public Command getOffPoleRight() {
@@ -422,13 +436,34 @@ public class RobotContainer {
   public Command goToLeftClimbPose() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.1, 4.60, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
+        new PathConstraints(0.25, 3.0, 12.5, 20.0));
   }
 
   public Command getOffPoleLeft() {
     return AutoBuilder.pathfindToPose(
         Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
+  }
+
+  public Command goToTowerApproachPose() {
+    return new ConditionalCommand(
+        goToRightApproachPose(),
+        goToLeftApproachPose(),
+        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
+  }
+
+  public Command goToClimbPose() {
+    return new ConditionalCommand(
+        goToRightClimbPose(),
+        goToLeftClimbPose(),
+        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
+  }
+
+  public Command getOffTower() {
+    return new ConditionalCommand(
+        getOffPoleRight(),
+        getOffPoleLeft(),
+        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
   }
 
   public Command shoot() {
