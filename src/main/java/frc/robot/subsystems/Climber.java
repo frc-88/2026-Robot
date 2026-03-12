@@ -109,17 +109,9 @@ public class Climber extends SubsystemBase {
     configureCANrange();
     configureMotors();
     configureSmartDashboardButtons();
-    configurePigeon();
 
-    liftTestTarget.addChangeHandler((Double f) -> configureMotors());
-  }
-
-  private void configurePigeon() {
-    Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
-    pigeonConfig.MountPose.MountPoseYaw = -90; // -180;
-    pigeonConfig.MountPose.MountPosePitch = 0; // 90;
-    pigeonConfig.MountPose.MountPoseRoll = 0;
-    pigeon.getConfigurator().apply(pigeonConfig);
+    liftTestTarget.addChangeHandler((Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    pivotTestTarget.addChangeHandler((Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
   }
 
   private void configureCANrange() {
@@ -317,6 +309,7 @@ public class Climber extends SubsystemBase {
 
   private void liftGetOnPole() {
     if (isPartiallyOnPole()) {
+      pivotGotoPosition(pivotPrepPosition.getValues);
       goToGrip();
     } else if (isPartiallyOnPole() == false) {
       goToChinStrap();
