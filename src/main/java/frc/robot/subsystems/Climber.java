@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
@@ -64,14 +63,12 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Lift/Target/Down", 1.0);
   private final DoublePreferenceConstant pivotTestTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
-  private final DoublePreferenceConstant pivotLeftFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/LeftFlip", 296.0);
-  private final DoublePreferenceConstant pivotLeftFlipDelay =
-      new DoublePreferenceConstant("Climber/Pivot/Target/LeftDelay", 35.0);
-  private final DoublePreferenceConstant pivotRightFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightFlip", -305.0);
-  private final DoublePreferenceConstant pivotRightFlipDelay =
-      new DoublePreferenceConstant("Climber/Pivot/Target/RightDelay", 35.0);
+  private final DoublePreferenceConstant pivotGripTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
+  private final DoublePreferenceConstant pivotFlipTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Flip", -305.0);
+  private final DoublePreferenceConstant pivotFlipDelay =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Delay", 35.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
@@ -114,8 +111,10 @@ public class Climber extends SubsystemBase {
     configureMotors();
     configureSmartDashboardButtons();
 
-    liftTestTarget.addChangeHandler((Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
-    pivotTestTarget.addChangeHandler((Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    liftTestTarget.addChangeHandler(
+        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    pivotTestTarget.addChangeHandler(
+        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
   }
 
   private void configureCANrange() {
@@ -166,23 +165,20 @@ public class Climber extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("Climber/Lift/calibrate", calibrate());
-    // SmartDashboard.putData("Climber/FullSend", fullSend());
-    SmartDashboard.putData("Climber/Flip Left", leftFlip());
-    SmartDashboard.putData("Climber/Flip Right", rightFlip());
+    SmartDashboard.putData("Climber/Lift/Lift Calibrate", calibrate());
+    SmartDashboard.putData("Climber/Flip", flipCommand());
     SmartDashboard.putData("Climber/Go Grip", goToGrip());
     SmartDashboard.putData("Climber/Go L1", gotoL1());
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
     SmartDashboard.putData("Climber/Go Chinstrap", goToChinStrap());
-    SmartDashboard.putData("Climber/Go pole", getOnPole());
+    SmartDashboard.putData("Climber/Go Pole", getOnPole());
 
-    SmartDashboard.putData("Climber/Lift/Goto Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Lift/Goto TargetClimb", liftGoto(() -> liftGripTarget.getValue()));
+        "Climber/Lift/Lift Go Target", liftGoto(() -> liftTestTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Pivot/Goto Target", pivotGoto(() -> pivotTestTarget.getValue()));
+        "Climber/Pivot/Pivot Go Target", pivotGoto(() -> pivotTestTarget.getValue()));
     SmartDashboard.putData(
-        "Climber/Pivot/Zero",
+        "Climber/Pivot/ZeroPivot",
         new InstantCommand(() -> pivot.setPosition(0.0), this).ignoringDisable(true));
     SmartDashboard.putData(
         "Climber/Lift/Zero", new InstantCommand(() -> lift.setPosition(0.0), this));
@@ -212,7 +208,7 @@ public class Climber extends SubsystemBase {
   @AutoLogOutput
   public boolean isFullyOnPole() {
     return getDistance() < 0.195
-        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.67;
+        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5;
   }
 
   private void stop() {
@@ -253,11 +249,9 @@ public class Climber extends SubsystemBase {
     lift.setControl(new DutyCycleOut(-0.08));
   }
 
-  private void flip(boolean flipRight) {
-    if (lift.getPosition().getValueAsDouble()
-        < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
-      pivotGotoPosition(
-          flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
+  private void flip() {
+    if (lift.getPosition().getValueAsDouble() < (pivotFlipDelay.getValue())) {
+      pivotGotoPosition(pivotFlipTarget.getValue());
     }
 
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
@@ -269,21 +263,19 @@ public class Climber extends SubsystemBase {
     }
   }
 
-  private void flipMotion(boolean flipRight) {
-    if (lift.getPosition().getValueAsDouble()
-        < (flipRight ? pivotRightFlipDelay.getValue() : pivotLeftFlipDelay.getValue())) {
-      pivotGotoPosition(
-          flipRight ? pivotRightFlipTarget.getValue() : pivotLeftFlipTarget.getValue());
-    }
+  // private void flipMotion(boolean flipRight) {
+  //   if (lift.getPosition().getValueAsDouble() < (pivotFlipDelay.getValue())) {
+  //     pivotGotoPosition(pivotFlipTarget.getValue());
+  //   }
 
-    double position = Math.abs(pivot.getPosition().getValueAsDouble());
+  //   double position = Math.abs(pivot.getPosition().getValueAsDouble());
 
-    if (position > pivotSwitchTarget.getValue()) {
-      liftGotoPosition(liftGripTarget.getValue());
-    } else {
-      liftGotoPosition(liftTuckTarget.getValue());
-    }
-  }
+  //   if (position > pivotSwitchTarget.getValue()) {
+  //     liftGotoPosition(liftGripTarget.getValue());
+  //   } else {
+  //     liftGotoPosition(liftTuckTarget.getValue());
+  //   }
+  // }
 
   public double getDistance() {
     return f.calculate(canRange.getDistance().getValueAsDouble());
@@ -379,17 +371,8 @@ public class Climber extends SubsystemBase {
     return new RunCommand(() -> liftGotoPosition(liftDownTarget.getValue()), this);
   }
 
-  public Command rightFlip() {
-    return new RunCommand(() -> flip(true), this);
-  }
-
-  public Command leftFlip() {
-    return new RunCommand(() -> flipMotion(false), this)
-        .until(
-            () ->
-                Math.abs(pivot.getPosition().getValueAsDouble() - pivotLeftFlipTarget.getValue())
-                    < 10.0)
-        .andThen(new RunCommand(() -> flip(false), this));
+  public Command flipCommand() {
+    return new RunCommand(() -> flip(), this);
   }
 
   public Command stopall() {

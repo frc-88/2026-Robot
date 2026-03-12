@@ -170,16 +170,14 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Climb L1", climber.gotoL1());
     NamedCommands.registerCommand(
-        "Go To Climb Approach Right",
-        new ParallelDeadlineGroup(goToRightApproachPose(), climber.goToChinStrap()));
+        "Go To Climb Approach Right", new ParallelDeadlineGroup(goToRightApproachPose()));
     NamedCommands.registerCommand(
         "Get On Pole Right",
         new ParallelCommandGroup(
             climber.getOnPole(), goToRightClimbPose())); // .until(() -> climber.isFullyOnPole()));
 
     NamedCommands.registerCommand(
-        "Go To Climb Approach Left",
-        new ParallelDeadlineGroup(goToLeftApproachPose(), climber.goToChinStrap()));
+        "Go To Climb Approach Left", new ParallelDeadlineGroup(goToLeftApproachPose()));
     NamedCommands.registerCommand(
         "Get On Pole Left", goToLeftClimbPose().alongWith(climber.getOnPole()));
 
@@ -216,11 +214,8 @@ public class RobotContainer {
       SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
       SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
       SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
-      SmartDashboard.putData("goToClimbPose", goToClimbPose().alongWith(climber.getOnPole()));
-      SmartDashboard.putData(
-          "GetOffTower",
-          new ParallelDeadlineGroup(getOffTower().alongWith(climber.goToGrip().withTimeout(0.5)))
-              .andThen(climber.gotoStow()));
+      SmartDashboard.putData("goToClimbPose", getOnTower());
+      SmartDashboard.putData("GetOffTower", getOffTower());
       SmartDashboard.putData("AntiJam", antiJam());
 
       //   SmartDashboard.putData(
@@ -316,8 +311,7 @@ public class RobotContainer {
 
   public void configureButtonBox() {
     buttons.button(1).onTrue(prepClimber());
-    buttons.button(2).onTrue(climber.leftFlip());
-    // buttons.button(3).onTrue(climber.rightFlip());
+    buttons.button(2).onTrue(climber.flipCommand().alongWith(drive.pointForwardsCommand()));
     buttons.button(4).onTrue(climber.gotoL1());
     buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
@@ -342,7 +336,7 @@ public class RobotContainer {
   }
 
   public Command prepClimber() {
-    return climber.calibrate().withTimeout(0.5).andThen(climber.goToGrip());
+    return goToTowerApproachPose().andThen(getOnTower());
   }
 
   public Command resetBatman() { // DO NOT FLIP IF RED
@@ -459,12 +453,20 @@ public class RobotContainer {
         () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
   }
 
-  public Command getOffTower() {
+  public Command climberGetOffTower() {
     return new ConditionalCommand(
         getOffPoleRight(),
         getOffPoleLeft(),
         () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
   }
+
+  public Command getOnTower() {
+    return (goToClimbPose().alongWith(climber.getOnPole())).until(() -> (climber.isFullyOnPole()));
+  }
+
+  public Command getOffTower() {
+    return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(0.5);
+  } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   public Command shoot() {
     return new ParallelCommandGroup(
