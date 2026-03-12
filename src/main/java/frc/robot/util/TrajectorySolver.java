@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
-
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -41,7 +40,8 @@ public class TrajectorySolver extends SubsystemBase {
   private double turretToProjectedTargetDistance = 0.0;
   private int numberOfIterations = 5;
 
-  public DoublePreferenceConstant lagCompensation = new DoublePreferenceConstant("Trajectory/LagCompensation", 0.02);
+  public DoublePreferenceConstant lagCompensation =
+      new DoublePreferenceConstant("Trajectory/LagCompensation", 0.02);
 
   public double hoodAngle;
   public double shootSpeed;
@@ -91,7 +91,9 @@ public class TrajectorySolver extends SubsystemBase {
     robotPosition =
         robotPosition
             .plus(robotVelocity.times(lagCompensation.getValue()))
-            .plus(robotAcceleration.times(lagCompensation.getValue() * lagCompensation.getValue() * (1.0 / 2.0)));
+            .plus(
+                robotAcceleration.times(
+                    lagCompensation.getValue() * lagCompensation.getValue() * (1.0 / 2.0)));
     robotVelocity = robotVelocity.plus(robotAcceleration.times(lagCompensation.getValue()));
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
