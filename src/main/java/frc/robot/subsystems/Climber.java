@@ -64,7 +64,9 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant pivotTestTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
   private final DoublePreferenceConstant pivotGripTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Grip", 0.0);
+  private final DoublePreferenceConstant pivotChinStrapTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/ChinStrap", 0.0);
   private final DoublePreferenceConstant pivotFlipTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Flip", -305.0);
   private final DoublePreferenceConstant pivotFlipDelay =
@@ -284,11 +286,11 @@ public class Climber extends SubsystemBase {
   private void liftGetOnPole() {
     if (isPartiallyOnPole()
         || (lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5)) {
-      pivotGotoPosition(pivotTestTarget.getValue());
+      pivotGotoPosition(pivotGripTarget.getValue());
       liftGotoPosition(liftGripTarget.getValue());
     } else {
       liftGotoPosition(liftChinStrapTarget.getValue());
-      pivotGotoPosition(pivotTestTarget.getValue());
+      pivotGotoPosition(pivotChinStrapTarget.getValue());
     }
   }
 
