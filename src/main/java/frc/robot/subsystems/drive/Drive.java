@@ -400,6 +400,11 @@ public class Drive extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
+  @AutoLogOutput(key = "Odometry/RobotFlipped")
+  public Pose2d getPoseFlipped() {
+    return Util.flipIfRed(getPose());
+  }
+
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return getPose().getRotation();
