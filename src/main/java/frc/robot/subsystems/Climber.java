@@ -52,23 +52,25 @@ public class Climber extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants(
           "Climber/PivotPID", 500., 10000., 0., 10., 0., 0., 0.11048, 0.0, 0.0195);
   private final DoublePreferenceConstant liftTestTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Test", 3.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Test", 0.0);
   private final DoublePreferenceConstant liftGripTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 91.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Grip", 90.4);
+  private final DoublePreferenceConstant liftFlipGripTarget =
+      new DoublePreferenceConstant("Climber/Lift/Target/FlipGrip", 91.9);
   private final DoublePreferenceConstant liftChinStrapTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/ChinStrap", 86.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/ChinStrap", 89.81);
   private final DoublePreferenceConstant liftTuckTarget =
-      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 33.0);
+      new DoublePreferenceConstant("Climber/Lift/Target/Tuck", 25.48);
   private final DoublePreferenceConstant liftDownTarget =
       new DoublePreferenceConstant("Climber/Lift/Target/Down", 1.0);
   private final DoublePreferenceConstant pivotTestTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Test", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Test", 7.4);
   private final DoublePreferenceConstant pivotGripTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Grip", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Grip", -10.0);
   private final DoublePreferenceConstant pivotChinStrapTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/ChinStrap", 0.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/ChinStrap", -10.0);
   private final DoublePreferenceConstant pivotFlipTarget =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Flip", -305.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Flip", 166.5);
   private final DoublePreferenceConstant pivotFlipDelay =
       new DoublePreferenceConstant("Climber/Pivot/Target/Delay", 35.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
@@ -159,11 +161,13 @@ public class Climber extends SubsystemBase {
     pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
     pivotConfig.MotionMagic.MotionMagicCruiseVelocity = pivotPID.getMaxVelocity().getValue();
     pivotConfig.MotionMagic.MotionMagicAcceleration = pivotPID.getMaxAcceleration().getValue();
-    pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TODO
+    pivotConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // TODO
 
     pivot.getConfigurator().apply(pivotConfig);
     pivot.setNeutralMode(NeutralModeValue.Brake);
     lift.setNeutralMode(NeutralModeValue.Brake);
+
+    pivot.setPosition(7.4);
   }
 
   private void configureSmartDashboardButtons() {
@@ -181,7 +185,7 @@ public class Climber extends SubsystemBase {
         "Climber/Pivot/Pivot Go Target", pivotGoto(() -> pivotTestTarget.getValue()));
     SmartDashboard.putData(
         "Climber/Pivot/ZeroPivot",
-        new InstantCommand(() -> pivot.setPosition(0.0), this).ignoringDisable(true));
+        new InstantCommand(() -> pivot.setPosition(7.4), this).ignoringDisable(true));
     SmartDashboard.putData(
         "Climber/Lift/Zero", new InstantCommand(() -> lift.setPosition(0.0), this));
     SmartDashboard.putData(
@@ -210,7 +214,7 @@ public class Climber extends SubsystemBase {
   @AutoLogOutput
   public boolean isFullyOnPole() {
     return getDistance() < 0.195
-        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5;
+        && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.2;
   }
 
   private void stop() {
@@ -259,7 +263,7 @@ public class Climber extends SubsystemBase {
     double position = Math.abs(pivot.getPosition().getValueAsDouble());
 
     if (position > pivotSwitchTarget.getValue()) {
-      liftGotoPosition(liftGripTarget.getValue());
+      liftGotoPosition(liftFlipGripTarget.getValue());
     } else {
       liftGotoPosition(liftTuckTarget.getValue());
     }
