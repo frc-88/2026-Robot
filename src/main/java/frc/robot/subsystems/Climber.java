@@ -110,6 +110,8 @@ public class Climber extends SubsystemBase {
     configureMotors();
     configureSmartDashboardButtons();
     configurePigeon();
+
+    liftTestTarget.addChangeHandler((Double f) -> configureMotors());
   }
 
   private void configurePigeon() {
