@@ -292,9 +292,11 @@ public class Climber extends SubsystemBase {
   private void liftGetOnPole() {
     if (isPartiallyOnPole()
         || (lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5)) {
+      pivotGotoPosition(pivotTestTarget.getValue());
       liftGotoPosition(liftGripTarget.getValue());
     } else {
       liftGotoPosition(liftChinStrapTarget.getValue());
+      pivotGotoPosition(pivotTestTarget.getValue());
     }
   }
 
