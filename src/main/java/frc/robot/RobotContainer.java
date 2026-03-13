@@ -294,6 +294,7 @@ public class RobotContainer {
     buttons.button(3).onTrue(turret.syncCommand());
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
+    buttons.button(11).whileTrue(getOffTower());
   }
 
   public void periodic() {
