@@ -46,7 +46,8 @@ public class Feeder extends SubsystemBase {
       new DoublePreferenceConstant("Feeder/FeedSpeed", 105.0);
   private final MotionMagicPIDPreferenceConstants p_feederConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Feeder/MotorPID", 0., 0., 0., 0., 0., 0., 0.0988, 0., 0.);
+          "Feeder/MotorPID", 0., 0., 0.,
+           0.15886, 0., 0., 0.10665, 0.099049, 0.063801);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(

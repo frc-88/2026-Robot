@@ -53,7 +53,8 @@ public class Shooter extends SubsystemBase {
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
+          "Shooter/ShooterMotors", 0.0, 0.0,
+           0.0, 0.19816, 0.0, 0.0, 0.1, 0.36882, 0.017346);
   private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")

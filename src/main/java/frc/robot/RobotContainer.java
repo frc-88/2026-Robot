@@ -276,7 +276,7 @@ public class RobotContainer {
   }
 
   public void configureButtonBox() {
-    buttons.button(1).onTrue(prepClimber());
+    buttons.button(1).whileTrue(prepClimber());
     buttons
         .button(2)
         .onTrue(
