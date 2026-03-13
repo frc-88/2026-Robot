@@ -67,6 +67,10 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Test", 7.4);
   private final DoublePreferenceConstant pivotGripTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Grip", -10.0);
+  private final DoublePreferenceConstant pivotStowTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/Stow", 7.4);
+  private final DoublePreferenceConstant pivotL1Target =
+      new DoublePreferenceConstant("Climber/Pivot/Target/L1", 0.0);
   private final DoublePreferenceConstant pivotChinStrapTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/ChinStrap", -10.0);
   private final DoublePreferenceConstant pivotFlipTarget =
@@ -374,11 +378,11 @@ public class Climber extends SubsystemBase {
   }
 
   public Command gotoL1() {
-    return new RunCommand(() -> liftGotoPosition(liftTuckTarget.getValue()), this);
+    return new RunCommand(() -> {liftGotoPosition(liftTuckTarget.getValue()); pivotGotoPosition(pivotL1Target.getValue());}, this);
   }
 
   public Command gotoStow() {
-    return new RunCommand(() -> liftGotoPosition(liftDownTarget.getValue()), this);
+    return new RunCommand(() -> {liftGotoPosition(liftDownTarget.getValue()); pivotGotoPosition(pivotStowTarget.getValue());}, this);
   }
 
   public Command flipCommand() {
