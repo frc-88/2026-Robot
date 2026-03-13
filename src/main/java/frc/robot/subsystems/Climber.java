@@ -370,7 +370,12 @@ public class Climber extends SubsystemBase {
   }
 
   public Command goToGrip() {
-    return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
+    return new RunCommand(
+        () -> {
+          pivotGotoPosition(pivotGripTarget.getValue());
+          liftGotoPosition(liftGripTarget.getValue());
+        },
+        this);
   }
 
   public Command goToChinStrap() {
@@ -404,7 +409,7 @@ public class Climber extends SubsystemBase {
   public Command flipCommand() {
     return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this)
         .withTimeout(0.5)
-        .andThen(() -> flip(), this);
+        .andThen(new RunCommand(() -> flip(), this));
   }
 
   public Command stopall() {
