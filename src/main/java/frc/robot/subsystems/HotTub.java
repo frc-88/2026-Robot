@@ -46,8 +46,7 @@ public class HotTub extends SubsystemBase {
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Spinner/SpinnerMotors", 0., 0.,
-           0., 0.17547, 0., 0., 0.11504, 0.18565, 0.01426);
+          "Spinner/SpinnerMotors", 0., 0., 0., 0.17547, 0., 0., 0.11504, 0.18565, 0.01426);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -46,7 +47,7 @@ public class Intake extends SubsystemBase {
   private final DoublePreferenceConstant speed =
       new DoublePreferenceConstant("Intake/Speed", 100.0);
   private final DoublePreferenceConstant deployPositionRotations =
-      new DoublePreferenceConstant("Intake/DeployPosition", 26.1);
+      new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
 
   private boolean isDoingTheThing = false;
   private boolean isShooting = false;
@@ -91,12 +92,13 @@ public class Intake extends SubsystemBase {
     rollerConfig.Slot0.kV = intakeRollerConfigConstants.getKV().getValue();
     rollerConfig.Slot0.kS = intakeRollerConfigConstants.getKS().getValue();
     rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
     intakeRoller.getConfigurator().apply(rollerConfig);
   }
 
   private void configureSmartDashboardButtons() {
     SmartDashboard.putData("Intake/Calibrate", calibrateIntake());
-    SmartDashboard.putData("Intake/JustPivot", deployJustIntake());
+    // SmartDashboard.putData("Intake/JustPivot", deployJustIntake());
     SmartDashboard.putData("Intake/SetPosition", pivotGoToPosition());
     SmartDashboard.putData("Intake/SetRotations", pivotGoToRotations());
     SmartDashboard.putData("Intake/Retract", retractIntake());
@@ -178,7 +180,7 @@ public class Intake extends SubsystemBase {
                 (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 65.0, 120.0));
   }
 
-  private void intakeIn() {
+  public void intakeIn() {
     goToRotations(0.0);
     stopSpinner();
   }
@@ -267,9 +269,17 @@ public class Intake extends SubsystemBase {
     return new RunCommand(() -> intakeOut(), this);
   }
 
-  public Command deployJustIntake() {
+  public Command deployJustIntake(BooleanSupplier isClimberUp) {
     // TODO: determine proper deploy angle, put it here
-    return new RunCommand(() -> justIntakeOut(), this);
+    return new RunCommand(
+        () -> {
+          if (isClimberUp.getAsBoolean()) {
+            intakeIn();
+          } else {
+            justIntakeOut();
+          }
+        },
+        this);
   }
 
   public Command doTheThing() {

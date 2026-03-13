@@ -76,7 +76,7 @@ public class Climber extends SubsystemBase {
   private final DoublePreferenceConstant pivotFlipTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Flip", 166.5);
   private final DoublePreferenceConstant pivotFlipDelay =
-      new DoublePreferenceConstant("Climber/Pivot/Target/Delay", 35.0);
+      new DoublePreferenceConstant("Climber/Pivot/Target/Delay", 30.0);
   private final DoublePreferenceConstant pivotSwitchTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
@@ -295,6 +295,10 @@ public class Climber extends SubsystemBase {
     }
   }
 
+  public double getLiftPosition() {
+    return lift.getPosition().getValueAsDouble();
+  }
+
   private void liftGetOnPole() {
     if (isPartiallyOnPole()
         || (lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.5)) {
@@ -378,15 +382,29 @@ public class Climber extends SubsystemBase {
   }
 
   public Command gotoL1() {
-    return new RunCommand(() -> {liftGotoPosition(liftTuckTarget.getValue()); pivotGotoPosition(pivotL1Target.getValue());}, this);
+    return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this)
+        .withTimeout(0.5)
+        .andThen(
+            (() -> {
+              liftGotoPosition(liftTuckTarget.getValue());
+              pivotGotoPosition(pivotL1Target.getValue());
+            }),
+            this);
   }
 
   public Command gotoStow() {
-    return new RunCommand(() -> {liftGotoPosition(liftDownTarget.getValue()); pivotGotoPosition(pivotStowTarget.getValue());}, this);
+    return new RunCommand(
+        () -> {
+          liftGotoPosition(liftDownTarget.getValue());
+          pivotGotoPosition(pivotStowTarget.getValue());
+        },
+        this);
   }
 
   public Command flipCommand() {
-    return new RunCommand(() -> flip(), this);
+    return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this)
+        .withTimeout(0.5)
+        .andThen(() -> flip(), this);
   }
 
   public Command stopall() {

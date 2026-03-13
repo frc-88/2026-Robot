@@ -209,7 +209,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake());
+    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 20.0));
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
@@ -269,7 +269,9 @@ public class RobotContainer {
     //                 drive)
     //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
-    controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
+    controller
+        .leftBumper()
+        .toggleOnTrue(intake.deployJustIntake(() -> climber.getLiftPosition() > 20.0));
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
     controller.rightBumper().whileTrue(intake.doTheThing());
@@ -299,6 +301,10 @@ public class RobotContainer {
       if (!batman.hasGlobalized()) {
         batman.resetPose(new Pose3d(drive.getPose()));
       }
+    }
+
+    if (climber.getLiftPosition() > 20) {
+      intake.intakeIn();
     }
 
     Logger.recordOutput("AutoName", autoChooser.get().getName());
@@ -434,7 +440,7 @@ public class RobotContainer {
   }
 
   public Command getOffTower() {
-    return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(0.5);
+    return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(2.0);
   } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   public Command prepClimber() {
