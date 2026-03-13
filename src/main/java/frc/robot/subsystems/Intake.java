@@ -45,6 +45,8 @@ public class Intake extends SubsystemBase {
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
   private final DoublePreferenceConstant speed =
       new DoublePreferenceConstant("Intake/Speed", 100.0);
+  private final DoublePreferenceConstant deployPositionRotations =
+      new DoublePreferenceConstant("Intake/DeployPosition", 26.1);
 
   private boolean isDoingTheThing = false;
   private boolean isShooting = false;
@@ -165,7 +167,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void intakeOut() {
-    goToRotations(23.0); // TODO
+    goToRotations(deployPositionRotations.getValue()); // TODO
     setSpinnerSpeed();
   }
 
@@ -173,7 +175,7 @@ public class Intake extends SubsystemBase {
     setSpinnerSpeed(
         () ->
             MathUtil.clamp(
-                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 40.0, 120.0));
+                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 65.0, 120.0));
   }
 
   private void intakeIn() {
@@ -201,10 +203,10 @@ public class Intake extends SubsystemBase {
 
   private void justIntakeOut() {
     if (isShooting) {
-      goToRotations(23.0); // TODO
+      goToRotations(deployPositionRotations.getValue()); // TODO
       setSpinnerSpeed();
     } else {
-      goToRotations(23.0); // TODO
+      goToRotations(deployPositionRotations.getValue()); // TODO
       stopSpinner();
     }
   }

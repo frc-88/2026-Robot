@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -161,31 +160,25 @@ public class RobotContainer {
     intake = new Intake(drive::getSpeed);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
-    NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
-    NamedCommands.registerCommand(
-        "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
+    NamedCommands.registerCommand("Intake In", intake.retractIntake());
+    NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
     NamedCommands.registerCommand("Climb L1", climber.gotoL1());
-    NamedCommands.registerCommand(
-        "Go To Climb Approach Right", new ParallelDeadlineGroup(goToRightApproachPose()));
-    NamedCommands.registerCommand(
-        "Get On Pole Right",
-        new ParallelCommandGroup(
-            climber.getOnPole(), goToRightClimbPose())); // .until(() -> climber.isFullyOnPole()));
 
-    NamedCommands.registerCommand(
-        "Go To Climb Approach Left", new ParallelDeadlineGroup(goToLeftApproachPose()));
-    NamedCommands.registerCommand(
-        "Get On Pole Left", goToLeftClimbPose().alongWith(climber.getOnPole()));
+    NamedCommands.registerCommand("Go To Climb Approach Right", goToTowerApproachPose());
+    NamedCommands.registerCommand("Go To Climb Approach Left", goToTowerApproachPose());
+
+    NamedCommands.registerCommand("Get On Pole Right", getOnTower());
+    NamedCommands.registerCommand("Get On Pole Left", getOnTower());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
 
-    NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
+    // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -202,38 +195,11 @@ public class RobotContainer {
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
 
     if (Util.logif()) {
-      SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunShooter", shooter.runShooter());
-      SmartDashboard.putData("StopShooter", shooter.stopShooter());
-      SmartDashboard.putData("RunIntake", intake.runIntake());
-      SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
-      SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
-      SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
       SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
       SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
       SmartDashboard.putData("goToClimbPose", getOnTower());
       SmartDashboard.putData("GetOffTower", getOffTower());
       SmartDashboard.putData("AntiJam", antiJam());
-
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
       SmartDashboard.putData("Prepclimb", prepClimber());
@@ -243,13 +209,13 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake()); // TODO calibrate first. THIS
+    intake.setDefaultCommand(intake.deployJustIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRotateAroundRobotCenter());
-    climber.setDefaultCommand(climber.stopall()); // TODO calibration
+    drive.setDefaultCommand(driveRebuilt());
+    climber.setDefaultCommand(climber.stopall());
   }
 
   public void disabledInit() {
@@ -311,14 +277,21 @@ public class RobotContainer {
 
   public void configureButtonBox() {
     buttons.button(1).onTrue(prepClimber());
-    buttons.button(2).onTrue(climber.flipCommand().alongWith(drive.pointForwardsCommand()));
-    buttons.button(4).onTrue(climber.gotoL1());
+    buttons
+        .button(2)
+        .onTrue(
+            climber
+                .flipCommand()
+                .alongWith(drive.pointForwardsCommand())
+                .alongWith(intake.retractIntake()));
+    buttons.button(4).onTrue(climber.gotoL1().alongWith(intake.retractIntake()));
     buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
-    buttons.button(8).onTrue(driveRotateAroundRobotCenter());
-    buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
+    buttons.button(3).onTrue(turret.syncCommand());
+    buttons.button(8).whileTrue(intake.doTheThing());
+    buttons.button(9).whileTrue(antiJam());
   }
 
   public void periodic() {
@@ -333,10 +306,6 @@ public class RobotContainer {
 
   public Pose2d getPoseBatman() {
     return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
-  }
-
-  public Command prepClimber() {
-    return goToTowerApproachPose().andThen(getOnTower());
   }
 
   public Command resetBatman() { // DO NOT FLIP IF RED
@@ -467,6 +436,11 @@ public class RobotContainer {
   public Command getOffTower() {
     return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(0.5);
   } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  public Command prepClimber() {
+    return new ParallelDeadlineGroup(
+        goToTowerApproachPose().andThen(getOnTower()), intake.retractIntake());
+  }
 
   public Command shoot() {
     return new ParallelCommandGroup(

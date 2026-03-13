@@ -208,12 +208,12 @@ public class Climber extends SubsystemBase {
 
   @AutoLogOutput
   public boolean isPartiallyOnPole() {
-    return debouncer.calculate(getDistance() < 0.272 && getDistance() > 0.195); // TODO
+    return debouncer.calculate(getDistance() < 0.3 && getDistance() > 0.215);
   }
 
   @AutoLogOutput
-  public boolean isFullyOnPole() {
-    return getDistance() < 0.195
+  public boolean isFullyOnPole() { // TODO SIGNAL STRENGTH
+    return getDistance() < 0.215
         && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.2;
   }
 
@@ -284,7 +284,11 @@ public class Climber extends SubsystemBase {
   // }
 
   public double getDistance() {
-    return f.calculate(canRange.getDistance().getValueAsDouble());
+    if (canRange.getSignalStrength().getValueAsDouble() > 2000.0) {
+      return f.calculate(canRange.getDistance().getValueAsDouble());
+    } else {
+      return 10000.0;
+    }
   }
 
   private void liftGetOnPole() {

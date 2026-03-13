@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
+              (state) -> Logger.recordOutput("Shooter/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
   private DoubleSupplier m_targetSpeed;
 

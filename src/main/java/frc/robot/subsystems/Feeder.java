@@ -4,13 +4,13 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -26,6 +26,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 // so much fuel goes by
 // suddenly I realize
@@ -54,7 +55,7 @@ public class Feeder extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> SignalLogger.writeString("state", state.toString())),
+              (state) -> Logger.recordOutput("Feeder/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private BooleanSupplier m_turretOnTarget;
@@ -100,6 +101,11 @@ public class Feeder extends SubsystemBase {
   @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_feeder.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getPosition() {
+    return m_feeder.getPosition().getValue();
   }
 
   private void setVoltage(Voltage volts) {
