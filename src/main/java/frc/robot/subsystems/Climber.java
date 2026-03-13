@@ -119,10 +119,10 @@ public class Climber extends SubsystemBase {
     configureMotors();
     configureSmartDashboardButtons();
 
-    liftTestTarget.addChangeHandler(
-        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
-    pivotTestTarget.addChangeHandler(
-        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    // liftTestTarget.addChangeHandler(
+    //     (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    // pivotTestTarget.addChangeHandler(
+    //     (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
   }
 
   private void configureCANrange() {
