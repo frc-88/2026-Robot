@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -79,6 +78,7 @@ public class RobotContainer {
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
+  private boolean shouldUseQuest = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -150,7 +150,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> (batman.shouldUse() ? batman.getPose2d() : drive.getPose()),
+            () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
     turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
     feeder = new Feeder(turret::onTarget);
@@ -284,7 +284,17 @@ public class RobotContainer {
         .onTrue(
             climber
                 .flipCommand()
-                .alongWith(drive.pointForwardsCommand())
+                .alongWith(
+                    DriveCommands.joystickDrive(
+                            drive,
+                            () -> 0.0,
+                            () ->
+                                (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791
+                                        ? 1.0
+                                        : -1.0)
+                                    * 0.2,
+                            () -> 0.0)
+                        .withTimeout(1.0))
                 .alongWith(intake.retractIntake()));
     buttons.button(4).onTrue(climber.gotoL1().alongWith(intake.retractIntake()));
     buttons.button(5).onTrue(climber.gotoStow());
@@ -295,19 +305,29 @@ public class RobotContainer {
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
     buttons.button(11).whileTrue(getOffTower());
+    buttons
+        .button(12)
+        .toggleOnTrue(
+            new InstantCommand(
+                    () -> {
+                      shouldUseQuest = !shouldUseQuest;
+                      if (shouldUseQuest) {
+                        batman.resetPose(new Pose3d(drive.getPose()));
+                      }
+                    })
+                .ignoringDisable(true));
   }
 
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      if (!batman.hasGlobalized()) {
-        batman.resetPose(new Pose3d(drive.getPose()));
-      }
+    if (!batman.hasGlobalized()) {
+      batman.resetPose(new Pose3d(drive.getPose()));
     }
 
     if (climber.getLiftPosition() > 20) {
       intake.intakeIn();
     }
 
+    Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoChooser.get().getName());
   }
 

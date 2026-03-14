@@ -183,6 +183,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
     SmartDashboard.putData("Climber/Go Chinstrap", goToChinStrap());
     SmartDashboard.putData("Climber/Go Pole", getOnPole());
+    SmartDashboard.putData("Climber/JustPivotL1", pivotGotToL1());
 
     SmartDashboard.putData(
         "Climber/Lift/Lift Go Target", liftGoto(() -> liftTestTarget.getValue()));
@@ -233,7 +234,7 @@ public class Climber extends SubsystemBase {
   }
 
   private void pivotGotoPosition(double position) {
-    if (pivot.getPosition().getValueAsDouble() >80.0) {
+    if (pivot.getPosition().getValueAsDouble() > 80.0) {
       pivot.setControl(
           dynamic.withVelocity(20.0).withAcceleration(40.0).withPosition(position)); // * sin
     } else {
@@ -420,5 +421,9 @@ public class Climber extends SubsystemBase {
 
   public Command stopall() {
     return new RunCommand((() -> stop()), this);
+  }
+
+  public Command pivotGotToL1() {
+    return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this);
   }
 }
