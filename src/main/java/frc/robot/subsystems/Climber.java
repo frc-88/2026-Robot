@@ -81,6 +81,7 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
+  private final DynamicMotionMagicVoltage dynamic = new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
   private final MotionMagicVoltage pivotMotionMagic =
       new MotionMagicVoltage(0).withFeedForward(3.0);
   private final DynamicMotionMagicVoltage liftMotionMagicSlow =
@@ -232,7 +233,12 @@ public class Climber extends SubsystemBase {
   }
 
   private void pivotGotoPosition(double position) {
-    pivot.setControl(pivotMotionMagic.withPosition(position)); // * sin
+    if (pivot.getPosition().getValueAsDouble() >80.0) {
+      pivot.setControl(
+          dynamic.withVelocity(20.0).withAcceleration(40.0).withPosition(position)); // * sin
+    } else {
+      pivot.setControl(pivotMotionMagic.withPosition(position));
+    }
     // pitch
     // pivot.setControl(new DutyCycleOut(1.0));
   }

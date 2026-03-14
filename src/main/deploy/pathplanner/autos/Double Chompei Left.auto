@@ -78,7 +78,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftCenterToLeftUnload"
+                        "pathName": "LeftCenterToLeftUnload(LeftStart)"
                       }
                     },
                     {
@@ -155,7 +155,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftUnloadToLeftDeepCenter"
+                        "pathName": "StartToLeftDeepCenter"
                       }
                     },
                     {

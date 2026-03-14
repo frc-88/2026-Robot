@@ -380,38 +380,38 @@ public class RobotContainer {
   }
 
   public Command goToRightApproachPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
         new PathConstraints(1.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToRightClimbPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0)),
         new PathConstraints(0.25, 3.0, 5.0, 10.0));
   }
 
   public Command getOffPoleRight() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
         new PathConstraints(0.5, 3.0, 5.0, 10.0));
   }
 
   public Command goToLeftApproachPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(1.5, 3.0, 12.5, 20.0));
   }
 
   public Command goToLeftClimbPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.144, 4.69, Rotation2d.fromDegrees(90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.144, 4.69, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(0.25, 3.0, 12.5, 20.0));
   }
 
   public Command getOffPoleLeft() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0))),
+    return AutoBuilder.pathfindToPoseFlipped(
+        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
         new PathConstraints(0.5, 3.0, 12.5, 20.0));
   }
 
