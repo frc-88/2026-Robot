@@ -462,8 +462,7 @@ public class RobotContainer {
   } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   public Command prepClimber() {
-    return new ParallelDeadlineGroup(
-        goToTowerApproachPose().andThen(getOnTower()));
+    return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
   }
 
   public Command shoot() {
