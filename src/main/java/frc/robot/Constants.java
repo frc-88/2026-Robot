@@ -87,6 +87,6 @@ public final class Constants {
 
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(2.5, 1.0);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(2.5, 7.0);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
 }
