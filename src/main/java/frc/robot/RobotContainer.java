@@ -209,7 +209,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 20.0));
+    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 10.0));
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
@@ -463,7 +463,7 @@ public class RobotContainer {
 
   public Command prepClimber() {
     return new ParallelDeadlineGroup(
-        goToTowerApproachPose().andThen(getOnTower()), intake.retractIntake());
+        goToTowerApproachPose().andThen(getOnTower()));
   }
 
   public Command shoot() {
