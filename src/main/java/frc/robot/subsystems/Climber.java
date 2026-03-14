@@ -81,6 +81,7 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
+  private final DynamicMotionMagicVoltage dynamic = new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
   private final MotionMagicVoltage pivotMotionMagic =
       new MotionMagicVoltage(0).withFeedForward(3.0);
   private final DynamicMotionMagicVoltage liftMotionMagicSlow =
@@ -119,10 +120,10 @@ public class Climber extends SubsystemBase {
     configureMotors();
     configureSmartDashboardButtons();
 
-    liftTestTarget.addChangeHandler(
-        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
-    pivotTestTarget.addChangeHandler(
-        (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    // liftTestTarget.addChangeHandler(
+    //     (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
+    // pivotTestTarget.addChangeHandler(
+    //     (Double abcdefghijklmnopqrstuvwxyz1234567890) -> configureMotors());
   }
 
   private void configureCANrange() {
@@ -182,6 +183,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putData("Climber/Go Stow", gotoStow());
     SmartDashboard.putData("Climber/Go Chinstrap", goToChinStrap());
     SmartDashboard.putData("Climber/Go Pole", getOnPole());
+    SmartDashboard.putData("Climber/JustPivotL1", pivotGotToL1());
 
     SmartDashboard.putData(
         "Climber/Lift/Lift Go Target", liftGoto(() -> liftTestTarget.getValue()));
@@ -232,7 +234,12 @@ public class Climber extends SubsystemBase {
   }
 
   private void pivotGotoPosition(double position) {
-    pivot.setControl(pivotMotionMagic.withPosition(position)); // * sin
+    if (pivot.getPosition().getValueAsDouble() > 80.0) {
+      pivot.setControl(
+          dynamic.withVelocity(20.0).withAcceleration(40.0).withPosition(position)); // * sin
+    } else {
+      pivot.setControl(pivotMotionMagic.withPosition(position));
+    }
     // pitch
     // pivot.setControl(new DutyCycleOut(1.0));
   }
@@ -370,7 +377,12 @@ public class Climber extends SubsystemBase {
   }
 
   public Command goToGrip() {
-    return new RunCommand(() -> liftGotoPosition(liftGripTarget.getValue()), this);
+    return new RunCommand(
+        () -> {
+          pivotGotoPosition(pivotGripTarget.getValue());
+          liftGotoPosition(liftGripTarget.getValue());
+        },
+        this);
   }
 
   public Command goToChinStrap() {
@@ -404,10 +416,14 @@ public class Climber extends SubsystemBase {
   public Command flipCommand() {
     return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this)
         .withTimeout(0.5)
-        .andThen(() -> flip(), this);
+        .andThen(new RunCommand(() -> flip(), this));
   }
 
   public Command stopall() {
     return new RunCommand((() -> stop()), this);
+  }
+
+  public Command pivotGotToL1() {
+    return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this);
   }
 }

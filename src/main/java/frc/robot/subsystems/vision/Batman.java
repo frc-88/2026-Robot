@@ -83,6 +83,7 @@ public class Batman extends SubsystemBase {
   public void resetPose(Pose3d pose) {
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+    hasGlobalized = true;
   }
 
   public boolean hasGlobalized() {
