@@ -11,31 +11,6 @@
           }
         },
         {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 1.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake Out"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -46,7 +21,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightStartToCenter"
+                        "pathName": "RightStartToDeepCenter"
                       }
                     },
                     {
@@ -78,32 +53,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightCenterToOutpost"
-                      }
-                    },
-                    {
-                      "type": "sequential",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 2.2
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Shoot"
-                            }
-                          }
-                        ]
+                        "pathName": "RightDeepCenterToRightUnload"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Don't Shoot"
                       }
                     }
                   ]
@@ -119,63 +81,83 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.5
+                  "waitTime": 3.0
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "Shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake The Thing"
                 }
               }
             ]
           }
         },
         {
-          "type": "deadline",
+          "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "deadline",
                 "data": {
-                  "name": "Go To Climb Approach Right"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake In"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "RightUnloadToCenter"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Don't Shoot"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         },
         {
-          "type": "deadline",
+          "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "deadline",
                 "data": {
-                  "name": "Get On Pole Right"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake In"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "RightCenterToUnload"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Don't Shoot"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -188,19 +170,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Climb L1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake In"
+                  "name": "Intake The Thing"
                 }
               }
             ]
