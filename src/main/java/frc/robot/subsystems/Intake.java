@@ -91,6 +91,9 @@ public class Intake extends SubsystemBase {
     rollerConfig.Slot0.kD = intakeRollerConfigConstants.getKD().getValue();
     rollerConfig.Slot0.kV = intakeRollerConfigConstants.getKV().getValue();
     rollerConfig.Slot0.kS = intakeRollerConfigConstants.getKS().getValue();
+
+    rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     intakeRoller.getConfigurator().apply(rollerConfig);
