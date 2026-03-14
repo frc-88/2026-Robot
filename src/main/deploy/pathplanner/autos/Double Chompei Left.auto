@@ -55,20 +55,20 @@
                       "data": {
                         "pathName": "LeftDeepCenterToLeftUnload"
                       }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Don't Shoot"
+                      }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake Out"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Don't Shoot"
                 }
               }
             ]
