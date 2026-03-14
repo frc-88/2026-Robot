@@ -78,7 +78,7 @@ public class RobotContainer {
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
-  private boolean shouldUseQuest = true;
+  private boolean shouldUseQuest = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -204,7 +204,7 @@ public class RobotContainer {
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
       SmartDashboard.putData("Prepclimb", prepClimber());
     }
-    SmartDashboard.putData("Batman/SetPose", resetBatman());
+    // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
@@ -319,9 +319,6 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    if (!batman.hasGlobalized()) {
-      batman.resetPose(new Pose3d(drive.getPose()));
-    }
 
     if (climber.getLiftPosition() > 20) {
       intake.intakeIn();

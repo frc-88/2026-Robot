@@ -50,6 +50,8 @@ public class Batman extends SubsystemBase {
 
   private QuestNav quest = new QuestNav();
 
+  public Batman() {}
+
   public void globalize(Pose3d globalPose) {
     resetPose(globalPose);
     hasGlobalized = true;
