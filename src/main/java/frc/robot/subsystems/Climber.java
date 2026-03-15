@@ -223,6 +223,10 @@ public class Climber extends SubsystemBase {
         && lift.getPosition().getValueAsDouble() > liftGripTarget.getValue() - 0.2;
   }
 
+  public boolean isAtTuck() {
+    return Math.abs(lift.getPosition().getValueAsDouble() - liftTuckTarget.getValue()) < 1.0;
+  }
+
   private void stop() {
     lift.setControl(new DutyCycleOut(0));
     pivot.setControl(new DutyCycleOut(0));
@@ -236,7 +240,7 @@ public class Climber extends SubsystemBase {
   private void pivotGotoPosition(double position) {
     if (pivot.getPosition().getValueAsDouble() > 80.0) {
       pivot.setControl(
-          dynamic.withVelocity(20.0).withAcceleration(40.0).withPosition(position)); // * sin
+          dynamic.withVelocity(20.0).withAcceleration(80.0).withPosition(position)); // * sin
     } else {
       pivot.setControl(pivotMotionMagic.withPosition(position));
     }
@@ -413,10 +417,8 @@ public class Climber extends SubsystemBase {
         this);
   }
 
-  public Command flipCommand() {
-    return new RunCommand(() -> pivotGotoPosition(pivotL1Target.getValue()), this)
-        .withTimeout(0.5)
-        .andThen(new RunCommand(() -> flip(), this));
+  public Command flipCommand() { // assume L1
+    return new RunCommand(() -> flip(), this);
   }
 
   public Command stopall() {

@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -209,7 +210,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 10.0));
+    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 2.0));
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
@@ -279,24 +280,8 @@ public class RobotContainer {
 
   public void configureButtonBox() {
     buttons.button(1).whileTrue(prepClimber());
-    buttons
-        .button(2)
-        .onTrue(
-            climber
-                .flipCommand()
-                .alongWith(
-                    DriveCommands.joystickDrive(
-                            drive,
-                            () -> 0.0,
-                            () ->
-                                (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791
-                                        ? 1.0
-                                        : -1.0)
-                                    * 0.2,
-                            () -> 0.0)
-                        .withTimeout(1.0))
-                .alongWith(intake.retractIntake()));
-    buttons.button(4).onTrue(climber.gotoL1().alongWith(intake.retractIntake()));
+    buttons.button(2).onTrue(L1AndFlip());
+    buttons.button(4).onTrue(L1());
     buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
@@ -463,6 +448,31 @@ public class RobotContainer {
 
   public Command prepClimber() {
     return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
+  }
+
+  public Command climbDriveIn() {
+    return DriveCommands.joystickDrive(
+        drive,
+        () -> 0.0,
+        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791 ? 1.0 : -1.0) * 0.8,
+        () -> 0.0);
+  }
+
+  public Command L1() {
+    return climber
+        .gotoL1()
+        .alongWith(intake.retractIntake())
+        .alongWith(
+            climbDriveIn().withTimeout(0.5).andThen(new RunCommand(() -> drive.stop(), drive)));
+  }
+
+  public Command L1AndFlip() {
+    return L1().until(() -> climber.isAtTuck())
+        .andThen(
+            climber
+                .flipCommand()
+                .alongWith(drive.pointForwardsCommand())
+                .alongWith(intake.retractIntake()));
   }
 
   public Command shoot() {
