@@ -308,6 +308,8 @@ public class RobotContainer {
 
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoChooser.get().getName());
+
+    Pose2d targetStartingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d()); // TODO: Use actual numbers here based on auto selection.  THIS IS A PLACEHOLDER (currently set to left start).
   }
 
   public Pose2d getPoseBatman() {
