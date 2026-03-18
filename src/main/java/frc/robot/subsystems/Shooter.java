@@ -34,7 +34,12 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// I like blueberries
+// especially the tasty
+// big round yellow ones
+
 public class Shooter extends SubsystemBase {
+  // motors & devices
   private final TalonFX shooterMain =
       new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
   private final TalonFX shooterFollower =
@@ -42,9 +47,11 @@ public class Shooter extends SubsystemBase {
   private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
   private final DigitalInput feederBeamBreak = new DigitalInput(0);
 
+  // output requests
   private final VelocityVoltage requestShooter = new VelocityVoltage(0.0);
   private final VoltageOut sysIdReq = new VoltageOut(0.0);
 
+  // preferences
   private final DoublePreferenceConstant shootSpeed =
       new DoublePreferenceConstant("Shooter/ShootSpeed", 37.3);
   private final DoublePreferenceConstant increaseDuration =
@@ -233,8 +240,23 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getVoltage() {
+  private double getMainVoltage() {
     return shooterMain.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerVoltage() {
+    return shooterFollower.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getMainCurrent() {
+    return shooterMain.getTorqueCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerCurrent() {
+    return shooterFollower.getTorqueCurrent().getValueAsDouble();
   }
 
   @AutoLogOutput
