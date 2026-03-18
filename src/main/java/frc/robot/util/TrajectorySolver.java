@@ -4,10 +4,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -23,8 +23,8 @@ public class TrajectorySolver extends SubsystemBase {
   public Rotation2d robotYaw = Rotation2d.kZero; // rad
   public Translation2d robotVelocity = Translation2d.kZero; // m/s
   public Translation2d lastRobotVelocity = Translation2d.kZero;
-  public Timer accelerationTimer = new Timer();
-  public double lastTime = 0.0;
+  // public Timer accelerationTimer = new Timer();
+  // public double lastTime = 0.0;
   public double robotRotationalVelocity = 0.0; // rad/s
   public Translation2d robotAcceleration = Translation2d.kZero; // m/s/s
   public Translation2d targetVelocity = Translation2d.kZero;
@@ -39,13 +39,16 @@ public class TrajectorySolver extends SubsystemBase {
   private double turretToProjectedTargetDistance = 0.0;
   private int numberOfIterations = 5;
 
+  public DoublePreferenceConstant lagCompensation =
+      new DoublePreferenceConstant("Trajectory/LagCompensation", 0.02);
+
   public double hoodAngle;
   public double shootSpeed;
 
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
     drivePoseSupplier = drivePose;
     velocityPoseSupplier = velocityPose;
-    accelerationTimer.start();
+    // accelerationTimer.start();
   }
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
@@ -81,13 +84,16 @@ public class TrajectorySolver extends SubsystemBase {
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
     robotAcceleration = getAcceleration();
     lastRobotVelocity = robotVelocity;
-    lastTime = accelerationTimer.get();
+    // lastTime = accelerationTimer.get();
 
+    // TODO tune number
     robotPosition =
         robotPosition
-            .plus(robotVelocity.times(0.02))
-            .plus(robotAcceleration.times(0.02 * 0.02 * (1.0 / 2.0)));
-    robotVelocity = robotVelocity.plus(robotAcceleration.times(0.02));
+            .plus(robotVelocity.times(lagCompensation.getValue()))
+            .plus(
+                robotAcceleration.times(
+                    lagCompensation.getValue() * lagCompensation.getValue() * (1.0 / 2.0)));
+    robotVelocity = robotVelocity.plus(robotAcceleration.times(lagCompensation.getValue()));
 
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
@@ -103,10 +109,11 @@ public class TrajectorySolver extends SubsystemBase {
             .minus(targetVelocity);
 
     Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
-    Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition, Rotation2d.kZero));
-    Logger.recordOutput(
-        "Trajectory/TurretToTargetRelativeVelocity",
-        new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
+    // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
+    // Rotation2d.kZero));
+    // Logger.recordOutput(
+    //     "Trajectory/TurretToTargetRelativeVelocity",
+    //     new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
 
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
@@ -165,14 +172,11 @@ public class TrajectorySolver extends SubsystemBase {
 
     if (turret.getX() > Units.inchesToMeters(181.56)) {
       if (turret.getY() > Units.inchesToMeters(158.32)) {
-        Logger.recordOutput("Trajectory/TargetSelection", "LEFT_SHUTTLE_TARGET_POSITION");
         target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
       } else {
-        Logger.recordOutput("Trajectory/TargetSelection", "RIGHT_SHUTTLE_TARGET_POSITION");
         target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
       }
     } else {
-      Logger.recordOutput("Trajectory/TargetSelection", "HUB_POSITION");
       target = Constants.HUB_POSITION;
     }
 
@@ -181,9 +185,9 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput
   private Translation2d getAcceleration() {
-    double currentTime = accelerationTimer.get();
+    // double currentTime = accelerationTimer.get();
     // System.out.println(currentTime);
-    double dt = currentTime - lastTime;
+    // double dt = currentTime - lastTime;
     // System.out.println(dt);
     return robotVelocity.minus(lastRobotVelocity).div(0.02);
   }
@@ -201,7 +205,6 @@ public class TrajectorySolver extends SubsystemBase {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
       return 9.18 + 3.01 * distance;
-      // - 1.11 * (Math.pow(distance, 3.0));
     }
   }
 
@@ -211,7 +214,5 @@ public class TrajectorySolver extends SubsystemBase {
     } else { // real
       return 23.3 + 4.23 * (distance);
     }
-    // + 0.0279446 * (Math.pow(distance, 2.0));
-    // - 0.0514 * (Math.pow(distance, 3.0));
   }
 }

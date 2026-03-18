@@ -41,14 +41,14 @@ public class Turret extends SubsystemBase {
 
   // Preferences
   private final DoublePreferenceConstant p_proportion =
-      new DoublePreferenceConstant("Turret/Conversion Constant", -262.0588);
+      new DoublePreferenceConstant("Turret/Conversion Constant", -260.0);
   private final DoublePreferenceConstant p_limitBuffer =
       new DoublePreferenceConstant("Turret/Limit Buffer", 10.0);
   private final DoublePreferenceConstant p_syncThreshold =
-      new DoublePreferenceConstant("Turret/Sync Threshold", 5.0);
+      new DoublePreferenceConstant("Turret/Sync Threshold", 0.75);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 40.0, 20.0, 0.0, 3.2, 0.0, 0.0, 0.01, 0.0, 0);
+          "Turret/PID", 100.0, 250.0, 0.0, 1.0, 0.0, 0.0, 0.01, 0.0, 0);
   private final DoublePreferenceConstant p_forwardLimit =
       new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
@@ -56,11 +56,11 @@ public class Turret extends SubsystemBase {
   private final DoublePreferenceConstant p_spinCompensation =
       new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
-      new DoublePreferenceConstant("Turret/CANCoder50 Offset", 0.0); // TODO Rename and recalibrate
+      new DoublePreferenceConstant("Turret/CANCoder50 Offset", -0.143311);
   private final DoublePreferenceConstant p_goingOutCurrent =
       new DoublePreferenceConstant("Turret/Out Current", 0.0);
   private final DoublePreferenceConstant p_goingInCurrent =
-      new DoublePreferenceConstant("Turret/In Current", -40.0);
+      new DoublePreferenceConstant("Turret/In Current", -9.0);
 
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
@@ -92,6 +92,7 @@ public class Turret extends SubsystemBase {
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
+    sync();
     CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 
@@ -136,11 +137,15 @@ public class Turret extends SubsystemBase {
     // The turret must be physically moved to its center position.
     // WARNING - doing this when the turret isn't in the "zero"
     // position could cause the turret to move to unsafe positions.
-    // m_turret.setPosition(0.0);
-    p_CANcoderOffset.setValue(
-        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue());
-    // // p_cancoder66offset.setValue(
-    // // -m_cancoder66.getAbsolutePosition().getValueAsDouble() + p_cancoder66offset.getValue());
+    double newOffset =
+        -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue();
+    if (newOffset > 1.0) {
+      newOffset -= 1.0;
+    } else if (newOffset < -1.0) {
+      newOffset += 1.0;
+    }
+
+    p_CANcoderOffset.setValue(newOffset);
     configureCANCoder();
     CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
@@ -153,7 +158,7 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private double getCANCoderPosition() {
-    return m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0);
+    return m_CANcoder.getAbsolutePosition().getValueAsDouble();
   }
 
   @AutoLogOutput
@@ -210,7 +215,10 @@ public class Turret extends SubsystemBase {
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
 
-    if (m_circumnavigating && !isFacingSafe(target)) {
+    if (isPositionSafe(target)) {
+      m_circumnavigating = false;
+      goToPosition(turretFacingToFalconEncoderPosition(target), spinCompensation);
+    } else if (m_circumnavigating && !isFacingSafe(target)) {
       // if we are circumnavigating, ignore the input and keep doing that until we get there
       goToPosition(turretFacingToFalconEncoderPosition(m_circumnavigationTarget), false);
       m_circumnavigating = Math.abs(m_circumnavigationTarget - getFacing()) > 5.0;
@@ -338,7 +346,7 @@ public class Turret extends SubsystemBase {
   public boolean onTarget() {
     return m_targeting
         && !m_circumnavigating
-        && Math.abs(getFacing() - m_target) < 5.0; // TODO: Lower 5.0 threshold
+        && Math.abs(getFacing() - m_target) < 7.0; // TODO: Lower 5.0 threshold
   }
 
   public Command calibrateEncoderCommand() {

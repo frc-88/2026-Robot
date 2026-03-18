@@ -3,81 +3,77 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.794904761904762,
-        "y": 4.434511904761905
+        "x": 4.3877651515151515,
+        "y": 0.6222979797979815
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.212529231667845,
-        "y": 3.2055293777274136
+        "x": 4.679449925797591,
+        "y": 0.640760881796112
       },
       "isLocked": false,
-      "linkedName": "Auto9_01End"
+      "linkedName": "RightTrenchStart"
     },
     {
       "anchor": {
-        "x": 5.761660230315133,
-        "y": 0.7436591604854277
+        "x": 5.744177215189873,
+        "y": 0.6222979797979815
       },
       "prevControl": {
-        "x": 6.268694211543834,
-        "y": 0.9845067997730828
+        "x": 5.494229539753801,
+        "y": 0.6171833396245262
       },
       "nextControl": {
-        "x": 5.325543541660745,
-        "y": 0.5364981440544982
+        "x": 6.8206682553116105,
+        "y": 0.6443260475148168
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.3500398998474803,
-        "y": 0.7436591604854277
+        "x": 8.037435897435897,
+        "y": 0.99874643874644
       },
       "prevControl": {
-        "x": 3.8409376111029503,
-        "y": 0.6918912366876748
+        "x": 7.6890619656598265,
+        "y": 0.8428949429518816
       },
       "nextControl": {
-        "x": 2.515587371403977,
-        "y": 0.8316568714440448
+        "x": 8.473714378448554,
+        "y": 1.1939236539363138
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.5497023809523818,
-        "y": 5.584936708860759
+        "x": 8.347521367521367,
+        "y": 3.6861538461538466
       },
       "prevControl": {
-        "x": 0.6061127910585955,
-        "y": 5.341384115707558
+        "x": 8.361704262514657,
+        "y": 3.3968715337566358
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Right Approach"
+      "linkedName": "RightDeepCenter"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 2.0,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 2.1,
+      "rotationDegrees": 90.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.6948228882833702,
+      "minWaypointRelativePos": 2.2724795640327202,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
         "maxVelocity": 1.0,
-        "maxAcceleration": 0.5,
+        "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -97,13 +93,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -89.15747573925957
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 0.4152716567430378
   },
   "useDefaultConstraints": true
 }

@@ -5,7 +5,13 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "named",
+          "data": {
+            "name": "Start Targeting"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -17,13 +23,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Shooter"
+                  "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Deploy Intake"
+                  "name": "Intake Out"
                 }
               }
             ]
@@ -40,19 +46,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Auto9_01StartToCenter"
+                        "pathName": "RightStartToRightCenter"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "Start Shooter"
+                        "name": "Intake Out"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "Deploy Intake"
+                        "name": "Don't Shoot"
                       }
                     }
                   ]
@@ -72,13 +78,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Auto9_02CenterToTower"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Retract Intake"
+                        "pathName": "RightCenterToOutpost"
                       }
                     },
                     {
@@ -88,16 +88,22 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 1.0
+                              "waitTime": 2.2
                             }
                           },
                           {
                             "type": "named",
                             "data": {
-                              "name": "Start Shooter"
+                              "name": "Shoot"
                             }
                           }
                         ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Out"
                       }
                     }
                   ]
@@ -113,13 +119,88 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 5.0
+                  "waitTime": 1.5
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Stop Shooter"
+                  "name": "Shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go To Climb Approach Right"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake In"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Get On Pole Right"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake In"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Climb L1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake In"
                 }
               }
             ]
@@ -128,7 +209,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

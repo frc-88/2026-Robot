@@ -46,14 +46,14 @@ public class Shooter extends SubsystemBase {
   private final VoltageOut sysIdReq = new VoltageOut(0.0);
 
   private final DoublePreferenceConstant shootSpeed =
-      new DoublePreferenceConstant("Shooter/ShootSpeed", 0.0);
+      new DoublePreferenceConstant("Shooter/ShootSpeed", 37.3);
   private final DoublePreferenceConstant increaseDuration =
       new DoublePreferenceConstant("Shooter/IncreaseDuration", 0.06);
   private final DoublePreferenceConstant increaseDelay =
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
+          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.19816, 0.0, 0.0, 0.1, 0.36882, 0.017346);
   private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")
@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
+              (state) -> Logger.recordOutput("Shooter/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
   private DoubleSupplier m_targetSpeed;
 
@@ -101,7 +101,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kA = shooterConfigConstants.getKA().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
-    shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
     shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;

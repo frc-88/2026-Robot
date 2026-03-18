@@ -8,66 +8,46 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.060480792962195,
-        "y": 6.095462075951416
+        "x": 7.780794797225317,
+        "y": 4.27231481492506
       },
       "isLocked": false,
       "linkedName": "LeftCenter"
     },
     {
       "anchor": {
-        "x": 5.727185328106039,
-        "y": 7.287085013225859
+        "x": 6.892278481012657,
+        "y": 7.296
       },
       "prevControl": {
-        "x": 5.976787476033272,
-        "y": 7.272986511528458
+        "x": 7.7491484788180225,
+        "y": 6.79352393915605
       },
       "nextControl": {
-        "x": 4.408358423783364,
-        "y": 7.361577494574984
+        "x": 6.221030427118683,
+        "y": 7.6896257294965125
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.2643188407958648,
-        "y": 7.287085013225859
+        "x": 3.494,
+        "y": 7.445
       },
       "prevControl": {
-        "x": 3.48995478435564,
-        "y": 7.394734541668346
-      },
-      "nextControl": {
-        "x": 2.6193375346356085,
-        "y": 6.979368377449797
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 1.1173291139240495,
-        "y": 5.3323544303797465
-      },
-      "prevControl": {
-        "x": 1.3765319460532086,
-        "y": 6.339036791913695
+        "x": 4.756161365362544,
+        "y": 7.232242093151705
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Left Approach"
+      "linkedName": "LeftUnload"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.8,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 2.0,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 1.1,
+      "rotationDegrees": -1.2462874730364868
     }
   ],
   "constraintZones": [],
@@ -83,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -1.0416266760099164
   },
   "reversed": false,
   "folder": null,
