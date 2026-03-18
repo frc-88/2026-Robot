@@ -24,13 +24,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
@@ -72,7 +69,7 @@ public class RobotContainer {
   private final Hood hood;
   private final Vision vision;
   private final Simulation simulation;
-  private final Climber climber = new Climber();
+  // private final Climber climber = new Climber();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
@@ -167,13 +164,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
-    NamedCommands.registerCommand("Climb L1", climber.gotoL1());
+    // NamedCommands.registerCommand("Climb L1", climber.gotoL1());
 
     NamedCommands.registerCommand("Go To Climb Approach Right", goToTowerApproachPose());
     NamedCommands.registerCommand("Go To Climb Approach Left", goToTowerApproachPose());
 
-    NamedCommands.registerCommand("Get On Pole Right", getOnTower());
-    NamedCommands.registerCommand("Get On Pole Left", getOnTower());
+    // NamedCommands.registerCommand("Get On Pole Right", getOnTower());
+    // NamedCommands.registerCommand("Get On Pole Left", getOnTower());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
@@ -198,25 +195,25 @@ public class RobotContainer {
     if (Util.logif()) {
       SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
       SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
-      SmartDashboard.putData("goToClimbPose", getOnTower());
-      SmartDashboard.putData("GetOffTower", getOffTower());
+      // SmartDashboard.putData("goToClimbPose", getOnTower());
+      // SmartDashboard.putData("GetOffTower", getOffTower());
       SmartDashboard.putData("AntiJam", antiJam());
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-      SmartDashboard.putData("Prepclimb", prepClimber());
+      // SmartDashboard.putData("Prepclimb", prepClimber());
     }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake(() -> climber.getLiftPosition() > 2.0));
+    intake.setDefaultCommand(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 2.0*/ ));
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRebuilt());
-    climber.setDefaultCommand(climber.stopall());
+    // climber.setDefaultCommand(climber.stopall());
   }
 
   public void disabledInit() {
@@ -272,24 +269,24 @@ public class RobotContainer {
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller
         .leftBumper()
-        .toggleOnTrue(intake.deployJustIntake(() -> climber.getLiftPosition() > 20.0));
+        .toggleOnTrue(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 20.0*/ ));
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
     controller.rightBumper().whileTrue(intake.doTheThing());
   }
 
   public void configureButtonBox() {
-    buttons.button(1).whileTrue(prepClimber());
-    buttons.button(2).onTrue(L1AndFlip());
-    buttons.button(4).onTrue(L1());
-    buttons.button(5).onTrue(climber.gotoStow());
+    // buttons.button(1).whileTrue(prepClimber());
+    // buttons.button(2).onTrue(L1AndFlip());
+    // buttons.button(4).onTrue(L1());
+    // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).onTrue(turret.syncCommand());
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    buttons.button(11).whileTrue(getOffTower());
+    // buttons.button(11).whileTrue(getOffTower());
     buttons
         .button(12)
         .toggleOnTrue(
@@ -305,9 +302,9 @@ public class RobotContainer {
 
   public void periodic() {
 
-    if (climber.getLiftPosition() > 20) {
-      intake.intakeIn();
-    }
+    // if (climber.getLiftPosition() > 20) {
+    //   intake.intakeIn();
+    // }
 
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoChooser.get().getName());
@@ -438,17 +435,18 @@ public class RobotContainer {
         () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
   }
 
-  public Command getOnTower() {
-    return (goToClimbPose().alongWith(climber.getOnPole())).until(() -> (climber.isFullyOnPole()));
-  }
+  // public Command getOnTower() {
+  //   return (goToClimbPose().alongWith(climber.getOnPole())).until(() ->
+  // (climber.isFullyOnPole()));
+  // }
 
-  public Command getOffTower() {
-    return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(2.0);
-  } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // public Command getOffTower() {
+  //   return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(2.0);
+  // } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  public Command prepClimber() {
-    return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
-  }
+  // public Command prepClimber() {
+  //   return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
+  // }
 
   public Command climbDriveIn() {
     return DriveCommands.joystickDrive(
@@ -458,22 +456,22 @@ public class RobotContainer {
         () -> 0.0);
   }
 
-  public Command L1() {
-    return climber
-        .gotoL1()
-        .alongWith(intake.retractIntake())
-        .alongWith(
-            climbDriveIn().withTimeout(0.5).andThen(new RunCommand(() -> drive.stop(), drive)));
-  }
+  // public Command L1() {
+  //   return climber
+  //       .gotoL1()
+  //       .alongWith(intake.retractIntake())
+  //       .alongWith(
+  //           climbDriveIn().withTimeout(0.5).andThen(new RunCommand(() -> drive.stop(), drive)));
+  // }
 
-  public Command L1AndFlip() {
-    return L1().until(() -> climber.isAtTuck())
-        .andThen(
-            climber
-                .flipCommand()
-                .alongWith(drive.pointForwardsCommand())
-                .alongWith(intake.retractIntake()));
-  }
+  // public Command L1AndFlip() {
+  //   return L1().until(() -> climber.isAtTuck())
+  //       .andThen(
+  //           climber
+  //               .flipCommand()
+  //               .alongWith(drive.pointForwardsCommand())
+  //               .alongWith(intake.retractIntake()));
+  // }
 
   public Command shoot() {
     return new ParallelCommandGroup(
