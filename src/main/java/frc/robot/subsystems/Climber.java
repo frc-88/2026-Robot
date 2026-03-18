@@ -69,6 +69,8 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Grip", -10.0);
   private final DoublePreferenceConstant pivotStowTarget =
       new DoublePreferenceConstant("Climber/Pivot/Target/Stow", 7.4);
+  private final DoublePreferenceConstant pivotFirstTarget =
+      new DoublePreferenceConstant("Climber/Pivot/Target/FirstTarget", 150.0);
   private final DoublePreferenceConstant pivotL1Target =
       new DoublePreferenceConstant("Climber/Pivot/Target/L1", 0.0);
   private final DoublePreferenceConstant pivotChinStrapTarget =
@@ -81,7 +83,8 @@ public class Climber extends SubsystemBase {
       new DoublePreferenceConstant("Climber/Pivot/Target/Switch", 90.0);
 
   private final MotionMagicVoltage liftMotionMagic = new MotionMagicVoltage(0);
-  private final DynamicMotionMagicVoltage dynamic = new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
+  private final DynamicMotionMagicVoltage dynamic =
+      new DynamicMotionMagicVoltage(0.0, 10.0, -200.0);
   private final MotionMagicVoltage pivotMotionMagic =
       new MotionMagicVoltage(0).withFeedForward(3.0);
   private final DynamicMotionMagicVoltage liftMotionMagicSlow =
@@ -238,14 +241,20 @@ public class Climber extends SubsystemBase {
   }
 
   private void pivotGotoPosition(double position) {
-    if (pivot.getPosition().getValueAsDouble() > 80.0) {
-      pivot.setControl(
-          dynamic.withVelocity(20.0).withAcceleration(80.0).withPosition(position)); // * sin
-    } else {
-      pivot.setControl(pivotMotionMagic.withPosition(position));
-    }
+    // if (pivot.getPosition().getValueAsDouble() >= 40.0) {
+    //   Logger.recordOutput("IsDynamic", true);
+    //   pivot.setControl(dynamic.withPosition(position)); // * sin
+    // } else {
+    // Logger.recordOutput("IsDynamic", false);
+    pivot.setControl(pivotMotionMagic.withPosition(position));
+    // }
     // pitch
     // pivot.setControl(new DutyCycleOut(1.0));
+  }
+
+  @AutoLogOutput
+  public double getPivotVelocity() {
+    return pivot.getVelocity().getValueAsDouble();
   }
 
   private void pivotGotoPositionMotion(boolean flipRight) {
@@ -272,6 +281,11 @@ public class Climber extends SubsystemBase {
 
   private void flip() {
     if (lift.getPosition().getValueAsDouble() < (pivotFlipDelay.getValue())) {
+      // if (!pivotAtPosition(pivotFirstTarget.getValue())) {
+      //   pivotGotoPosition(pivotFirstTarget.getValue());
+      // } else {
+      //   pivotGotoPosition(pivotFlipTarget.getValue());
+      // }
       pivotGotoPosition(pivotFlipTarget.getValue());
     }
 
@@ -282,6 +296,10 @@ public class Climber extends SubsystemBase {
     } else {
       liftGotoPosition(liftTuckTarget.getValue());
     }
+  }
+
+  private boolean pivotAtPosition(double target) {
+    return Math.abs(pivot.getPosition().getValueAsDouble() - target) < 2.0;
   }
 
   // private void flipMotion(boolean flipRight) {

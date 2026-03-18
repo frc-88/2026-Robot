@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -10,7 +11,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -31,14 +30,17 @@ public class Intake extends SubsystemBase {
 
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
+  private final DynamicMotionMagicVoltage pivotRequestDynamic =
+      new DynamicMotionMagicVoltage(0.0, 0.1, 10.0);
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
-  private final VelocityVoltage rollerRequest = new VelocityVoltage(0);
-  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0);
+  private final VelocityVoltage rollerRequest = new VelocityVoltage(0.0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
-  private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
+  private final MotionMagicPIDPreferenceConstants
+      intakePivotConfigConstants = // VELOCITY: 50.0 ACCELERATION: 1000.0
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
+              "Intake/IntakePivotMotor", 10., 100., 0., 0., 0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
@@ -60,7 +62,7 @@ public class Intake extends SubsystemBase {
     configureTalons();
     configureSmartDashboardButtons();
 
-    intakePivot.setPosition(0.0);
+    // intakePivot.setPosition(0.0);
   }
 
   private void configureTalons() {
@@ -106,6 +108,8 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/SetRotations", pivotGoToRotations());
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
+    SmartDashboard.putData(
+        "Intake/Set27.6", new InstantCommand(() -> intakePivot.setPosition(27.6)));
     SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
   }
 
@@ -133,6 +137,11 @@ public class Intake extends SubsystemBase {
   @AutoLogOutput
   private Current getRollerCurrent() {
     return intakeRoller.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private double getRollerVoltage() {
+    return intakeRoller.getMotorVoltage().getValueAsDouble();
   }
 
   @AutoLogOutput
@@ -189,21 +198,22 @@ public class Intake extends SubsystemBase {
   }
 
   private void theThing() {
-    double toUse = 0.0;
-    if (isDoingTheThing) {
-      toUse = lastTimestamp;
-    } else {
-      isDoingTheThing = true;
-      lastTimestamp = Timer.getFPGATimestamp();
-      toUse = lastTimestamp;
-    }
+    // double toUse = 0.0;
+    // if (isDoingTheThing) {
+    //   toUse = lastTimestamp;
+    // } else {
+    //   isDoingTheThing = true;
+    //   lastTimestamp = Timer.getFPGATimestamp();
+    //   toUse = lastTimestamp;
+    // }
 
-    double setpoint =
-        (((21.0 + 0.6) / 2.0) / 2.0)
-                * Math.sin(Math.PI * 2.0 * (Timer.getFPGATimestamp() - toUse - (Math.PI / 2.0)))
-            + ((21.0 + 0.6) / 2.0);
-    goToRotations(setpoint);
-    setSpinnerSpeed(() -> speed.getValue());
+    // double setpoint =
+    //     (((21.0 + 0.6) / 2.0) / 2.0)
+    //             * Math.sin(Math.PI * 2.0 * (Timer.getFPGATimestamp() - toUse - (Math.PI / 2.0)))
+    //         + ((21.0 + 0.6) / 2.0);
+    intakePivot.setControl(
+        pivotRequestDynamic.withAcceleration(100.0).withVelocity(10.0).withPosition(5.0));
+    setSpinnerSpeed(() -> speed.getValue() / 10.0);
   }
 
   private void justIntakeOut() {
@@ -272,20 +282,18 @@ public class Intake extends SubsystemBase {
     return new RunCommand(() -> intakeOut(), this);
   }
 
-  public Command deployJustIntake(BooleanSupplier isClimberUp) {
+  public Command deployJustIntake() {
     // TODO: determine proper deploy angle, put it here
     return new RunCommand(
         () -> {
-          if (isClimberUp.getAsBoolean()) {
-            intakeIn();
-          } else {
-            justIntakeOut();
-          }
+          justIntakeOut();
         },
         this);
   }
 
   public Command doTheThing() {
-    return new RunCommand(() -> theThing(), this).finallyDo(() -> isDoingTheThing = false);
+    return new RunCommand(() -> theThing(), this)
+        .finallyDo(() -> isDoingTheThing = false)
+        .andThen(deployIntake());
   }
 }

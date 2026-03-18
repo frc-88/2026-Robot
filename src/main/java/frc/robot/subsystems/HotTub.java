@@ -82,6 +82,9 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.Slot0.kV = p_spinnerConfigConstants.getKV().getValue();
     spinnerConfig.Slot0.kS = p_spinnerConfigConstants.getKS().getValue();
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    spinnerConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
   }
 
