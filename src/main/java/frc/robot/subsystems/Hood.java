@@ -85,6 +85,11 @@ public class Hood extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return hood.isConnected() && hood.isAlive();
+  }
+
+  @AutoLogOutput
   private Voltage getVoltage() {
     return hood.getMotorVoltage().getValue();
   }

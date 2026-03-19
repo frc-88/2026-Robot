@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -213,6 +214,14 @@ public class Climber extends SubsystemBase {
         "Climber/Pivot/SysId/Pivot Dynamic Forward", pivotSysIdDynamic(Direction.kForward));
     SmartDashboard.putData(
         "Climber/Pivot/SysId/Pivot Dynamic Reverse", pivotSysIdDynamic(Direction.kReverse));
+  }
+
+  @AutoLogOutput
+  public boolean isHealthy() {
+    return lift.isConnected()
+        && lift.isAlive()
+        && pivot.isConnected()
+        && pivot.isAlive();
   }
 
   @AutoLogOutput

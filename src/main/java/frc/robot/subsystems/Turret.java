@@ -211,8 +211,13 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean encoderHealthy() {
-    return m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+  public boolean isHealthy() {
+    return encodersHealthy() && motorsHealthy();
+  }
+
+  private boolean encodersHealthy() {
+    return m_CANcoder.isConnected()
+        && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
         && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 

@@ -89,6 +89,11 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return m_feeder.isConnected() && m_feeder.isAlive();
+  }
+
+  @AutoLogOutput
   private Voltage getVoltage() {
     return m_feeder.getMotorVoltage().getValue();
   }

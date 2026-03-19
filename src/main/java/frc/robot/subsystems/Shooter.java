@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Voltage;
@@ -222,6 +223,16 @@ public class Shooter extends SubsystemBase {
     if (earliestBallTime > 0 && lastBallTime > 0) {
       ballsPerSecond = (ballsCount) / (lastBallTime - earliestBallTime);
     }
+  }
+
+  public boolean isHealthy() {
+    return shooterMain.isConnected()
+        && shooterMain.isAlive()
+        && shooterFollower.isConnected()
+        && shooterFollower.isAlive()
+        && shooterCANcoder.isConnected()
+        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 
   @AutoLogOutput

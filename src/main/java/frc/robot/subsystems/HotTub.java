@@ -89,6 +89,11 @@ public class HotTub extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return m_spinner.isConnected() && m_spinner.isAlive();
+  }
+
+  @AutoLogOutput
   private Voltage getVoltage() {
     return m_spinner.getMotorVoltage().getValue();
   }
