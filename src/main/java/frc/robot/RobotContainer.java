@@ -318,12 +318,15 @@ public class RobotContainer {
     Pose2d currentRobotPose = drive.getPose();
 
     boolean isPoseSafe = false;
-    if (targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation())
+    double poseDistance =
+        targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation());
+    if (poseDistance
         < 0.5) { // Compare if the distance between the current and target pose is within 0.5 meters
       isPoseSafe = true;
     }
 
-    SmartDashboard.putBoolean("Starting Pose is Safe", isPoseSafe);
+    SmartDashboard.putBoolean("Starting Position/Starting Position is Safe", isPoseSafe);
+    SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
   public Pose2d getPoseBatman() {
