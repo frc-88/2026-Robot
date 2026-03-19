@@ -8,7 +8,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,7 +35,7 @@ public class Turret extends SubsystemBase {
 
   private final CANcoder m_CANcoder = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
-  private final MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
+  private final MotionMagicVoltage motionMagicReq = new MotionMagicVoltage(0.0);
   private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0.0);
   private final TorqueCurrentFOC torqueReq = new TorqueCurrentFOC(0.0);
 
@@ -116,7 +116,7 @@ public class Turret extends SubsystemBase {
     m_turret.getConfigurator().apply(turretCfg);
 
     TalonFXConfiguration retractomaticCfg = new TalonFXConfiguration();
-    retractomaticCfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    retractomaticCfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     m_retractomatic.getConfigurator().apply(retractomaticCfg);
   }
 
