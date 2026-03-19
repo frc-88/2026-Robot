@@ -44,6 +44,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import java.util.function.Supplier;
@@ -70,6 +71,8 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   // private final Climber climber = new Climber();
+
+  private final AutoStartPositions autoStartPositions = new AutoStartPositions();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
@@ -306,14 +309,17 @@ public class RobotContainer {
     //   intake.intakeIn();
     // }
 
-    Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
-    Logger.recordOutput("AutoName", autoChooser.get().getName());
+    String autoName = autoChooser.get().getName();
 
-    Pose2d targetStartingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d()); // TODO: Use actual numbers here based on auto selection.  THIS IS A PLACEHOLDER (currently set to left start).
+    Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
+    Logger.recordOutput("AutoName", autoName);
+
+    Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
     Pose2d currentRobotPose = drive.getPose();
 
     boolean isPoseSafe = false;
-    if (targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation()) < 0.5) { // Compare if the distance between the two poses is within 0.5 meters
+    if (targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation())
+        < 0.5) { // Compare if the distance between the current and target pose is within 0.5 meters
       isPoseSafe = true;
     }
 
