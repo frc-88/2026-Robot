@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -91,6 +92,10 @@ public class Hood extends SubsystemBase {
 
     Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
     Logger.recordOutput("Hood/isShooting", isShooting);
+
+    CanHealthTracker.updateDevice(
+        "Hood/TalonFXS/" + Constants.HOOD, hood.isConnected());
+
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
       // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());

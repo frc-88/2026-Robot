@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+import frc.robot.util.CanHealthTracker;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -110,6 +111,11 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putNumber(
         "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPos.getValue()));
     Logger.recordOutput("Intake/IsShooting", isShooting);
+
+    CanHealthTracker.updateDevice(
+        "Intake/PivotTalonFX/" + Constants.INTAKE_PIVOT, intakePivot.isConnected());
+    CanHealthTracker.updateDevice(
+        "Intake/RollerTalonFX/" + Constants.INTAKE_ROLLER, intakeRoller.isConnected());
   }
 
   @AutoLogOutput

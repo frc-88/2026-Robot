@@ -35,6 +35,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.CanHealthTracker;
 import java.util.Queue;
 
 /**
@@ -191,6 +192,15 @@ public class ModuleIOTalonFX implements ModuleIO {
     var turnStatus =
         BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
     var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+
+    // Phoenix "connected" indicates whether the device is currently communicating on the CAN bus.
+    // Use it for health logging + latching (transition to disconnected while enabled).
+    CanHealthTracker.updateDevice(
+        "Swerve/DriveTalon/" + constants.DriveMotorId, driveTalon.isConnected());
+    CanHealthTracker.updateDevice(
+        "Swerve/TurnTalon/" + constants.SteerMotorId, turnTalon.isConnected());
+    CanHealthTracker.updateDevice(
+        "Swerve/CANcoder/" + constants.EncoderId, cancoder.isConnected());
 
     // Update drive inputs
     inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());

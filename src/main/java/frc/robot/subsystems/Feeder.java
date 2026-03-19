@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -118,7 +119,10 @@ public class Feeder extends SubsystemBase {
     m_feeder.setControl(antiJamRequest.withOutput(-1.0));
   }
 
-  public void periodic() {}
+  public void periodic() {
+    CanHealthTracker.updateDevice(
+        "Feeder/TalonFX/" + Constants.FEEDER_MAIN, m_feeder.isConnected());
+  }
 
   public Command runFeeder() {
     return new RunCommand(

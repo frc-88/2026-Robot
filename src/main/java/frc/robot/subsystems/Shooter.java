@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.Util;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -252,6 +253,14 @@ public class Shooter extends SubsystemBase {
 
     // Lookup Table Building Override
     // targetVelocity = shootSpeed.getValue();
+
+    CanHealthTracker.updateDevice(
+        "Shooter/TalonFX/Main/" + Constants.SHOOTER_MAIN, shooterMain.isConnected());
+    CanHealthTracker.updateDevice(
+        "Shooter/TalonFX/Follower/" + Constants.SHOOTER_FOLLOWER,
+        shooterFollower.isConnected());
+    CanHealthTracker.updateDevice(
+        "Shooter/CANcoder/" + Constants.SHOOTER_CANCODER, shooterCANcoder.isConnected());
 
     if (Util.logif()) {
       SmartDashboard.putNumber("Shooter/TimeSinceBallLastSeen", timeSinceBallLastSeen.get());

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -115,7 +116,10 @@ public class HotTub extends SubsystemBase {
     m_spinner.setControl(antiJamRequest.withOutput(-1.0));
   }
 
-  public void periodic() {}
+  public void periodic() {
+    CanHealthTracker.updateDevice(
+        "HotTub/TalonFX/" + Constants.SPINNER_MAIN, m_spinner.isConnected());
+  }
 
   public Command runSpinner() {
     return new RunCommand(

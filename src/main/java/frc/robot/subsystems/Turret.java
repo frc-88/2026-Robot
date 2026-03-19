@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -380,6 +381,14 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    CanHealthTracker.updateDevice(
+        "Turret/TalonFX/" + Constants.TURRET_MOTOR_ID, m_turret.isConnected());
+    CanHealthTracker.updateDevice(
+        "Turret/Retractomatic/TalonFX/" + Constants.TURRET_RETRACTOMATIC_ID,
+        m_retractomatic.isConnected());
+    CanHealthTracker.updateDevice(
+        "Turret/CANcoder/" + Constants.TURRET_CANCODER_ID2, m_CANcoder.isConnected());
+
     if (Util.logif()) {
       SmartDashboard.putNumber(
           "Turret/Constant", getFacing() / m_CANcoder.getAbsolutePosition().getValueAsDouble());

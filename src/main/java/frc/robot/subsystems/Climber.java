@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -324,6 +325,15 @@ public class Climber extends SubsystemBase {
   }
 
   public void periodic() {
+    CanHealthTracker.updateDevice(
+        "Climber/TalonFX/Lift/" + Constants.CLIMBER_LIFT, lift.isConnected());
+    CanHealthTracker.updateDevice(
+        "Climber/TalonFX/Pivot/" + Constants.CLIMBER_PIVOT, pivot.isConnected());
+    CanHealthTracker.updateDevice(
+        "Climber/CANrange/" + Constants.CLIMBER_CANRANGE, canRange.isConnected());
+    CanHealthTracker.updateDevice(
+        "Climber/Pigeon2/" + Constants.CLIMBER_PIGEON, pigeon.isConnected());
+
     SmartDashboard.putNumber(
         "Climber/CANrange/Distance", f.calculate(canRange.getDistance().getValueAsDouble()));
     SmartDashboard.putBoolean("Climber/CANrange/Detected", isDetected());

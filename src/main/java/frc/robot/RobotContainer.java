@@ -49,6 +49,7 @@ import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.TrajectorySolver;
+import frc.robot.util.CanHealthTracker;
 import frc.robot.util.Util;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -83,6 +84,9 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     GyroIO gyro;
+
+    // Clear the latching disconnected list at robot boot (power cycle).
+    CanHealthTracker.clearLatch();
 
     // TODO Disable diagnostic server if in COMP mode?
     if (!Util.logif()) {
@@ -201,6 +205,10 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     SmartDashboard.putData(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+
+    SmartDashboard.putData(
+        "CAN/ClearDisconnectedDevices",
+        new InstantCommand(() -> CanHealthTracker.clearLatch()).ignoringDisable(true));
 
     if (Util.logif()) {
       SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
