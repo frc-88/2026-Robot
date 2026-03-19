@@ -150,7 +150,10 @@ public class RobotContainer {
         new TrajectorySolver(
             () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
+    turret =
+        new Turret(
+            () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
+            trajectorySolver::getTurretTarget);
     feeder = new Feeder(turret::onTarget);
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);

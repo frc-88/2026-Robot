@@ -209,7 +209,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToFacing(double target) {
-    goToFacing(target, false);
+    goToFacing(target, true);
   }
 
   private void goToFacing(double target, boolean spinCompensation) {
@@ -242,7 +242,10 @@ public class Turret extends SubsystemBase {
         m_turret.setControl(
             motionMagicReq
                 .withPosition(position)
-                .withFeedForward(p_spinCompensation.getValue() * m_robotYawRate.getAsDouble()));
+                .withFeedForward(
+                    -1.0
+                        * p_turretPID.getKV().getValue()
+                        * turretFacingToFalconEncoderPosition(m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -252,6 +255,7 @@ public class Turret extends SubsystemBase {
       m_turret.stopMotor();
       m_retractomatic.stopMotor();
     }
+    System.out.println("GGRGFG" + m_robotYawRate.getAsDouble());
   }
 
   private double calcCircumnavigationTarget(double origin) {
