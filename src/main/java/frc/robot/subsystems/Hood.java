@@ -93,8 +93,7 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
     Logger.recordOutput("Hood/isShooting", isShooting);
 
-    CanHealthTracker.updateDevice(
-        "Hood/TalonFXS/" + Constants.HOOD, hood.isConnected());
+    CanHealthTracker.updateDevice("Hood/TalonFXS/" + Constants.HOOD, hood.isConnected());
 
     if (Util.logif()) {
       SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());

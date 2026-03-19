@@ -199,8 +199,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         "Swerve/DriveTalon/" + constants.DriveMotorId, driveTalon.isConnected());
     CanHealthTracker.updateDevice(
         "Swerve/TurnTalon/" + constants.SteerMotorId, turnTalon.isConnected());
-    CanHealthTracker.updateDevice(
-        "Swerve/CANcoder/" + constants.EncoderId, cancoder.isConnected());
+    CanHealthTracker.updateDevice("Swerve/CANcoder/" + constants.EncoderId, cancoder.isConnected());
 
     // Update drive inputs
     inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());

@@ -51,10 +51,8 @@ public final class CanHealthTracker {
   }
 
   private static void publishDisconnectedLatch() {
-    String latchString =
-        disconnectedLatch.isEmpty() ? "" : String.join(",", disconnectedLatch);
+    String latchString = disconnectedLatch.isEmpty() ? "" : String.join(",", disconnectedLatch);
     SmartDashboard.putString(DISCONNECTED_LATCH_KEY, latchString);
     Logger.recordOutput("CAN/DisconnectedDevices", latchString);
   }
 }
-
