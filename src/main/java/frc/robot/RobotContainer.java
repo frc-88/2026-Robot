@@ -310,6 +310,14 @@ public class RobotContainer {
     Logger.recordOutput("AutoName", autoChooser.get().getName());
 
     Pose2d targetStartingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d()); // TODO: Use actual numbers here based on auto selection.  THIS IS A PLACEHOLDER (currently set to left start).
+    Pose2d currentRobotPose = drive.getPose();
+
+    boolean isPoseSafe = false;
+    if (targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation()) < 0.5) { // Compare if the distance between the two poses is within 0.5 meters
+      isPoseSafe = true;
+    }
+
+    SmartDashboard.putBoolean("Starting Pose is Safe", isPoseSafe);
   }
 
   public Pose2d getPoseBatman() {
