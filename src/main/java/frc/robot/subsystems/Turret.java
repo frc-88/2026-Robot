@@ -235,7 +235,7 @@ public class Turret extends SubsystemBase {
 
     // CCW side of minimum tether length, negative (clockwise) velocity, pull in
     if (currentFacingAngleRelative > 0.0 && currentVelocity < 0.0) { // CCW side of 0; going in
-      targetCurrent = p_goingInCurrent.getValue();
+      targetCurrent = -15.0; // p_goingInCurrent.getValue();
     } else if (currentFacingAngleRelative > 0.0
         && currentVelocity > 0.0) { // CCW side of 0; going out
       targetCurrent = p_goingOutCurrent.getValue();
@@ -262,7 +262,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToFacing(double target) {
-    goToFacing(target, false);
+    goToFacing(target, true);
   }
 
   private void goToFacing(double target, boolean spinCompensation) {
@@ -292,10 +292,12 @@ public class Turret extends SubsystemBase {
   private void goToPosition(double position, boolean spinCompensation) {
     if (motorsHealthy()) {
       if (spinCompensation) {
+        System.out.println("SpinComp");
         m_turret.setControl(
             motionMagicReq
                 .withPosition(position)
-                .withFeedForward(p_spinCompensation.getValue() * m_robotYawRate.getAsDouble()));
+                .withFeedForward(
+                    0.12 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -327,6 +329,11 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput(key = "Turret/Velocity")
   private double getFacingOmega() {
     return turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble());
+  }
+
+  @AutoLogOutput
+  private double getCurrent() {
+    return m_turret.getSupplyCurrent().getValueAsDouble();
   }
 
   @AutoLogOutput

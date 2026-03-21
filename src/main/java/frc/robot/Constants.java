@@ -39,41 +39,41 @@ public final class Constants {
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
 
   // Intake
-  public static final int INTAKE_PIVOT = 14;
-  public static final int INTAKE_ROLLER = 15;
+  public static final int INTAKE_PIVOT = 2;
+  public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
   // Spinner
-  public static final int SPINNER_MAIN = 21;
+  public static final int SPINNER_MAIN = 17;
 
   // Feeder
-  public static final int FEEDER_MAIN = 4;
+  public static final int FEEDER_MAIN = 19;
 
   // Shooter
-  public static final int SHOOTER_MAIN = 6;
-  public static final int SHOOTER_FOLLOWER = 7;
-  public static final int SHOOTER_CANCODER = 6;
+  public static final int SHOOTER_MAIN = 12;
+  public static final int SHOOTER_FOLLOWER = 5;
+  public static final int SHOOTER_CANCODER = 7;
   public static final double SHOOTER_GEAR_RATIO = 24.0 / 18.0;
 
   // Climber
-  public static final int CLIMBER_LIFT = 16;
-  public static final int CLIMBER_PIVOT = 19;
+  public static final int CLIMBER_LIFT = 18;
+  public static final int CLIMBER_PIVOT = 16;
   public static final int CLIMBER_CANRANGE = 7;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
   public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);
 
   // Turret
-  public static final int TURRET_MOTOR_ID = 3;
-  public static final int TURRET_RETRACTOMATIC_ID = 17;
-  public static final int TURRET_CANCODER_ID2 = 3;
+  public static final int TURRET_MOTOR_ID = 6;
+  public static final int TURRET_RETRACTOMATIC_ID = 25;
+  public static final int TURRET_CANCODER_ID2 = 12;
 
   // Drive
   public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
 
   // HOOD Milk
-  public static final int HOOD = 5;
+  public static final int HOOD = 16;
   public static final double MINION_ROT_TO_ANGLE = (1.0 / (287.0 / 54.0)) * 360.0;
 
   // Robot and Field constants

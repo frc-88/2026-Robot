@@ -44,6 +44,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import java.util.function.Supplier;
@@ -70,6 +71,8 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   // private final Climber climber = new Climber();
+
+  private final AutoStartPositions autoStartPositions = new AutoStartPositions();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
@@ -150,7 +153,10 @@ public class RobotContainer {
         new TrajectorySolver(
             () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
+    turret =
+        new Turret(
+            () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
+            trajectorySolver::getTurretTarget);
     feeder = new Feeder(turret::onTarget);
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
@@ -306,8 +312,24 @@ public class RobotContainer {
     //   intake.intakeIn();
     // }
 
+    String autoName = autoChooser.get().getName();
+
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
-    Logger.recordOutput("AutoName", autoChooser.get().getName());
+    Logger.recordOutput("AutoName", autoName);
+
+    Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
+    Pose2d currentRobotPose = Util.flipIfRed(drive.getPose());
+
+    boolean isPoseSafe = false;
+    double poseDistance =
+        targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation());
+    if (poseDistance
+        < 0.5) { // Compare if the distance between the current and target pose is within 0.5 meters
+      isPoseSafe = true;
+    }
+
+    SmartDashboard.putBoolean("Starting Position/Starting Position is Safe", isPoseSafe);
+    SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
   public Pose2d getPoseBatman() {
@@ -337,14 +359,10 @@ public class RobotContainer {
   public Command driveRebuilt() {
     return DriveCommands.rebuiltDrive(
         drive,
+        () -> shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY(),
+        () -> shooting ? MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5) : -controller.getLeftX(),
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
-        () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
-        () ->
-            shooting
-                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
-                : -controller.getRightX(),
+            shooting ? MathUtil.clamp(-controller.getRightX(), -0.5, 0.5) : -controller.getRightX(),
         this::turretRotSupplier);
   }
 
