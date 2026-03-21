@@ -27,6 +27,8 @@ public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
+  private final TalonFX intakeInnerRoller = new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
+
 
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
@@ -51,9 +53,7 @@ public class Intake extends SubsystemBase {
   private final DoublePreferenceConstant deployPositionRotations =
       new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
 
-  private boolean isDoingTheThing = false;
   private boolean isShooting = false;
-  private double lastTimestamp = 0.0;
 
   DoubleSupplier m_drivespeed;
 
@@ -198,19 +198,6 @@ public class Intake extends SubsystemBase {
   }
 
   private void theThing() {
-    // double toUse = 0.0;
-    // if (isDoingTheThing) {
-    //   toUse = lastTimestamp;
-    // } else {
-    //   isDoingTheThing = true;
-    //   lastTimestamp = Timer.getFPGATimestamp();
-    //   toUse = lastTimestamp;
-    // }
-
-    // double setpoint =
-    //     (((21.0 + 0.6) / 2.0) / 2.0)
-    //             * Math.sin(Math.PI * 2.0 * (Timer.getFPGATimestamp() - toUse - (Math.PI / 2.0)))
-    //         + ((21.0 + 0.6) / 2.0);
     intakePivot.setControl(
         pivotRequestDynamic.withAcceleration(100.0).withVelocity(10.0).withPosition(5.0));
     setSpinnerSpeed(() -> speed.getValue() / 10.0);
@@ -292,8 +279,6 @@ public class Intake extends SubsystemBase {
   }
 
   public Command doTheThing() {
-    return new RunCommand(() -> theThing(), this)
-        .finallyDo(() -> isDoingTheThing = false)
-        .andThen(deployIntake());
+    return new RunCommand(() -> theThing(), this);
   }
 }

@@ -242,9 +242,7 @@ public class Turret extends SubsystemBase {
         System.out.println("SpinComp");
         m_turret.setControl(
             motionMagicReq
-                .withPosition(position)
-                .withFeedForward(
-                    0.7 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
+                .withPosition(position - (0.015 * m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
