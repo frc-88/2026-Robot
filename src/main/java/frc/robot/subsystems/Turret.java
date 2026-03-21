@@ -329,11 +329,6 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getTurretVelocity() {
-    return m_turret.getVelocity().getValueAsDouble();
-  }
-
-  @AutoLogOutput
   private double getTargetVelocity() {
     return m_turret.getClosedLoopReferenceSlope().getValueAsDouble();
   }
