@@ -293,8 +293,9 @@ public class Turret extends SubsystemBase {
         m_turret.setControl(
             motionMagicReq
                 .withPosition(position - (0.015 * m_robotYawRate.getAsDouble()))
-                .withFeedForward(
-                    0.0 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
+                // .withFeedForward(
+                //     0.0 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble()))
+                    );
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
