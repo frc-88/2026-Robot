@@ -8,7 +8,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,7 +35,7 @@ public class Turret extends SubsystemBase {
 
   private final CANcoder m_CANcoder = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
-  private final MotionMagicDutyCycle motionMagicReq = new MotionMagicDutyCycle(0.0);
+  private final MotionMagicVoltage motionMagicReq = new MotionMagicVoltage(0.0);
   private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0.0);
   private final TorqueCurrentFOC torqueReq = new TorqueCurrentFOC(0.0);
 
@@ -116,7 +116,7 @@ public class Turret extends SubsystemBase {
     m_turret.getConfigurator().apply(turretCfg);
 
     TalonFXConfiguration retractomaticCfg = new TalonFXConfiguration();
-    retractomaticCfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    retractomaticCfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     m_retractomatic.getConfigurator().apply(retractomaticCfg);
   }
 
@@ -182,7 +182,7 @@ public class Turret extends SubsystemBase {
 
     // CCW side of minimum tether length, negative (clockwise) velocity, pull in
     if (currentFacingAngleRelative > 0.0 && currentVelocity < 0.0) { // CCW side of 0; going in
-      targetCurrent = p_goingInCurrent.getValue();
+      targetCurrent = -15.0; // p_goingInCurrent.getValue();
     } else if (currentFacingAngleRelative > 0.0
         && currentVelocity > 0.0) { // CCW side of 0; going out
       targetCurrent = p_goingOutCurrent.getValue();
@@ -209,7 +209,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToFacing(double target) {
-    goToFacing(target, false);
+    goToFacing(target, true);
   }
 
   private void goToFacing(double target, boolean spinCompensation) {
@@ -239,10 +239,12 @@ public class Turret extends SubsystemBase {
   private void goToPosition(double position, boolean spinCompensation) {
     if (motorsHealthy()) {
       if (spinCompensation) {
+        System.out.println("SpinComp");
         m_turret.setControl(
             motionMagicReq
                 .withPosition(position)
-                .withFeedForward(p_spinCompensation.getValue() * m_robotYawRate.getAsDouble()));
+                .withFeedForward(
+                    0.7 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -252,6 +254,7 @@ public class Turret extends SubsystemBase {
       m_turret.stopMotor();
       m_retractomatic.stopMotor();
     }
+    System.out.println("GGRGFG" + m_robotYawRate.getAsDouble());
   }
 
   private double calcCircumnavigationTarget(double origin) {
