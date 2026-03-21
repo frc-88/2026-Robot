@@ -340,14 +340,10 @@ public class RobotContainer {
   public Command driveRebuilt() {
     return DriveCommands.rebuiltDrive(
         drive,
+        () -> shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY(),
+        () -> shooting ? MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5) : -controller.getLeftX(),
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
-        () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
-        () ->
-            shooting
-                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
-                : -controller.getRightX(),
+            shooting ? MathUtil.clamp(-controller.getRightX(), -0.5, 0.5) : -controller.getRightX(),
         this::turretRotSupplier);
   }
 
