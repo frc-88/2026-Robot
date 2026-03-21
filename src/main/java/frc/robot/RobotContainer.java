@@ -318,7 +318,7 @@ public class RobotContainer {
     Logger.recordOutput("AutoName", autoName);
 
     Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
-    Pose2d currentRobotPose = drive.getPose();
+    Pose2d currentRobotPose = Util.flipIfRed(drive.getPose());
 
     boolean isPoseSafe = false;
     double poseDistance =
