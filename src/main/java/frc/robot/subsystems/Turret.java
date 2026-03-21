@@ -291,11 +291,10 @@ public class Turret extends SubsystemBase {
     if (motorsHealthy()) {
       if (spinCompensation) {
         m_turret.setControl(
-            motionMagicReq
-                .withPosition(position - (0.015 * m_robotYawRate.getAsDouble()))
-                // .withFeedForward(
-                //     0.0 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble()))
-                    );
+            motionMagicReq.withPosition(position - (0.015 * m_robotYawRate.getAsDouble()))
+            // .withFeedForward(
+            //     0.0 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble()))
+            );
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
