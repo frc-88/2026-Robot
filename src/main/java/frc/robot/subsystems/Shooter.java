@@ -94,13 +94,14 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(DoubleSupplier speed) {
     m_targetSpeed = speed;
-    configureTalons();
     configureCANCoder();
+    configureTalons();
     configureSmartDashboardButtons();
   }
 
   private void configureTalons() {
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
+    TalonFXConfiguration shooterFollowerConfig = new TalonFXConfiguration();
 
     shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue();
     shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
@@ -109,7 +110,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kA = shooterConfigConstants.getKA().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
-    shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
     shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
@@ -117,6 +118,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Feedback.RotorToSensorRatio = Constants.SHOOTER_GEAR_RATIO;
 
     shooterMain.getConfigurator().apply(shooterConfig);
+    shooterFollower.getConfigurator().apply(shooterFollowerConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     timeSinceBallLastSeen.reset();

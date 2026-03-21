@@ -52,13 +52,11 @@ public class Turret extends SubsystemBase {
       new DoublePreferenceConstant("Turret/Sync Threshold", 0.75);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 100.0, 250.0, 0.0, 1.0, 0.0, 0.0, 0.01, 0.0, 0);
+          "Turret/PID", 100.0, 250.0, 0.0, 12.0, 0.0, 0.0, 0.12, 0.0, 0);
   private final DoublePreferenceConstant p_forwardLimit =
       new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
       new DoublePreferenceConstant("Turret/Reverse Limit", -225.0);
-  private final DoublePreferenceConstant p_spinCompensation =
-      new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
       new DoublePreferenceConstant("Turret/CANCoder50 Offset", -0.143311);
   private final DoublePreferenceConstant p_goingOutCurrent =
@@ -124,7 +122,7 @@ public class Turret extends SubsystemBase {
     m_turret.getConfigurator().apply(turretCfg);
 
     TalonFXConfiguration retractomaticCfg = new TalonFXConfiguration();
-    retractomaticCfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    retractomaticCfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     m_retractomatic.getConfigurator().apply(retractomaticCfg);
   }
 
@@ -230,7 +228,7 @@ public class Turret extends SubsystemBase {
   private void retractomatic() {
     double currentFacingAngleRelative =
         getFacing() + 10.0; // TODO: find facing that is minimum tether length
-    double currentVelocity = getFacingOmega();
+    double currentVelocity = getFacingVelocity();
     double targetCurrent = 0.0; // POSITIVE OUT
 
     // CCW side of minimum tether length, negative (clockwise) velocity, pull in
@@ -292,12 +290,11 @@ public class Turret extends SubsystemBase {
   private void goToPosition(double position, boolean spinCompensation) {
     if (motorsHealthy()) {
       if (spinCompensation) {
-        System.out.println("SpinComp");
         m_turret.setControl(
             motionMagicReq
-                .withPosition(position)
+                .withPosition(position - (0.015 * m_robotYawRate.getAsDouble()))
                 .withFeedForward(
-                    0.12 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
+                    0.0 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -326,9 +323,19 @@ public class Turret extends SubsystemBase {
     return turretEncoderPositionToFacing(getTurretPosition());
   }
 
-  @AutoLogOutput(key = "Turret/Velocity")
-  private double getFacingOmega() {
+  @AutoLogOutput
+  private double getFacingVelocity() {
     return turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble());
+  }
+
+  @AutoLogOutput
+  private double getTurretVelocity() {
+    return m_turret.getVelocity().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getTargetVelocity() {
+    return m_turret.getClosedLoopReferenceSlope().getValueAsDouble();
   }
 
   @AutoLogOutput
@@ -386,7 +393,7 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private boolean isNotMoving() {
-    return Math.abs(getFacingOmega() * 10.) < 45.;
+    return Math.abs(getFacingVelocity() * 10.) < 45.;
   }
 
   @AutoLogOutput
