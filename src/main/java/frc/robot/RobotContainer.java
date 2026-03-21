@@ -206,6 +206,9 @@ public class RobotContainer {
       SmartDashboard.putData("AntiJam", antiJam());
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
+
+      SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
+
       // SmartDashboard.putData("Prepclimb", prepClimber());
     }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
@@ -366,6 +369,13 @@ public class RobotContainer {
                 ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveTrench() {
+    return DriveCommands.trenchDrive(
+        drive,
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY());
   }
 
   public Command driveRebuiltTwo() {
