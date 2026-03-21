@@ -244,7 +244,7 @@ public class Turret extends SubsystemBase {
             motionMagicReq
                 .withPosition(position)
                 .withFeedForward(
-                    0.7 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
+                    0.12 * turretFacingToFalconEncoderPosition(-m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -254,7 +254,6 @@ public class Turret extends SubsystemBase {
       m_turret.stopMotor();
       m_retractomatic.stopMotor();
     }
-    System.out.println("GGRGFG" + m_robotYawRate.getAsDouble());
   }
 
   private double calcCircumnavigationTarget(double origin) {
@@ -277,6 +276,11 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput(key = "Turret/Velocity")
   private double getFacingOmega() {
     return turretEncoderPositionToFacing(m_turret.getVelocity().getValueAsDouble());
+  }
+
+  @AutoLogOutput
+  private double getCurrent() {
+    return m_turret.getSupplyCurrent().getValueAsDouble();
   }
 
   @AutoLogOutput
