@@ -14,6 +14,10 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -29,10 +33,10 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 /** insert new haiku here */
 public class Turret extends SubsystemBase {
+  // motors & devices
   private final TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());
   private final TalonFX m_retractomatic =
       new TalonFX(Constants.TURRET_RETRACTOMATIC_ID, CANBus.roboRIO());
-
   private final CANcoder m_CANcoder = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
   private final MotionMagicVoltage motionMagicReq = new MotionMagicVoltage(0.0);
@@ -70,6 +74,10 @@ public class Turret extends SubsystemBase {
 
   private boolean m_circumnavigating = false;
   private double m_circumnavigationTarget;
+
+  // my head is spinning
+  // newton's approximation
+  // shows the way to look
 
   public Turret(
       DoubleSupplier driveGyroRateSupplier, DoubleSupplier trajectorySolverFacingSupplier) {
@@ -151,6 +159,46 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Voltage getTurretVoltage() {
+    return m_turret.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getTurretCurrent() {
+    return m_turret.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getTurretVelocity() {
+    return m_turret.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getTurretRawPosition() {
+    return m_turret.getPosition().getValue();
+  }
+
+  @AutoLogOutput
+  private Voltage getRetractomaticVoltage() {
+    return m_retractomatic.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRetractomaticCurrent() {
+    return m_retractomatic.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getRetractomaticVelocity() {
+    return m_retractomatic.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getRetractomaticPosition() {
+    return m_turret.getPosition().getValue();
+  }
+
+  @AutoLogOutput
   private double getCANCoderFacing() {
     return turretEncoderPositionToFacing(
         m_CANcoder.getAbsolutePosition().getValueAsDouble() * 100.0 * (7.0 / 5.0));
@@ -162,8 +210,13 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean encoderHealthy() {
-    return m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+  public boolean isHealthy() {
+    return encodersHealthy() && motorsHealthy();
+  }
+
+  private boolean encodersHealthy() {
+    return m_CANcoder.isConnected()
+        && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
         && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 

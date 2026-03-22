@@ -216,6 +216,11 @@ public class Climber extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return lift.isConnected() && lift.isAlive() && pivot.isConnected() && pivot.isAlive();
+  }
+
+  @AutoLogOutput
   public boolean isPartiallyOnPole() {
     return debouncer.calculate(getDistance() < 0.3 && getDistance() > 0.215);
   }

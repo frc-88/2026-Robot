@@ -55,7 +55,7 @@ public class HotTub extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> Logger.recordOutput("HotTub/SysIdTestState", state.toString())),
+              (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private final BooleanSupplier m_turretOnTarget;
@@ -86,6 +86,11 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
+  }
+
+  @AutoLogOutput
+  public boolean isHealthy() {
+    return m_spinner.isConnected() && m_spinner.isAlive();
   }
 
   @AutoLogOutput
