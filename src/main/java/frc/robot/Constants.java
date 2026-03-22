@@ -41,6 +41,7 @@ public final class Constants {
   // Intake
   public static final int INTAKE_PIVOT = 14;
   public static final int INTAKE_ROLLER = 15;
+  public static final int INTAKE_INNER_ROLLER = 0;
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
@@ -89,4 +90,7 @@ public final class Constants {
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
   public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
   public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
+
+  public static double RIGHT_TRENCH_Y = Units.inchesToMeters(49.82 / 2.0);
+  public static double LEFT_TRENCH_Y = Constants.FIELD_WIDTH - Units.inchesToMeters(49.82 / 2.0);
 }
