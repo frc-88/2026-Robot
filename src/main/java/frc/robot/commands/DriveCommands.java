@@ -437,7 +437,7 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(
-            () -> {angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()); targetSet = false;})
+            () -> {angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()); yController.reset(Util.flipIfRed(drive.getPose()).getTranslation().getY()); targetSet = false;})
         .finallyDo(() -> targetSet = false);
   }
 
