@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -74,15 +75,19 @@ public class Turret extends SubsystemBase {
 
   private boolean m_circumnavigating = false;
   private double m_circumnavigationTarget;
+  private DoubleSupplier m_distance;
 
   // my head is spinning
   // newton's approximation
   // shows the way to look
 
   public Turret(
-      DoubleSupplier driveGyroRateSupplier, DoubleSupplier trajectorySolverFacingSupplier) {
+      DoubleSupplier driveGyroRateSupplier,
+      DoubleSupplier trajectorySolverFacingSupplier,
+      DoubleSupplier distanceToTargetSupplier) {
     m_robotYawRate = driveGyroRateSupplier;
     m_targetFacing = trajectorySolverFacingSupplier;
+    m_distance = distanceToTargetSupplier;
 
     configureMotors();
     configureCANCoder();
@@ -292,7 +297,6 @@ public class Turret extends SubsystemBase {
   private void goToPosition(double position, boolean spinCompensation) {
     if (motorsHealthy()) {
       if (spinCompensation) {
-        System.out.println("SpinComp");
         m_turret.setControl(
             motionMagicReq.withPosition(position - (0.015 * m_robotYawRate.getAsDouble())));
       } else {
@@ -304,7 +308,6 @@ public class Turret extends SubsystemBase {
       m_turret.stopMotor();
       m_retractomatic.stopMotor();
     }
-    System.out.println("GGRGFG" + m_robotYawRate.getAsDouble());
   }
 
   private double calcCircumnavigationTarget(double origin) {
@@ -399,7 +402,8 @@ public class Turret extends SubsystemBase {
   public boolean onTarget() {
     return m_targeting
         && !m_circumnavigating
-        && Math.abs(getFacing() - m_target) < 7.0; // TODO: Lower 5.0 threshold
+        && Math.abs(getFacing() - m_target)
+            < Units.radiansToDegrees(Math.asin(Units.inchesToMeters(17.895) / m_distance.getAsDouble()));
   }
 
   public Command calibrateEncoderCommand() {

@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
     configureTalons();
     configureSmartDashboardButtons();
 
-    // intakePivot.setPosition(0.0);
+    intakePivot.setPosition(0.0);
   }
 
   private void configureTalons() {
@@ -117,7 +117,7 @@ public class Intake extends SubsystemBase {
     pivotRollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     pivotRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    intakeRoller.getConfigurator().apply(pivotRollerConfig);
+    intakePivotRoller.getConfigurator().apply(pivotRollerConfig);
   }
 
   private void configureSmartDashboardButtons() {

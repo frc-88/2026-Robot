@@ -392,12 +392,6 @@ public class DriveCommands {
                 targetSet = true;
               }
 
-              Logger.recordOutput("Trench/rotationTarget", rotationTarget);
-              Logger.recordOutput("Trench/rotationFlipped", rotationFlipped);
-
-              Logger.recordOutput("Trench/yTarget", yTarget);
-              Logger.recordOutput("Trench/yFlipped", yFlipped);
-
               // Get linear velocity
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(
@@ -432,8 +426,18 @@ public class DriveCommands {
         // Reset PID controller when command starts
         .beforeStarting(
             () -> {
-              angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
-              yController.reset(Util.flipIfRed(drive.getPose()).getTranslation().getY());
+              angleController.reset(
+                  Util.flipIfRed(drive.getPose()).getRotation().getRadians()
+                  // , drive.getChassisSpeedsFieldRelative().getRotation().getRadians()
+                  );
+              yController.reset(
+                  Util.flipIfRed(drive.getPose()).getTranslation().getY()
+                  //   ,
+                  //   drive
+                  //       .getChassisSpeedsFieldRelative()
+                  //       .rotateBy(Rotation2d.fromDegrees(180.0))
+                  //       .getY()
+                  );
               targetSet = false;
             })
         .finallyDo(() -> targetSet = false);

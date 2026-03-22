@@ -9,6 +9,7 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 
 import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -107,7 +108,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+                new VisionIOLimelight(camera1Name, drive::getRotation),
+                new VisionIOLimelight(camera2Name, drive::getRotation));
         simulation = null;
         break;
 
@@ -156,7 +158,8 @@ public class RobotContainer {
     turret =
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
-            trajectorySolver::getTurretTarget);
+            trajectorySolver::getTurretTarget,
+            trajectorySolver::getDistanceToTarget);
     feeder = new Feeder(turret::onTarget);
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
@@ -279,7 +282,7 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.doTheThing());
+    controller.rightBumper().whileTrue(intake.retractIntake());
   }
 
   public void configureButtonBox() {
@@ -360,8 +363,10 @@ public class RobotContainer {
   public Command driveRebuilt() {
     return DriveCommands.rebuiltDrive(
         drive,
-        () -> shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY(),
-        () -> shooting ? MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5) : -controller.getLeftX(),
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65) : -controller.getLeftY(),
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65) : -controller.getLeftX(),
         () ->
             shooting
                 ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
@@ -511,8 +516,12 @@ public class RobotContainer {
         intake.setShooting());
   }
 
-  private Command setShooting(boolean shoot) {
+  public Command setShooting(boolean shoot) {
     return new InstantCommand(() -> shooting = shoot);
+  }
+
+  public void stopShooting() {
+    shooting = false;
   }
 
   public Command stopShoot() {

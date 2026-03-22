@@ -61,6 +61,10 @@ public class TrajectorySolver extends SubsystemBase {
     return shootSpeed;
   }
 
+  public double getDistanceToTarget() {
+    return turretToProjectedTargetDistance;
+  }
+
   @AutoLogOutput(key = "Trajectory/TurretTarget")
   public double getTurretTarget() {
     double target = turretToProjectedTarget.getAngle().getDegrees() - 180.0 - robotYaw.getDegrees();
