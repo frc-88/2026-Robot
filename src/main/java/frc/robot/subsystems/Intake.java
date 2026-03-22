@@ -27,8 +27,8 @@ public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
-  private final TalonFX intakePivotRoller = new TalonFX(Constants.INTAKE_PIVOT_ROLLER, CANBus.roboRIO());
-
+  private final TalonFX intakePivotRoller =
+      new TalonFX(Constants.INTAKE_PIVOT_ROLLER, CANBus.roboRIO());
 
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
@@ -176,7 +176,7 @@ public class Intake extends SubsystemBase {
     return intakeRoller.getVelocity().getValueAsDouble();
   }
 
-    @AutoLogOutput
+  @AutoLogOutput
   private Current getPivotRollerCurrent() {
     return intakePivotRoller.getStatorCurrent().getValue();
   }
@@ -218,7 +218,6 @@ public class Intake extends SubsystemBase {
   private void stopPivotRoller() {
     intakePivotRoller.stopMotor();
   }
-
 
   private void setPosition(double angle) {
     intakePivot.setControl(pivotRequest.withPosition(intakePivotAngleDegreesToRotations(angle)));
