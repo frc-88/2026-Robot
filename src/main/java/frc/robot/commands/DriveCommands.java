@@ -7,8 +7,6 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -25,7 +23,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util;
 import java.text.DecimalFormat;
@@ -47,7 +44,7 @@ public class DriveCommands {
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
 
-  private static final double Y_KP = 0.6;
+  private static final double Y_KP = 3.0;
 
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
@@ -368,19 +365,14 @@ public class DriveCommands {
     // Create PID controller
     ProfiledPIDController angleController =
         new ProfiledPIDController(
-            1.0,
+            5.0,
             0.0,
             0.0,
             new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     ProfiledPIDController yController =
-        new ProfiledPIDController(
-            Y_KP,
-            0.0,
-            0.0,
-            new TrapezoidProfile.Constraints(
-                TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2.0, 100.0));
+        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(3.0, 2.0));
 
     // Construct command
     return Commands.run(
@@ -410,6 +402,8 @@ public class DriveCommands {
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(
                       xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
+
+              Logger.recordOutput("Trench/YStick", yController.calculate(yFlipped, yTarget));
 
               // Calculate angular speed
               double omega =
