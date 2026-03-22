@@ -276,9 +276,7 @@ public class RobotContainer {
     //                 drive)
     //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
-    controller
-        .leftBumper()
-        .toggleOnTrue(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 20.0*/ ));
+    controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
     controller.rightBumper().whileTrue(intake.doTheThing());

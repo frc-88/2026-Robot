@@ -7,8 +7,6 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -25,7 +23,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util;
 import java.text.DecimalFormat;
@@ -47,12 +44,16 @@ public class DriveCommands {
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
 
-  private static final double Y_KP = 6.0;
+  private static final double Y_KP = 3.0;
 
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+
+  private static boolean targetSet = false;
+  private static double rotationTarget;
+  private static double yTarget;
 
   private DriveCommands() {}
 
@@ -361,39 +362,48 @@ public class DriveCommands {
 
   public static Command trenchDrive(Drive drive, DoubleSupplier xSupplier) {
 
-    double yFlipped = Util.flipIfRed(drive.getPose()).getY();
-    double yTarget = yFlipped > 4.0 ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
-
-    double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
-    double rotationTarget =
-        (rotationFlipped > -90.0 && rotationFlipped < 90.0)
-            ? 0.0
-            : Math.copySign(180.0, rotationFlipped);
-
     // Create PID controller
     ProfiledPIDController angleController =
         new ProfiledPIDController(
-            ANGLE_KP,
+            5.0,
             0.0,
-            ANGLE_KD,
+            0.0,
             new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     ProfiledPIDController yController =
-        new ProfiledPIDController(
-            Y_KP,
-            0.0,
-            0.0,
-            new TrapezoidProfile.Constraints(
-                TunerConstants.kSpeedAt12Volts.in(MetersPerSecond), 100.0));
+        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(3.0, 2.0));
 
     // Construct command
     return Commands.run(
             () -> {
+              double yFlipped = Util.flipIfRed(drive.getPose()).getY();
+
+              double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
+
+              Logger.recordOutput("Trench/targetset", targetSet);
+
+              if (!targetSet) {
+                yTarget = (yFlipped > 4.0) ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
+                rotationTarget =
+                    (rotationFlipped > -90.0 && rotationFlipped < 90.0)
+                        ? 0.0
+                        : Math.copySign(180.0, rotationFlipped);
+                targetSet = true;
+              }
+
+              Logger.recordOutput("Trench/rotationTarget", rotationTarget);
+              Logger.recordOutput("Trench/rotationFlipped", rotationFlipped);
+
+              Logger.recordOutput("Trench/yTarget", yTarget);
+              Logger.recordOutput("Trench/yFlipped", yFlipped);
+
               // Get linear velocity
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(
                       xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
+
+              Logger.recordOutput("Trench/YStick", yController.calculate(yFlipped, yTarget));
 
               // Calculate angular speed
               double omega =
@@ -421,8 +431,12 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(
-            () ->
-                angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
+            () -> {
+              angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+              yController.reset(Util.flipIfRed(drive.getPose()).getTranslation().getY());
+              targetSet = false;
+            })
+        .finallyDo(() -> targetSet = false);
   }
 
   /**
