@@ -41,7 +41,7 @@ public final class Constants {
   // Intake
   public static final int INTAKE_PIVOT = 14;
   public static final int INTAKE_ROLLER = 15;
-  public static final int INTAKE_INNER_ROLLER = 0;
+  public static final int INTAKE_PIVOT_ROLLER = 16;
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 

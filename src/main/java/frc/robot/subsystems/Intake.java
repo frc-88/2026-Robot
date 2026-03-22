@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
-  private final TalonFX intakeInnerRoller = new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
+  private final TalonFX intakePivotRoller = new TalonFX(Constants.INTAKE_PIVOT_ROLLER, CANBus.roboRIO());
 
 
   // output requests
@@ -36,6 +36,7 @@ public class Intake extends SubsystemBase {
       new DynamicMotionMagicVoltage(0.0, 0.1, 10.0);
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
   private final VelocityVoltage rollerRequest = new VelocityVoltage(0.0);
+  private final VelocityVoltage pivotRollerRequest = new VelocityVoltage(0.0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
@@ -46,10 +47,15 @@ public class Intake extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
+  private final MotionMagicPIDPreferenceConstants intakePivotRollerConfigConstants =
+      new MotionMagicPIDPreferenceConstants(
+          "Intake/IntakePivotRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
   private final DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
   private final DoublePreferenceConstant speed =
       new DoublePreferenceConstant("Intake/Speed", 100.0);
+  private final DoublePreferenceConstant pivotRollerSpeed =
+      new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);
   private final DoublePreferenceConstant deployPositionRotations =
       new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
 
@@ -99,6 +105,19 @@ public class Intake extends SubsystemBase {
     rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     intakeRoller.getConfigurator().apply(rollerConfig);
+
+    TalonFXConfiguration pivotRollerConfig = new TalonFXConfiguration();
+    pivotRollerConfig.Slot0.kP = intakePivotRollerConfigConstants.getKP().getValue();
+    pivotRollerConfig.Slot0.kI = intakePivotRollerConfigConstants.getKI().getValue();
+    pivotRollerConfig.Slot0.kD = intakePivotRollerConfigConstants.getKD().getValue();
+    pivotRollerConfig.Slot0.kV = intakePivotRollerConfigConstants.getKV().getValue();
+    pivotRollerConfig.Slot0.kS = intakePivotRollerConfigConstants.getKS().getValue();
+
+    pivotRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    pivotRollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+    pivotRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    intakeRoller.getConfigurator().apply(pivotRollerConfig);
   }
 
   private void configureSmartDashboardButtons() {
@@ -149,6 +168,21 @@ public class Intake extends SubsystemBase {
     return intakeRoller.getVelocity().getValueAsDouble();
   }
 
+    @AutoLogOutput
+  private Current getPivotRollerCurrent() {
+    return intakePivotRoller.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private double getPivotRollerVoltage() {
+    return intakePivotRoller.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getPivotRollerVelocity() {
+    return intakePivotRoller.getVelocity().getValueAsDouble();
+  }
+
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
     return (pivotAngle / 360.0) * Constants.INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS;
   }
@@ -161,13 +195,22 @@ public class Intake extends SubsystemBase {
     intakePivot.setControl(pivotRequest.withPosition(minionRotations));
   }
 
-  private void setSpinnerSpeed(DoubleSupplier speed) {
+  private void setRollerSpeed(DoubleSupplier speed) {
     intakeRoller.setControl(rollerRequest.withVelocity(speed.getAsDouble()));
   }
 
-  private void stopSpinner() {
+  private void stopRoller() {
     intakeRoller.stopMotor();
   }
+
+  private void setPivotRollerSpeed(DoubleSupplier speed) {
+    intakePivotRoller.setControl(pivotRollerRequest.withVelocity(speed.getAsDouble()));
+  }
+
+  private void stopPivotRoller() {
+    intakePivotRoller.stopMotor();
+  }
+
 
   private void setPosition(double angle) {
     intakePivot.setControl(pivotRequest.withPosition(intakePivotAngleDegreesToRotations(angle)));
@@ -181,12 +224,13 @@ public class Intake extends SubsystemBase {
   }
 
   private void intakeOut() {
-    goToRotations(deployPositionRotations.getValue()); // TODO
-    setSpinnerSpeed();
+    goToRotations(deployPositionRotations.getValue());
+    setRollerSpeed();
+    setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
 
-  public void setSpinnerSpeed() {
-    setSpinnerSpeed(
+  public void setRollerSpeed() {
+    setRollerSpeed(
         () ->
             MathUtil.clamp(
                 (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 65.0, 120.0));
@@ -194,27 +238,31 @@ public class Intake extends SubsystemBase {
 
   public void intakeIn() {
     goToRotations(0.0);
-    stopSpinner();
+    stopRoller();
+    stopPivotRoller();
   }
 
   private void theThing() {
     intakePivot.setControl(
         pivotRequestDynamic.withAcceleration(100.0).withVelocity(10.0).withPosition(5.0));
-    setSpinnerSpeed(() -> speed.getValue() / 10.0);
+    setRollerSpeed(() -> speed.getValue() / 10.0);
+    setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
 
   private void justIntakeOut() {
     if (isShooting) {
-      goToRotations(deployPositionRotations.getValue()); // TODO
-      setSpinnerSpeed();
+      goToRotations(deployPositionRotations.getValue());
+      setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
+      setRollerSpeed();
     } else {
-      goToRotations(deployPositionRotations.getValue()); // TODO
-      stopSpinner();
+      goToRotations(deployPositionRotations.getValue());
+      stopPivotRoller();
+      stopRoller();
     }
   }
 
   private void antiJam() {
-    setSpinnerSpeed(() -> -speed.getValue());
+    setRollerSpeed(() -> -speed.getValue());
   }
 
   public Command setNotShooting() {
@@ -236,13 +284,13 @@ public class Intake extends SubsystemBase {
   public Command runIntake() {
     return new RunCommand(
         () ->
-            setSpinnerSpeed(
+            setRollerSpeed(
                 () -> (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1)))),
         this);
   }
 
   public Command stopIntake() {
-    return new RunCommand(() -> stopSpinner(), this);
+    return new RunCommand(() -> stopRoller(), this);
   }
 
   public Command calibrateIntake() {
