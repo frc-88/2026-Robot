@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -26,9 +28,6 @@ import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util;
-
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -244,7 +243,7 @@ public class DriveCommands {
         drive);
   }
 
-  public static Command rebuiltDriveTwo( //unused
+  public static Command rebuiltDriveTwo( // unused
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
@@ -360,15 +359,16 @@ public class DriveCommands {
                 angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
   }
 
-  public static Command trenchDrive(
-      Drive drive,
-      DoubleSupplier xSupplier) {
-    
+  public static Command trenchDrive(Drive drive, DoubleSupplier xSupplier) {
+
     double yFlipped = Util.flipIfRed(drive.getPose()).getY();
     double yTarget = yFlipped > 4.0 ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
-    
+
     double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
-    double rotationTarget = (rotationFlipped > -90.0 && rotationFlipped < 90.0) ? 0.0 : Math.copySign(180.0, rotationFlipped);
+    double rotationTarget =
+        (rotationFlipped > -90.0 && rotationFlipped < 90.0)
+            ? 0.0
+            : Math.copySign(180.0, rotationFlipped);
 
     // Create PID controller
     ProfiledPIDController angleController =
@@ -384,14 +384,16 @@ public class DriveCommands {
             Y_KP,
             0.0,
             0.0,
-            new TrapezoidProfile.Constraints(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond), 100.0));
+            new TrapezoidProfile.Constraints(
+                TunerConstants.kSpeedAt12Volts.in(MetersPerSecond), 100.0));
 
     // Construct command
     return Commands.run(
             () -> {
               // Get linear velocity
               Translation2d linearVelocity =
-                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
+                  getLinearVelocityFromJoysticks(
+                      xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
 
               // Calculate angular speed
               double omega =
@@ -422,7 +424,6 @@ public class DriveCommands {
             () ->
                 angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
   }
-
 
   /**
    * Measures the velocity feedforward constants for the drive motors.

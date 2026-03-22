@@ -27,8 +27,8 @@ public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
-  private final TalonFX intakeInnerRoller = new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
-
+  private final TalonFX intakeInnerRoller =
+      new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
 
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
