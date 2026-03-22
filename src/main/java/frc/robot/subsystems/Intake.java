@@ -139,6 +139,14 @@ public class Intake extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return intakePivot.isConnected()
+        && intakePivot.isAlive()
+        && intakeRoller.isConnected()
+        && intakeRoller.isAlive();
+  }
+
+  @AutoLogOutput
   private Current getPivotCurrent() {
     return intakePivot.getStatorCurrent().getValue();
   }

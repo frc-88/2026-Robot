@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Voltage;
@@ -34,7 +35,12 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// I like blueberries
+// especially the tasty
+// big round yellow ones
+
 public class Shooter extends SubsystemBase {
+  // motors & devices
   private final TalonFX shooterMain =
       new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
   private final TalonFX shooterFollower =
@@ -42,9 +48,11 @@ public class Shooter extends SubsystemBase {
   private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
   private final DigitalInput feederBeamBreak = new DigitalInput(0);
 
+  // output requests
   private final VelocityVoltage requestShooter = new VelocityVoltage(0.0);
   private final VoltageOut sysIdReq = new VoltageOut(0.0);
 
+  // preferences
   private final DoublePreferenceConstant shootSpeed =
       new DoublePreferenceConstant("Shooter/ShootSpeed", 37.3);
   private final DoublePreferenceConstant increaseDuration =
@@ -86,13 +94,14 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(DoubleSupplier speed) {
     m_targetSpeed = speed;
-    configureTalons();
     configureCANCoder();
+    configureTalons();
     configureSmartDashboardButtons();
   }
 
   private void configureTalons() {
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
+    TalonFXConfiguration shooterFollowerConfig = new TalonFXConfiguration();
 
     shooterConfig.Slot0.kP = shooterConfigConstants.getKP().getValue();
     shooterConfig.Slot0.kI = shooterConfigConstants.getKI().getValue();
@@ -109,6 +118,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Feedback.RotorToSensorRatio = Constants.SHOOTER_GEAR_RATIO;
 
     shooterMain.getConfigurator().apply(shooterConfig);
+    shooterFollower.getConfigurator().apply(shooterFollowerConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     timeSinceBallLastSeen.reset();
@@ -217,6 +227,16 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  public boolean isHealthy() {
+    return shooterMain.isConnected()
+        && shooterMain.isAlive()
+        && shooterFollower.isConnected()
+        && shooterFollower.isAlive()
+        && shooterCANcoder.isConnected()
+        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
+        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
+  }
+
   @AutoLogOutput
   private boolean isBeamBlocked() {
     return !feederBeamBreak.get();
@@ -233,8 +253,23 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getVoltage() {
+  private double getMainVoltage() {
     return shooterMain.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerVoltage() {
+    return shooterFollower.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getMainCurrent() {
+    return shooterMain.getTorqueCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerCurrent() {
+    return shooterFollower.getTorqueCurrent().getValueAsDouble();
   }
 
   @AutoLogOutput

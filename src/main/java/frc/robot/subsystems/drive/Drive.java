@@ -52,6 +52,10 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// mechanically
+// straight forward, easy to use
+// advantageously
+
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
   Pose3d[] poses = new Pose3d[2];

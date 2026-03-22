@@ -66,6 +66,11 @@ public class Batman extends SubsystemBase {
     return currentPose.toPose2d();
   }
 
+  @AutoLogOutput(key = "Quest/RawQuestPose")
+  public Pose2d getRawPose2d() {
+    return currentPose.transformBy(ROBOT_TO_QUEST).toPose2d();
+  }
+
   public boolean isTracking() {
     return quest.isTracking();
   }
