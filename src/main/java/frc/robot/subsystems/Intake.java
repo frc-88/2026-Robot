@@ -114,7 +114,7 @@ public class Intake extends SubsystemBase {
     pivotRollerConfig.Slot0.kS = intakePivotRollerConfigConstants.getKS().getValue();
 
     pivotRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    pivotRollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+    pivotRollerConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     pivotRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     intakePivotRoller.getConfigurator().apply(pivotRollerConfig);

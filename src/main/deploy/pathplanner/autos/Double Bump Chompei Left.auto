@@ -51,9 +51,22 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "path",
+                      "type": "sequential",
                       "data": {
-                        "pathName": "LeftBumpUnloadToLeftTrench"
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "LeftBumpUnloadToLeftTrench"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.3
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -73,7 +86,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 1.0
+                                    "waitTime": 2.0
                                   }
                                 },
                                 {
@@ -137,7 +150,7 @@
           "data": {
             "commands": [
               {
-                "type": "deadline",
+                "type": "parallel",
                 "data": {
                   "commands": [
                     {
@@ -163,7 +176,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 1.0
+                                    "waitTime": 2.0
                                   }
                                 },
                                 {

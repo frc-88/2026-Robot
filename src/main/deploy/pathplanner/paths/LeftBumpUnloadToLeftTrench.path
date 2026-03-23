@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1923504273504273,
-        "y": 5.507905982905982
+        "x": 3.486654761904763,
+        "y": 5.5034761904761895
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.2383095238095247,
-        "y": 6.583238095238096
+        "x": 3.324690476190477,
+        "y": 6.021761904761904
       },
       "isLocked": false,
       "linkedName": "LeftBumpUnload"
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 0.6,
     "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

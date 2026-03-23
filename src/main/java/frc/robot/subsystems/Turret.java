@@ -14,7 +14,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -400,10 +399,10 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   public boolean onTarget() {
-    return m_targeting
-        && !m_circumnavigating
-        && Math.abs(getFacing() - m_target)
-            < Units.radiansToDegrees(Math.asin(Units.inchesToMeters(17.895) / m_distance.getAsDouble()));
+    return m_targeting && !m_circumnavigating && Math.abs(getFacing() - m_target) < 80.0
+    // Units.radiansToDegrees(
+    //     Math.asin(Units.inchesToMeters(16.895) / m_distance.getAsDouble()))
+    ;
   }
 
   public Command calibrateEncoderCommand() {
