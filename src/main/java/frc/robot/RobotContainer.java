@@ -87,9 +87,9 @@ public class RobotContainer {
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
-    if (!Util.logif()) {
-      Unmanaged.setPhoenixDiagnosticsStartTime(-1);
-    }
+    // if (!Util.logif()) {
+    //   Unmanaged.setPhoenixDiagnosticsStartTime(-1);
+    // }
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
