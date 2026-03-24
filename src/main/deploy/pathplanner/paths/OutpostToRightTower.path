@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.698746438746439,
-        "y": 0.6369800569800577
+        "x": 0.5433056872037911,
+        "y": 0.6498696682464435
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.8483145215569845,
-        "y": 0.8373032673286787
+        "x": 0.7040025896254261,
+        "y": 0.8413807790261881
       },
       "isLocked": false,
       "linkedName": "Outpost"
     },
     {
       "anchor": {
-        "x": 1.057190476190477,
-        "y": 2.56652380952381
+        "x": 0.5497023809523818,
+        "y": 5.584936708860759
       },
       "prevControl": {
-        "x": 1.0719437910259186,
-        "y": 2.316959509790522
+        "x": 0.5497023809523818,
+        "y": 5.334936708860759
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Tower Right Approach"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,7 +47,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -89.15747573925957
   },
   "reversed": false,
   "folder": null,

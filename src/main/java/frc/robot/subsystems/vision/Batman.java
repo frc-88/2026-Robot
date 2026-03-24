@@ -8,7 +8,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import java.util.function.Supplier;
@@ -17,10 +16,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
-  public Pose2d drivePose;
-  public Pose3d visionPose;
-  private DoublePreferenceConstant rotationWeight =
-      new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
+
+  // private DoublePreferenceConstant rotationWeight =
+  //    new DoublePreferenceConstant("Batman/RotationWeight", (18 / Math.PI)); // calculation
 
   @SuppressWarnings("unused")
   private boolean hasGlobalized = false;
@@ -52,6 +50,8 @@ public class Batman extends SubsystemBase {
 
   private QuestNav quest = new QuestNav();
 
+  public Batman() {}
+
   public void globalize(Pose3d globalPose) {
     resetPose(globalPose);
     hasGlobalized = true;
@@ -66,8 +66,17 @@ public class Batman extends SubsystemBase {
     return currentPose.toPose2d();
   }
 
+  @AutoLogOutput(key = "Quest/RawQuestPose")
+  public Pose2d getRawPose2d() {
+    return currentPose.transformBy(ROBOT_TO_QUEST).toPose2d();
+  }
+
   public boolean isTracking() {
     return quest.isTracking();
+  }
+
+  public boolean shouldUse() {
+    return shouldUse;
   }
 
   public boolean isConnected() {
@@ -81,6 +90,7 @@ public class Batman extends SubsystemBase {
   public void resetPose(Pose3d pose) {
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+    hasGlobalized = true;
   }
 
   public boolean hasGlobalized() {

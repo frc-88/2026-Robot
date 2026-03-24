@@ -3,51 +3,51 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2475972872123915,
-        "y": 7.000821020738133
+        "x": 7.546696202531644,
+        "y": 3.575759493670886
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.310647240081432,
-        "y": 6.660184836092218
+        "x": 7.900912359139338,
+        "y": 3.562886140138511
       },
       "isLocked": false,
-      "linkedName": "Start Point 1"
+      "linkedName": "RightCenter"
     },
     {
       "anchor": {
-        "x": 1.5113209565064611,
-        "y": 5.581524484794832
+        "x": 6.892278481012657,
+        "y": 0.7743924050632915
       },
       "prevControl": {
-        "x": 1.5662500793059584,
-        "y": 5.972823783520216
+        "x": 7.059519663918269,
+        "y": 0.960215941625084
       },
       "nextControl": {
-        "x": 1.4675830383300776,
-        "y": 5.269948114412967
+        "x": 6.705406464887652,
+        "y": 0.5667568315910613
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.1173291139240495,
-        "y": 5.3323544303797465
+        "x": 3.4938987341772143,
+        "y": 0.6251392405063279
       },
       "prevControl": {
-        "x": 1.5951277848977827,
-        "y": 5.332879563744415
+        "x": 4.32053164556962,
+        "y": 0.6366202531645571
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Left Approach"
+      "linkedName": "RightUnload"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.7687978650456119,
-      "rotationDegrees": 90.0
+      "waypointRelativePos": 1.1,
+      "rotationDegrees": -1.2462874730364866
     }
   ],
   "constraintZones": [],
@@ -62,14 +62,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": 90.0
+    "velocity": 0,
+    "rotation": 0.4152716567430378
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.9119775937312
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

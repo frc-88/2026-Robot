@@ -22,7 +22,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.Util;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -30,17 +32,28 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 0.5;
-  private static final double ANGLE_KD = 0.0;
-  private static final double ANGLE_MAX_VELOCITY = 24.0;
-  private static final double ANGLE_MAX_ACCELERATION = 48.0;
+  private static final double ANGLE_KP_FAST = 15.0;
+  private static final double ANGLE_KD_FAST = 0.04;
+
+  private static final double ANGLE_KP = 8.0;
+  private static final double ANGLE_KD = 0.04;
+  private static final double ANGLE_MAX_VELOCITY = 100.0;
+  private static final double ANGLE_MAX_ACCELERATION = 100.0;
+
+  private static final double Y_KP = 3.0;
+
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+
+  private static boolean targetSet = false;
+  private static double rotationTarget;
+  private static double yTarget;
 
   private DriveCommands() {}
 
@@ -79,6 +92,7 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
+          Logger.recordOutput("RegularOmega", omega);
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
               new ChassisSpeeds(
@@ -169,29 +183,53 @@ public class DriveCommands {
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
-          if (omega == 0.0 && linearVelocity.getNorm() > DEADBAND) {
-            // rotate in direction of translation
-            double omegaFast =
-                angleController.calculate(
-                    drive.getRotation().getRadians(), linearVelocity.getAngle().getRadians());
+          omega = Math.copySign(omega * omega, omega);
+          omega *= drive.getMaxAngularSpeedRadPerSec();
 
-            double omegaSlow =
-                angleControllerSlow.calculate(
-                    drive.getRotation().getRadians(), linearVelocity.getAngle().getRadians());
-            omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
-          } else {
-            // Square rotation value for more precise control
-            omega = Math.copySign(omega * omega, omega);
-            angleController.reset(drive.getRotation().getRadians());
-            angleControllerSlow.reset(drive.getRotation().getRadians());
-          }
+          //   if (omega == 0.0) {
+          //     // rotate in direction of translation
+          //     // Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
+          //     double omegaFast =
+          //         angleController.calculate(
+          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+          //             linearVelocity.getAngle().getRadians());
+          //     omegaFast =
+          //         MathUtil.clamp(
+          //             omegaFast,
+          //             -drive.getMaxAngularSpeedRadPerSec(),
+          //             drive.getMaxAngularSpeedRadPerSec());
+
+          //     double omegaSlow =
+          //         angleControllerSlow.calculate(
+          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+          //             linearVelocity.getAngle().getRadians());
+          //     omegaSlow =
+          //         MathUtil.clamp(
+          //             omegaSlow,
+          //             -drive.getMaxAngularSpeedRadPerSec(),
+          //             drive.getMaxAngularSpeedRadPerSec());
+          //     omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
+          //     // omega *= Math.sqrt(linearVelocity.getNorm());
+          //   } else {
+          //     // Square rotation value for more precise control
+          //     // Logger.recordOutput("Heading", 400.0);
+          //     omega = Math.copySign(omega * omega, omega);
+          //     omega *= drive.getMaxAngularSpeedRadPerSec();
+          //     angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+          //
+          // angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+          //   }
+
+          // omega = MathUtil.clamp(omega, -1.0, 1.0);
+
+          // Logger.recordOutput("OmegaTarget", omega);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
               new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+                  omega);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
@@ -206,7 +244,7 @@ public class DriveCommands {
         drive);
   }
 
-  public static Command rebuiltDriveTwo(
+  public static Command rebuiltDriveTwo( // unused
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
@@ -295,7 +333,8 @@ public class DriveCommands {
               // Calculate angular speed
               double omega =
                   angleController.calculate(
-                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+                      Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+                      rotationSupplier.get().getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
@@ -316,7 +355,92 @@ public class DriveCommands {
             drive)
 
         // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+        .beforeStarting(
+            () ->
+                angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
+  }
+
+  public static Command trenchDrive(Drive drive, DoubleSupplier xSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            5.0,
+            0.0,
+            0.0,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController yController =
+        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(3.0, 2.0));
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              double yFlipped = Util.flipIfRed(drive.getPose()).getY();
+
+              double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
+
+              Logger.recordOutput("Trench/targetset", targetSet);
+
+              if (!targetSet) {
+                yTarget = (yFlipped > 4.0) ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
+                rotationTarget =
+                    (rotationFlipped > -90.0 && rotationFlipped < 90.0)
+                        ? 0.0
+                        : Math.copySign(180.0, rotationFlipped);
+                targetSet = true;
+              }
+
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(
+                      xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
+
+              Logger.recordOutput("Trench/YStick", yController.calculate(yFlipped, yTarget));
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      Units.degreesToRadians(rotationFlipped),
+                      Units.degreesToRadians(rotationTarget));
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocityAroundCenter(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(
+            () -> {
+              angleController.reset(
+                  Util.flipIfRed(drive.getPose()).getRotation().getRadians()
+                  // , drive.getChassisSpeedsFieldRelative().getRotation().getRadians()
+                  );
+              yController.reset(
+                  Util.flipIfRed(drive.getPose()).getTranslation().getY()
+                  //   ,
+                  //   drive
+                  //       .getChassisSpeedsFieldRelative()
+                  //       .rotateBy(Rotation2d.fromDegrees(180.0))
+                  //       .getY()
+                  );
+              targetSet = false;
+            })
+        .finallyDo(() -> targetSet = false);
   }
 
   /**

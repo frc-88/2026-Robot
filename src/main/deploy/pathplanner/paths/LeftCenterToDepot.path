@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.76611111111111,
-        "y": 4.499297619047619
+        "x": 7.6498290598290595,
+        "y": 4.487207977207977
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.8993628991623925,
-        "y": 5.440474502370741
+        "x": 7.040907858818219,
+        "y": 5.308944455128385
       },
       "isLocked": false,
       "linkedName": "LeftCenter"
@@ -20,12 +20,12 @@
         "y": 7.421898734177216
       },
       "prevControl": {
-        "x": 6.6574745689728925,
-        "y": 7.46817248952845
+        "x": 6.7020220239541946,
+        "y": 7.43156681324424
       },
       "nextControl": {
-        "x": 1.68923001143171,
-        "y": 7.247896751076045
+        "x": 1.0502109407500688,
+        "y": 7.381355148793392
       },
       "isLocked": false,
       "linkedName": null
@@ -36,28 +36,28 @@
         "y": 7.123119047619047
       },
       "prevControl": {
-        "x": 0.7095538914838405,
-        "y": 7.31533635844409
+        "x": 0.7422253750030204,
+        "y": 7.2826022654251155
       },
       "nextControl": {
-        "x": 0.367599385347398,
-        "y": 6.904144900975086
+        "x": 0.3571793869017431,
+        "y": 6.963635829812979
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.4309285714285721,
-        "y": 5.762619047619048
+        "x": 0.4399493670886069,
+        "y": 5.5160506329113925
       },
       "prevControl": {
-        "x": 0.44890529844616645,
-        "y": 6.2851269068521445
+        "x": 0.641048041846686,
+        "y": 7.18560625161061
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Right Approach"
+      "linkedName": "DepotEnd"
     }
   ],
   "rotationTargets": [
@@ -70,15 +70,15 @@
       "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 2.0340248962655583,
+      "waypointRelativePos": 2.0,
       "rotationDegrees": -88.89829388479357
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.1642679900744441,
-      "maxWaypointRelativePos": 3.0,
+      "minWaypointRelativePos": 1.1280653950953659,
+      "maxWaypointRelativePos": 2.5,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 0.5,

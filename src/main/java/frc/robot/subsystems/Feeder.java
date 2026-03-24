@@ -1,14 +1,16 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -24,6 +26,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 // so much fuel goes by
 // suddenly I realize
@@ -36,22 +39,23 @@ public class Feeder extends SubsystemBase {
   // output requests
   private final VelocityVoltage m_request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
+  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
   private final DoublePreferenceConstant p_feedSpeed =
       new DoublePreferenceConstant("Feeder/FeedSpeed", 105.0);
   private final MotionMagicPIDPreferenceConstants p_feederConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Feeder/MotorPID", 0., 0., 0., 0., 0., 0., 0.0988, 0., 0.);
+          "Feeder/MotorPID", 0., 0., 0., 0.15886, 0., 0., 0.10665, 0.099049, 0.063801);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(
-              null, // Use default ramp rate (1 V/s)
+              Volts.of(0.5).per(Second), // lower default ramp rate to 0.5 V/s
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> SignalLogger.writeString("state", state.toString())),
+              (state) -> Logger.recordOutput("Feeder/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private BooleanSupplier m_turretOnTarget;
@@ -85,6 +89,11 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isHealthy() {
+    return m_feeder.isConnected() && m_feeder.isAlive();
+  }
+
+  @AutoLogOutput
   private Voltage getVoltage() {
     return m_feeder.getMotorVoltage().getValue();
   }
@@ -99,6 +108,11 @@ public class Feeder extends SubsystemBase {
     return m_feeder.getVelocity().getValue();
   }
 
+  @AutoLogOutput
+  private Angle getPosition() {
+    return m_feeder.getPosition().getValue();
+  }
+
   private void setVoltage(Voltage volts) {
     m_feeder.setControl(m_voltReq.withOutput(volts));
   }
@@ -111,12 +125,20 @@ public class Feeder extends SubsystemBase {
     m_feeder.stopMotor();
   }
 
+  private void antiJam() {
+    m_feeder.setControl(antiJamRequest.withOutput(-1.0));
+  }
+
   public void periodic() {}
 
   public Command runFeeder() {
     return new RunCommand(
         () -> setFeederSpeed(() -> m_turretOnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0),
         this);
+  }
+
+  public Command antiJamFeeder() {
+    return new RunCommand(() -> antiJam(), this);
   }
 
   public Command stopFeeder() {

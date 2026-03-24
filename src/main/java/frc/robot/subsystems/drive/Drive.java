@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -47,8 +48,13 @@ import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+// mechanically
+// straight forward, easy to use
+// advantageously
 
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
@@ -106,13 +112,16 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
   private double m_yaw;
+  private Supplier<Pose2d> m_batmanPoseSupplier;
 
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      Supplier<Pose2d> batmanPoseSupplier) {
+    m_batmanPoseSupplier = batmanPoseSupplier;
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -132,7 +141,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocityAroundCenter,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)),
+            new PIDConstants(6.0, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)), // drive: 6.0
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -292,6 +301,15 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void pointForwards() {
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(90)));
+    }
+  }
+
+  public Command pointForwardsCommand() {
+    return new RunCommand(() -> pointForwards(), this);
+  }
   /** Stops the drive. */
   public void stop() {
     runVelocityAroundCenter(new ChassisSpeeds());
@@ -367,6 +385,10 @@ public class Drive extends SubsystemBase {
     return values;
   }
 
+  public double getSpeed() {
+    return getChassisSpeedsFieldRelative().getTranslation().getNorm();
+  }
+
   /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
@@ -380,6 +402,11 @@ public class Drive extends SubsystemBase {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  @AutoLogOutput(key = "Odometry/RobotFlipped")
+  public Pose2d getPoseFlipped() {
+    return Util.flipIfRed(getPose());
   }
 
   /** Returns the current odometry rotation. */
