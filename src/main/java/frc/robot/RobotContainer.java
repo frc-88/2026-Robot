@@ -69,6 +69,7 @@ public class RobotContainer {
   private final Hood hood;
   private final Vision vision;
   private final Simulation simulation;
+  private final Dashboard dashboard = new Dashboard();
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();

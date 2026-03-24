@@ -5,9 +5,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.Util;
 
 public class Dashboard extends SubsystemBase {
   /** Creates a new Dashboard. */
@@ -17,31 +17,36 @@ public class Dashboard extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     String gameData = DriverStation.getGameSpecificMessage();
-    boolean weAreRed = DriverStation.getAlliance().equals(Alliance.Red);
+    boolean weAreRed = Util.weAreRed();
     double gameTime = DriverStation.getMatchTime();
 
-    double gameTimeInt = Math.floor(gameTime); // Round the seconds down
+    double gameTimeInt = Math.ceil(gameTime); // Round the seconds down
     double gameMinsInt = gameTimeInt / 60;
     String gameTimeString =
-        String.valueOf(Math.floor(gameMinsInt)) + ":" + insertZero(String.valueOf(gameTimeInt % 60));
-      
-    //gameTimeString = String.format("%1$:%2$02.0", gameMinsInt); // Not sure how to use this properly
+        String.valueOf(Math.floor(gameMinsInt))
+            + ":"
+            + insertZero(String.valueOf(gameTimeInt % 60));
+
+    // gameTimeString = String.format("%1$:%2$02.0", gameMinsInt); // Not sure how to use this
+    // properly
 
     SmartDashboard.putString("Driver Dashboard/Match Time", gameTimeString);
-
 
     boolean isHubActive = true;
     String currentMatchPeriod = "unknown";
     double periodTimeRemaining = 0;
 
-
     if (gameData.length() > 0) {
-      if (gameTime > 130) { // ---------- TRANSITION SHIFT ----------
+      if (gameTimeInt < 0) {
+        isHubActive = false;
+        currentMatchPeriod = "DISABLED";
+        periodTimeRemaining = gameTimeInt;
+      } else if (gameTimeInt >= 130) { // ---------- TRANSITION SHIFT ----------
         isHubActive = true;
         currentMatchPeriod = "TRANSITION SHIFT";
         periodTimeRemaining = gameTimeInt - 130;
 
-      } else if (gameTime > 105) { // ---------- SHIFT 1 ----------
+      } else if (gameTimeInt >= 105) { // ---------- SHIFT 1 ----------
         currentMatchPeriod = "SHIFT 1";
         periodTimeRemaining = gameTimeInt - 105;
         switch (gameData.charAt(0)) {
@@ -63,7 +68,7 @@ public class Dashboard extends SubsystemBase {
             isHubActive = true;
             break;
         }
-      } else if (gameTime > 80) { // ---------- SHIFT 2 ----------
+      } else if (gameTimeInt >= 80) { // ---------- SHIFT 2 ----------
         currentMatchPeriod = "SHIFT 2";
         periodTimeRemaining = gameTimeInt - 80;
         switch (gameData.charAt(0)) {
@@ -85,9 +90,9 @@ public class Dashboard extends SubsystemBase {
             isHubActive = true;
             break;
         }
-      } else if (gameTime > 55) { // ---------- SHIFT 3 ----------
+      } else if (gameTimeInt >= 55) { // ---------- SHIFT 3 ----------
         currentMatchPeriod = "SHIFT 3";
-        periodTimeRemaining = gameTimeInt - 5;
+        periodTimeRemaining = gameTimeInt - 55;
         switch (gameData.charAt(0)) {
           case 'B': // Blue case code (blue won autonomous, so red goes first)
             if (weAreRed) {
@@ -107,7 +112,7 @@ public class Dashboard extends SubsystemBase {
             isHubActive = true;
             break;
         }
-      } else if (gameTime > 30) { // ---------- SHIFT 4 ----------
+      } else if (gameTimeInt >= 30) { // ---------- SHIFT 4 ----------
         currentMatchPeriod = "SHIFT 4";
         periodTimeRemaining = gameTimeInt - 30;
         switch (gameData.charAt(0)) {
@@ -129,27 +134,32 @@ public class Dashboard extends SubsystemBase {
             isHubActive = true;
             break;
         }
-      } else { // ---------- END GAME ----------
+      } else if (gameTimeInt < 30
+          && !DriverStation.isAutonomous()) { // ---------- END GAME ----------
         currentMatchPeriod = "END GAME";
         periodTimeRemaining = gameTimeInt;
         isHubActive = true;
+      } else if (gameTimeInt <= 20 && DriverStation.isAutonomous()) {
+        currentMatchPeriod = "AUTONOMOUS";
+        periodTimeRemaining = gameTimeInt;
+        isHubActive = true;
+      } else {
+        currentMatchPeriod = "IDK BRUH";
+        isHubActive = false;
+        periodTimeRemaining = -1;
       }
 
     } else { // Code for no data received yet
-      isHubActive = true;
-      if (gameTime < 20) { // In autonomous
-        currentMatchPeriod = "AUTONOMOUS";
-        periodTimeRemaining = gameTimeInt;
-      } else { // Probably in transition shift
-        currentMatchPeriod = "TRANSITION SHIFT";
-        periodTimeRemaining = gameTimeInt - 130;
-      }
+      isHubActive = false;
+      currentMatchPeriod = "DISABLED";
+      isHubActive = false;
+      periodTimeRemaining = -1;
     }
 
     SmartDashboard.putBoolean("Driver Dashboard/Hub Active", isHubActive);
     SmartDashboard.putString("Driver Dashboard/Current Match Period", currentMatchPeriod);
     SmartDashboard.putNumber("Driver Dashboard/Period Time", periodTimeRemaining);
-
+    SmartDashboard.putString("Driver Dashboard/GameData", gameData);
   }
 
   private String insertZero(
