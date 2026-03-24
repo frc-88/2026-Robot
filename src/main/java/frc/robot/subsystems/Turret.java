@@ -30,7 +30,6 @@ import frc.robot.Constants;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -418,9 +417,12 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput
   public boolean onTarget() {
     double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
-    return m_targeting && !m_circumnavigating && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 
-    Units.radiansToDegrees(
-        Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse)) : 20.0);
+    return m_targeting
+        && !m_circumnavigating
+        && Math.abs(getFacing() - m_target)
+            < (m_istargetingHub.getAsBoolean()
+                ? Units.radiansToDegrees(Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse))
+                : 20.0);
   }
 
   public Command calibrateEncoderCommand() {
