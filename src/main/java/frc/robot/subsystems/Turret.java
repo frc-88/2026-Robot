@@ -31,7 +31,10 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
-/** insert new haiku here */
+// You know that I would
+// circumnavigate the world
+// to keep you in sight
+
 public class Turret extends SubsystemBase {
   // motors & devices
   private final TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());

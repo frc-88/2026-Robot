@@ -35,6 +35,10 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// call me grip and flip
+// a really cool mechanism
+// for some other game
+
 public class Climber extends SubsystemBase {
 
   private final CANBus canbus = new CANBus("Drivetrain");

@@ -31,6 +31,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+// if we see further
+// it is because, like Newton,
+// we stand on giants
+
 public class Vision extends SubsystemBase {
   // private Batman batman = new Batman();
   private final VisionConsumer consumer;

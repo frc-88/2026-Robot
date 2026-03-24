@@ -23,6 +23,10 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// hey kids! do The Thing!
+// put your arms out, pull them back
+// it's The Thing! oh yeah!
+
 public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
