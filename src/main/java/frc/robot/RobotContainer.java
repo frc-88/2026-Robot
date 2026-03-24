@@ -219,7 +219,8 @@ public class RobotContainer {
   }
 
   public boolean onTarget() {
-    return turret.onTarget(); // && (time until next shift start - TOF - 1.5 sec for processing < 0.0)
+    return turret
+        .onTarget(); // && (time until next shift start - TOF - 1.5 sec for processing < 0.0)
   }
 
   private void configureDriverController() {
