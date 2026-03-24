@@ -222,8 +222,10 @@ public class RobotContainer {
 
   public boolean onTarget() {
     return turret
-        .onTarget(); // && (time until next shift start - TOF - 1.5 sec for processing < 0.0)
-  }
+        .onTarget() && (dashboard.getIsHubActive()
+        || (dashboard.getIsHubActive() == false && dashboard.getPeriodTimeRemaining() < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+        || (dashboard.getIsHubActive() == false && dashboard.getPeriodTimeRemaining() > 25.0 - 3.0 + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))); 
+      }
 
   private void configureDriverController() {
     // controller

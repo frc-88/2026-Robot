@@ -95,4 +95,6 @@ public final class Constants {
 
   public static double RIGHT_TRENCH_Y = Units.inchesToMeters(49.82 / 2.0);
   public static double LEFT_TRENCH_Y = Constants.FIELD_WIDTH - Units.inchesToMeters(49.82 / 2.0);
+
+  public static double FUEL_SCORING_TIME = 0.25;
 }

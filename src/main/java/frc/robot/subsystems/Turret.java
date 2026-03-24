@@ -133,6 +133,8 @@ public class Turret extends SubsystemBase {
     turretCfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     turretCfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    turretCfg.CurrentLimits.StatorCurrentLimitEnable = true;
+    turretCfg.CurrentLimits.StatorCurrentLimit = 40.0;
     m_turret.getConfigurator().apply(turretCfg);
 
     TalonFXConfiguration retractomaticCfg = new TalonFXConfiguration();

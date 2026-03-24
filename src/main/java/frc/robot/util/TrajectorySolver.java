@@ -86,6 +86,10 @@ public class TrajectorySolver extends SubsystemBase {
     return turretToProjectedTarget.getAngle().getDegrees();
   }
 
+  public double getTimeOfFlight() {
+    return timeOfFlight;
+  }
+
   @Override
   public void periodic() {
     robotPosition = drivePoseSupplier.get().getTranslation();

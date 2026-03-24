@@ -117,6 +117,9 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Feedback.SensorToMechanismRatio = 1.0;
     shooterConfig.Feedback.RotorToSensorRatio = Constants.SHOOTER_GEAR_RATIO;
 
+    shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    shooterConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+
     shooterMain.getConfigurator().apply(shooterConfig);
     shooterFollower.getConfigurator().apply(shooterFollowerConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));

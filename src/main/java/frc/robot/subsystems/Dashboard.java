@@ -11,6 +11,9 @@ import frc.robot.util.Util;
 
 public class Dashboard extends SubsystemBase {
   /** Creates a new Dashboard. */
+  private double periodTimeRemaining = 0;
+  private boolean isHubActive = true;
+
   public Dashboard() {}
 
   @Override
@@ -32,9 +35,7 @@ public class Dashboard extends SubsystemBase {
 
     SmartDashboard.putString("Driver Dashboard/Match Time", gameTimeString);
 
-    boolean isHubActive = true;
     String currentMatchPeriod = "unknown";
-    double periodTimeRemaining = 0;
 
     if (gameData.length() > 0) {
       if (gameTimeInt < 0) {
@@ -160,6 +161,14 @@ public class Dashboard extends SubsystemBase {
     SmartDashboard.putString("Driver Dashboard/Current Match Period", currentMatchPeriod);
     SmartDashboard.putNumber("Driver Dashboard/Period Time", periodTimeRemaining);
     SmartDashboard.putString("Driver Dashboard/GameData", gameData);
+  }
+
+  public double getPeriodTimeRemaining() {
+    return periodTimeRemaining;
+  }
+
+  public boolean getIsHubActive() {
+    return isHubActive;
   }
 
   private String insertZero(
