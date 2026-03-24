@@ -11,7 +11,6 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 
-import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
@@ -159,7 +158,8 @@ public class RobotContainer {
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
             trajectorySolver::getTurretTarget,
-            trajectorySolver::getDistanceToTarget);
+            trajectorySolver::getDistanceToProjectedTarget,
+            trajectorySolver::getIsTargetingHub);
     feeder = new Feeder(turret::onTarget);
     hotTub = new HotTub(turret::onTarget);
     hood = new Hood(trajectorySolver::getAngle);

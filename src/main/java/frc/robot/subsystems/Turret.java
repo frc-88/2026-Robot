@@ -14,6 +14,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -28,6 +30,8 @@ import frc.robot.Constants;
 import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
+
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -76,6 +80,9 @@ public class Turret extends SubsystemBase {
   private double m_circumnavigationTarget;
   private DoubleSupplier m_distance;
 
+  private final LinearFilter f = LinearFilter.singlePoleIIR(0.3, 0.02);
+  private BooleanSupplier m_istargetingHub;
+
   // my head is spinning
   // newton's approximation
   // shows the way to look
@@ -83,10 +90,12 @@ public class Turret extends SubsystemBase {
   public Turret(
       DoubleSupplier driveGyroRateSupplier,
       DoubleSupplier trajectorySolverFacingSupplier,
-      DoubleSupplier distanceToTargetSupplier) {
+      DoubleSupplier distanceToTargetSupplier,
+      BooleanSupplier isTargetingHubSupplier) {
     m_robotYawRate = driveGyroRateSupplier;
     m_targetFacing = trajectorySolverFacingSupplier;
     m_distance = distanceToTargetSupplier;
+    m_istargetingHub = isTargetingHubSupplier;
 
     configureMotors();
     configureCANCoder();
@@ -258,7 +267,16 @@ public class Turret extends SubsystemBase {
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
 
-    m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
+    if (f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0 || !m_targeting) {
+      m_retractomatic.stopMotor();
+    } else {
+      m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
+    }
+  }
+
+  @AutoLogOutput
+  public double getFilterThing() {
+    return f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble()));
   }
 
   private void aimAtTarget() {
@@ -294,7 +312,7 @@ public class Turret extends SubsystemBase {
   }
 
   private void goToPosition(double position, boolean spinCompensation) {
-    if (motorsHealthy()) {
+    if (motorsHealthy() || !m_targeting) {
       if (spinCompensation) {
         m_turret.setControl(
             motionMagicReq.withPosition(position - (0.015 * m_robotYawRate.getAsDouble())));
@@ -399,10 +417,10 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   public boolean onTarget() {
-    return m_targeting && !m_circumnavigating && Math.abs(getFacing() - m_target) < 80.0
-    // Units.radiansToDegrees(
-    //     Math.asin(Units.inchesToMeters(16.895) / m_distance.getAsDouble()))
-    ;
+    double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
+    return m_targeting && !m_circumnavigating && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 
+    Units.radiansToDegrees(
+        Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse)) : 20.0);
   }
 
   public Command calibrateEncoderCommand() {

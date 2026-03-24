@@ -91,6 +91,8 @@ public final class Constants {
   public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
   public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
 
+  public static double HUB_RADIUS_TOLERANCE = Units.inchesToMeters((41.0-6.0-12.0)/2.0);
+
   public static double RIGHT_TRENCH_Y = Units.inchesToMeters(49.82 / 2.0);
   public static double LEFT_TRENCH_Y = Constants.FIELD_WIDTH - Units.inchesToMeters(49.82 / 2.0);
 }

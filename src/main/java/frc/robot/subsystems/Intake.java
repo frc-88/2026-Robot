@@ -128,7 +128,8 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
-        "Intake/Set27.6", new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
+        "Intake/Set27.6",
+        new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
     SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
   }
 
