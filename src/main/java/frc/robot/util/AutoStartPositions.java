@@ -40,6 +40,14 @@ public class AutoStartPositions {
         startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
         break;
 
+      case "Double Bump Chompei Left":
+        startingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d());
+        break;
+
+      case "Double Bump Chompei Right":
+        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
+        break;
+
       case "SimpleCenter":
         startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
         break;

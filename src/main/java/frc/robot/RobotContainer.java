@@ -13,7 +13,6 @@ import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,7 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -160,8 +158,8 @@ public class RobotContainer {
             trajectorySolver::getTurretTarget,
             trajectorySolver::getDistanceToProjectedTarget,
             trajectorySolver::getIsTargetingHub);
-    feeder = new Feeder(turret::onTarget);
-    hotTub = new HotTub(turret::onTarget);
+    feeder = new Feeder(this::onTarget);
+    hotTub = new HotTub(this::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
@@ -172,14 +170,6 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
-
-    // NamedCommands.registerCommand("Climb L1", climber.gotoL1());
-
-    NamedCommands.registerCommand("Go To Climb Approach Right", goToTowerApproachPose());
-    NamedCommands.registerCommand("Go To Climb Approach Left", goToTowerApproachPose());
-
-    // NamedCommands.registerCommand("Get On Pole Right", getOnTower());
-    // NamedCommands.registerCommand("Get On Pole Left", getOnTower());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
@@ -202,10 +192,6 @@ public class RobotContainer {
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
 
     if (Util.logif()) {
-      SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
-      SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
-      // SmartDashboard.putData("goToClimbPose", getOnTower());
-      // SmartDashboard.putData("GetOffTower", getOffTower());
       SmartDashboard.putData("AntiJam", antiJam());
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
@@ -230,6 +216,10 @@ public class RobotContainer {
 
   public void disabledInit() {
     shooter.resetBPS();
+  }
+
+  public boolean onTarget() {
+    return turret.onTarget(); // && (time until next shift start - TOF - 1.5 sec for processing < 0.0)
   }
 
   private void configureDriverController() {
@@ -410,101 +400,6 @@ public class RobotContainer {
     return shooting
         && Util.flipIfRed(drive.getPose()).getTranslation().getX() < Constants.HUB_POSITION.getX();
   }
-
-  public Command goToRightApproachPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToRightClimbPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(0.25, 3.0, 5.0, 10.0));
-  }
-
-  public Command getOffPoleRight() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(0.5, 3.0, 5.0, 10.0));
-  }
-
-  public Command goToLeftApproachPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToLeftClimbPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 4.69, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(0.25, 3.0, 12.5, 20.0));
-  }
-
-  public Command getOffPoleLeft() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToTowerApproachPose() {
-    return new ConditionalCommand(
-        goToRightApproachPose(),
-        goToLeftApproachPose(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  public Command goToClimbPose() {
-    return new ConditionalCommand(
-        goToRightClimbPose(),
-        goToLeftClimbPose(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  public Command climberGetOffTower() {
-    return new ConditionalCommand(
-        getOffPoleRight(),
-        getOffPoleLeft(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  // public Command getOnTower() {
-  //   return (goToClimbPose().alongWith(climber.getOnPole())).until(() ->
-  // (climber.isFullyOnPole()));
-  // }
-
-  // public Command getOffTower() {
-  //   return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(2.0);
-  // } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  // public Command prepClimber() {
-  //   return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
-  // }
-
-  public Command climbDriveIn() {
-    return DriveCommands.joystickDrive(
-        drive,
-        () -> 0.0,
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791 ? 1.0 : -1.0) * 0.8,
-        () -> 0.0);
-  }
-
-  // public Command L1() {
-  //   return climber
-  //       .gotoL1()
-  //       .alongWith(intake.retractIntake())
-  //       .alongWith(
-  //           climbDriveIn().withTimeout(0.5).andThen(new RunCommand(() -> drive.stop(), drive)));
-  // }
-
-  // public Command L1AndFlip() {
-  //   return L1().until(() -> climber.isAtTuck())
-  //       .andThen(
-  //           climber
-  //               .flipCommand()
-  //               .alongWith(drive.pointForwardsCommand())
-  //               .alongWith(intake.retractIntake()));
-  // }
 
   public Command shoot() {
     return new ParallelCommandGroup(

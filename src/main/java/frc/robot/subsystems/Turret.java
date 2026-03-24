@@ -314,7 +314,7 @@ public class Turret extends SubsystemBase {
     if (motorsHealthy() || !m_targeting) {
       if (spinCompensation) {
         m_turret.setControl(
-            motionMagicReq.withPosition(position - (0.015 * m_robotYawRate.getAsDouble())));
+            motionMagicReq.withPosition(position - (0.01 * m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -416,13 +416,17 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   public boolean onTarget() {
-    double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
-    return m_targeting
-        && !m_circumnavigating
-        && Math.abs(getFacing() - m_target)
-            < (m_istargetingHub.getAsBoolean()
-                ? Units.radiansToDegrees(Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse))
-                : 20.0);
+    if (m_distance.getAsDouble() < 1.8) {
+      return false;
+    } else {
+      double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
+      return m_targeting
+          && !m_circumnavigating
+          && Math.abs(getFacing() - m_target)
+              < (m_istargetingHub.getAsBoolean()
+                  ? Units.radiansToDegrees(Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse))
+                  : 20.0);
+    }
   }
 
   public Command calibrateEncoderCommand() {
