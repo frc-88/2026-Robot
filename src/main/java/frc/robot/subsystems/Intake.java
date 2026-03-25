@@ -64,6 +64,9 @@ public class Intake extends SubsystemBase {
       new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
 
   private boolean isShooting = false;
+  private boolean paused = false;
+  private int stallCounter = 0;
+  private int stopCounter = 0;
 
   DoubleSupplier m_drivespeed;
 
@@ -199,6 +202,12 @@ public class Intake extends SubsystemBase {
     return intakeInnerRoller.getVelocity().getValueAsDouble();
   }
 
+  @AutoLogOutput
+  private boolean isStalled() {
+    return intakeRoller.getStatorCurrent().getValueAsDouble() > 20.0
+        && intakeRoller.getVelocity().getValueAsDouble() < 0.1;
+  }
+
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
     return (pivotAngle / 360.0) * Constants.INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS;
   }
@@ -212,7 +221,28 @@ public class Intake extends SubsystemBase {
   }
 
   private void setRollerSpeed(DoubleSupplier speed) {
-    intakeRoller.setControl(rollerRequest.withVelocity(speed.getAsDouble()));
+    if (isStalled()) {
+      stallCounter++;
+    } else {
+      stallCounter = 0;
+    } 
+    
+    if (paused) {
+      stopCounter++;
+    } else {
+      stopCounter = 0;
+    }
+
+    if (stallCounter>50 && stopCounter>10) {
+      stallCounter = 0;
+      paused = false;      
+    } else if (stallCounter>50) {
+      paused = true;
+    }
+
+    intakeRoller.setControl(rollerRequest.withVelocity(paused ? 0.0 : speed.getAsDouble()));
+
+
   }
 
   private void stopRoller() {
