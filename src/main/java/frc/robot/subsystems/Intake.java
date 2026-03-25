@@ -223,26 +223,24 @@ public class Intake extends SubsystemBase {
   private void setRollerSpeed(DoubleSupplier speed) {
     if (isStalled()) {
       stallCounter++;
-    } else {
+    } else if (!paused) {
       stallCounter = 0;
-    } 
-    
+    }
+
     if (paused) {
       stopCounter++;
     } else {
       stopCounter = 0;
     }
 
-    if (stallCounter>50 && stopCounter>10) {
+    if (stallCounter > 50 && stopCounter > 10) {
       stallCounter = 0;
-      paused = false;      
-    } else if (stallCounter>50) {
+      paused = false;
+    } else if (stallCounter > 50) {
       paused = true;
     }
 
     intakeRoller.setControl(rollerRequest.withVelocity(paused ? 0.0 : speed.getAsDouble()));
-
-
   }
 
   private void stopRoller() {
