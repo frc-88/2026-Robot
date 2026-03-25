@@ -178,7 +178,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
 
-
     // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
