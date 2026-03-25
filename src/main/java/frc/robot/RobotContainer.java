@@ -176,6 +176,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
+    NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+
 
     // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
@@ -220,12 +222,23 @@ public class RobotContainer {
     shooter.resetBPS();
   }
 
+  public void startTargeting() {
+    turret.startTargeting();
+  }
+
   public boolean onTarget() {
-    return turret
-        .onTarget() && (dashboard.getIsHubActive()
-        || (dashboard.getIsHubActive() == false && dashboard.getPeriodTimeRemaining() < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
-        || (dashboard.getIsHubActive() == false && dashboard.getPeriodTimeRemaining() > 25.0 - 3.0 + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))); 
-      }
+    return turret.onTarget()
+        && (dashboard.getIsHubActive()
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    > 25.0
+                        - 3.0
+                        + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (!trajectorySolver.getIsTargetingHub()));
+  }
 
   private void configureDriverController() {
     // controller

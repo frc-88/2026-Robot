@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase {
     // config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = <reverse limit>
     // config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     pivotConfig.CurrentLimits.StatorCurrentLimit = 40.0;
 
     intakePivot.getConfigurator().apply(pivotConfig);

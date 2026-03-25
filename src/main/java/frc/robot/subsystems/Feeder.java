@@ -83,7 +83,7 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kV = p_feederConfigConstants.getKV().getValue();
     feederConfig.Slot0.kS = p_feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     feederConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     m_feeder.getConfigurator().apply(feederConfig);
 

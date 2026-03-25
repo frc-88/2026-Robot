@@ -8,27 +8,11 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4277754375254363,
-        "y": 6.959401302401304
+        "x": 3.1277492877492876,
+        "y": 6.528603988603988
       },
       "isLocked": false,
       "linkedName": "LeftBumpUnload"
-    },
-    {
-      "anchor": {
-        "x": 3.486654761904763,
-        "y": 7.3813390313390315
-      },
-      "prevControl": {
-        "x": 3.2945574610202772,
-        "y": 7.221343322043765
-      },
-      "nextControl": {
-        "x": 3.7125187327471405,
-        "y": 7.56945862517394
-      },
-      "isLocked": false,
-      "linkedName": null
     },
     {
       "anchor": {
@@ -36,8 +20,8 @@
         "y": 7.536381766381767
       },
       "prevControl": {
-        "x": 3.8661998238112947,
-        "y": 7.399674667449534
+        "x": 3.295712250712251,
+        "y": 7.26505698005698
       },
       "nextControl": null,
       "isLocked": false,
@@ -58,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.999
+    "rotation": 0.001
   },
   "reversed": false,
   "folder": null,

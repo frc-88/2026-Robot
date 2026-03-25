@@ -12,6 +12,7 @@ import frc.robot.util.Util;
 public class Dashboard extends SubsystemBase {
   /** Creates a new Dashboard. */
   private double periodTimeRemaining = 0;
+
   private boolean isHubActive = true;
 
   public Dashboard() {}

@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Start Targeting"
+            "name": "Stop Targeting"
           }
         },
         {
@@ -40,6 +40,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Targeting"
           }
         },
         {
@@ -114,6 +120,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Stop Targeting"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -143,6 +155,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Targeting"
           }
         },
         {
