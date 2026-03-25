@@ -75,6 +75,10 @@ public class Hood extends SubsystemBase {
         hoodConfigConstants.getMaxVelocity().getValue();
     hoodConfig.MotionMagic.MotionMagicAcceleration =
         hoodConfigConstants.getMaxAcceleration().getValue();
+
+    hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+
     hood.getConfigurator().apply(hoodConfig);
   }
 

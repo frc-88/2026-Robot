@@ -45,6 +45,8 @@ public class TrajectorySolver extends SubsystemBase {
   public double hoodAngle;
   public double shootSpeed;
 
+  public boolean isTargetingHub = true;
+
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
     drivePoseSupplier = drivePose;
     velocityPoseSupplier = velocityPose;
@@ -61,7 +63,7 @@ public class TrajectorySolver extends SubsystemBase {
     return shootSpeed;
   }
 
-  public double getDistanceToTarget() {
+  public double getDistanceToProjectedTarget() {
     return turretToProjectedTargetDistance;
   }
 
@@ -76,8 +78,16 @@ public class TrajectorySolver extends SubsystemBase {
     return target;
   }
 
+  public boolean getIsTargetingHub() {
+    return isTargetingHub;
+  }
+
   public double getSimTarget() {
     return turretToProjectedTarget.getAngle().getDegrees();
+  }
+
+  public double getTimeOfFlight() {
+    return timeOfFlight;
   }
 
   @Override
@@ -112,7 +122,7 @@ public class TrajectorySolver extends SubsystemBase {
                     .times(robotRotationalVelocity))
             .minus(targetVelocity);
 
-    Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
+    // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
     // Rotation2d.kZero));
     // Logger.recordOutput(
@@ -177,11 +187,14 @@ public class TrajectorySolver extends SubsystemBase {
     if (turret.getX() > Units.inchesToMeters(181.56)) {
       if (turret.getY() > Units.inchesToMeters(158.32)) {
         target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
+        isTargetingHub = false;
       } else {
         target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
+        isTargetingHub = false;
       }
     } else {
       target = Constants.HUB_POSITION;
+      isTargetingHub = true;
     }
 
     return Util.flipIfRed(target);

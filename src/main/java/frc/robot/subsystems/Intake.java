@@ -31,7 +31,7 @@ public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
-  private final TalonFX intakePivotRoller =
+  private final TalonFX intakeInnerRoller =
       new TalonFX(Constants.INTAKE_PIVOT_ROLLER, CANBus.roboRIO());
 
   // output requests
@@ -95,6 +95,9 @@ public class Intake extends SubsystemBase {
     // config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = <reverse limit>
     // config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
+    pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    pivotConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+
     intakePivot.getConfigurator().apply(pivotConfig);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
@@ -110,18 +113,18 @@ public class Intake extends SubsystemBase {
 
     intakeRoller.getConfigurator().apply(rollerConfig);
 
-    TalonFXConfiguration pivotRollerConfig = new TalonFXConfiguration();
-    pivotRollerConfig.Slot0.kP = intakePivotRollerConfigConstants.getKP().getValue();
-    pivotRollerConfig.Slot0.kI = intakePivotRollerConfigConstants.getKI().getValue();
-    pivotRollerConfig.Slot0.kD = intakePivotRollerConfigConstants.getKD().getValue();
-    pivotRollerConfig.Slot0.kV = intakePivotRollerConfigConstants.getKV().getValue();
-    pivotRollerConfig.Slot0.kS = intakePivotRollerConfigConstants.getKS().getValue();
+    TalonFXConfiguration innerRollerConfig = new TalonFXConfiguration();
+    innerRollerConfig.Slot0.kP = intakePivotRollerConfigConstants.getKP().getValue();
+    innerRollerConfig.Slot0.kI = intakePivotRollerConfigConstants.getKI().getValue();
+    innerRollerConfig.Slot0.kD = intakePivotRollerConfigConstants.getKD().getValue();
+    innerRollerConfig.Slot0.kV = intakePivotRollerConfigConstants.getKV().getValue();
+    innerRollerConfig.Slot0.kS = intakePivotRollerConfigConstants.getKS().getValue();
 
-    pivotRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    pivotRollerConfig.CurrentLimits.StatorCurrentLimit = 40.0;
-    pivotRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    innerRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    innerRollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+    innerRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    intakePivotRoller.getConfigurator().apply(pivotRollerConfig);
+    intakeInnerRoller.getConfigurator().apply(innerRollerConfig);
   }
 
   private void configureSmartDashboardButtons() {
@@ -132,7 +135,8 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
-        "Intake/Set27.6", new InstantCommand(() -> intakePivot.setPosition(27.6)));
+        "Intake/Set27.6",
+        new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
     SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
   }
 
@@ -182,17 +186,17 @@ public class Intake extends SubsystemBase {
 
   @AutoLogOutput
   private Current getPivotRollerCurrent() {
-    return intakePivotRoller.getStatorCurrent().getValue();
+    return intakeInnerRoller.getStatorCurrent().getValue();
   }
 
   @AutoLogOutput
   private double getPivotRollerVoltage() {
-    return intakePivotRoller.getMotorVoltage().getValueAsDouble();
+    return intakeInnerRoller.getMotorVoltage().getValueAsDouble();
   }
 
   @AutoLogOutput
   private double getPivotRollerVelocity() {
-    return intakePivotRoller.getVelocity().getValueAsDouble();
+    return intakeInnerRoller.getVelocity().getValueAsDouble();
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
@@ -216,11 +220,11 @@ public class Intake extends SubsystemBase {
   }
 
   private void setPivotRollerSpeed(DoubleSupplier speed) {
-    intakePivotRoller.setControl(pivotRollerRequest.withVelocity(speed.getAsDouble()));
+    intakeInnerRoller.setControl(pivotRollerRequest.withVelocity(speed.getAsDouble()));
   }
 
   private void stopPivotRoller() {
-    intakePivotRoller.stopMotor();
+    intakeInnerRoller.stopMotor();
   }
 
   private void setPosition(double angle) {
