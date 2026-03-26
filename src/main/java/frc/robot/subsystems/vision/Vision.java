@@ -20,6 +20,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
@@ -30,8 +31,12 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+// if we see further
+// it is because, like Newton,
+// we stand on giants
+
 public class Vision extends SubsystemBase {
-  private Batman batman = new Batman();
+  // private Batman batman = new Batman();
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
@@ -102,6 +107,16 @@ public class Vision extends SubsystemBase {
         }
       }
 
+      double maxX = 0., minX = 16., maxY = 0., minY = 8.;
+      for (var observation : inputs[cameraIndex].poseObservations) {
+        minX = Math.min(observation.pose().getX(), minX);
+        maxX = Math.max(observation.pose().getX(), maxX);
+        minY = Math.min(observation.pose().getY(), minY);
+        maxY = Math.max(observation.pose().getY(), maxY);
+      }
+
+      double variance = new Translation2d(maxX - minX, maxY - minX).getNorm();
+
       // Loop over pose observations
       for (var observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
@@ -116,7 +131,10 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+                || observation.pose().getY() > aprilTagLayout.getFieldWidth()
+
+                // reject MEGATAG2 if variance too high
+                || (observation.type() == PoseObservationType.MEGATAG_2 && variance > 0.2);
 
         // Add pose to log
         robotPoses.add(observation.pose());

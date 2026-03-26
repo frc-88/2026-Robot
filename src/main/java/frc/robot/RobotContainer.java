@@ -9,29 +9,24 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 
-import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
@@ -48,8 +43,10 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -72,22 +69,26 @@ public class RobotContainer {
   private final Hood hood;
   private final Vision vision;
   private final Simulation simulation;
-  private final Climber climber = new Climber();
+  private final Dashboard dashboard = new Dashboard();
+  // private final Climber climber = new Climber();
+
+  private final AutoStartPositions autoStartPositions = new AutoStartPositions();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
+  private boolean shouldUseQuest = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
-    if (!Util.logif()) {
-      Unmanaged.setPhoenixDiagnosticsStartTime(-1);
-    }
+    // if (!Util.logif()) {
+    //   Unmanaged.setPhoenixDiagnosticsStartTime(-1);
+    // }
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -106,7 +107,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+                new VisionIOLimelight(camera1Name, drive::getRotation),
+                new VisionIOLimelight(camera2Name, drive::getRotation));
         simulation = null;
         break;
 
@@ -150,43 +152,33 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> (batman.shouldUse() ? batman.getPose2d() : drive.getPose()),
+            () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
-    feeder = new Feeder(turret::onTarget);
-    hotTub = new HotTub(turret::onTarget);
+    turret =
+        new Turret(
+            () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
+            trajectorySolver::getTurretTarget,
+            trajectorySolver::getDistanceToProjectedTarget,
+            trajectorySolver::getIsTargetingHub);
+    feeder = new Feeder(this::onTarget);
+    hotTub = new HotTub(this::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
-    NamedCommands.registerCommand("Intake In", new WaitCommand(0.1)); // intake.retractIntake());
-    NamedCommands.registerCommand(
-        "Intake The Thing", intake.doTheThing()); // intake.retractIntake());
+    NamedCommands.registerCommand("Intake In", intake.retractIntake());
+    NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
-    NamedCommands.registerCommand("Climb L1", climber.gotoL1());
-    NamedCommands.registerCommand(
-        "Go To Climb Approach Right",
-        new ParallelDeadlineGroup(goToRightApproachPose(), climber.goToChinStrap()));
-    NamedCommands.registerCommand(
-        "Get On Pole Right",
-        new ParallelCommandGroup(
-            climber.getOnPole(), goToRightClimbPose())); // .until(() -> climber.isFullyOnPole()));
-
-    NamedCommands.registerCommand(
-        "Go To Climb Approach Left",
-        new ParallelDeadlineGroup(goToLeftApproachPose(), climber.goToChinStrap()));
-    NamedCommands.registerCommand(
-        "Get On Pole Left", goToLeftClimbPose().alongWith(climber.getOnPole()));
-
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
+    NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
 
-    NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
+    // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -203,67 +195,48 @@ public class RobotContainer {
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
 
     if (Util.logif()) {
-      SmartDashboard.putData("RunFooter", shooter.runShooter().alongWith(feeder.runFeeder()));
-      SmartDashboard.putData("StopFooter", shooter.stopShooter().alongWith(feeder.stopFeeder()));
-      SmartDashboard.putData("RunShooter", shooter.runShooter());
-      SmartDashboard.putData("StopShooter", shooter.stopShooter());
-      SmartDashboard.putData("RunIntake", intake.runIntake());
-      SmartDashboard.putData("StopIntake", intake.stopIntake());
-      SmartDashboard.putData("RunHopper", feeder.runFeeder().alongWith(hotTub.runSpinner()));
-      SmartDashboard.putData("StopHopper", feeder.stopFeeder().alongWith(hotTub.stopSpinner()));
-      SmartDashboard.putData("RunFooter", feeder.runFeeder().alongWith(shooter.runShooter()));
-      SmartDashboard.putData("StopFooter", feeder.stopFeeder().alongWith(shooter.stopShooter()));
-      SmartDashboard.putData("goToRightApproachPose", goToRightApproachPose());
-      SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
-      SmartDashboard.putData(
-          "goToRightClimbPose", goToRightClimbPose().alongWith(climber.getOnPole()));
-      SmartDashboard.putData(
-          "GetOffPoleRight",
-          new ParallelDeadlineGroup(getOffPoleRight().alongWith(climber.goToGrip()))
-              .andThen(climber.gotoStow()));
-
-      SmartDashboard.putData(
-          "GetOffPoleLeft",
-          new ParallelDeadlineGroup(getOffPoleLeft().alongWith(climber.goToGrip()))
-              .andThen(climber.gotoStow()));
       SmartDashboard.putData("AntiJam", antiJam());
-
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Quasistatic Forward", shooter.sysIdQuasistatic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Quasistatic Reverse", shooter.sysIdQuasistatic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Dynamic Forward", shooter.sysIdDynamic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Shooter/SysId/Dynamic Reverse", shooter.sysIdDynamic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Quasistatic Forward", feeder.sysIdQuasistatic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Quasistatic Reverse", feeder.sysIdQuasistatic(Direction.kReverse));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Dynamic Forward", feeder.sysIdDynamic(Direction.kForward));
-      //   SmartDashboard.putData(
-      //       "Feeder/SysId/Dynamic Reverse", feeder.sysIdDynamic(Direction.kReverse));
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-      SmartDashboard.putData("Prepclimb", prepClimber());
+
+      SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
+
+      // SmartDashboard.putData("Prepclimb", prepClimber());
     }
-    SmartDashboard.putData("Batman/SetPose", resetBatman());
+    // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake()); // TODO calibrate first. THIS
+    intake.setDefaultCommand(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 2.0*/ ));
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRotateAroundRobotCenter());
-    climber.setDefaultCommand(climber.stopall()); // TODO calibration
+    drive.setDefaultCommand(driveRebuilt());
+    // climber.setDefaultCommand(climber.stopall());
   }
 
   public void disabledInit() {
     shooter.resetBPS();
+  }
+
+  public void startTargeting() {
+    turret.startTargeting();
+  }
+
+  public boolean onTarget() {
+    return turret.onTarget()
+        && (dashboard.getIsHubActive()
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    > 25.0
+                        - 3.0
+                        + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (!trajectorySolver.getIsTargetingHub()));
   }
 
   private void configureDriverController() {
@@ -275,65 +248,103 @@ public class RobotContainer {
     //             () -> 0.0,
     //             () -> -controller.getLeftX(),
     //             () -> Rotation2d.fromDegrees(-90.0)));
-    controller.a().toggleOnTrue(driveRebuilt());
+    // controller.a().toggleOnTrue(driveRebuilt());
 
     // Switch to X pattern when X button is pressed
     controller
         .x()
         .onTrue(
-            intake
-                .stopIntake()
-                .alongWith(driveRotateAroundTurretCenter())
-                .alongWith(shooter.stopShooter())
-                .alongWith(hotTub.stopSpinner())
-                .alongWith(feeder.stopFeeder()));
+            driveAtAngle(() -> Rotation2d.fromDegrees(90.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    // Reset gyro to 0° when B button is pressed
+    controller
+        .a()
+        .onTrue(
+            driveAtAngle(() -> Rotation2d.fromDegrees(180.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
     controller
         .b()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+            driveAtAngle(() -> Rotation2d.fromDegrees(-90.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
+    controller
+        .y()
+        .onTrue(
+            driveAtAngle(() -> Rotation2d.fromDegrees(0.0))
+                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+
+    // Reset gyro to 0° when B button is pressed
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
-    controller.leftBumper().toggleOnTrue(intake.deployJustIntake());
+    controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.doTheThing());
+    controller.rightBumper().whileTrue(intake.retractIntake());
   }
 
   public void configureButtonBox() {
-    buttons.button(1).onTrue(prepClimber());
-    buttons.button(2).onTrue(climber.leftFlip());
-    // buttons.button(3).onTrue(climber.rightFlip());
-    buttons.button(4).onTrue(climber.gotoL1());
-    buttons.button(5).onTrue(climber.gotoStow());
+    // buttons.button(1).whileTrue(prepClimber());
+    // buttons.button(2).onTrue(L1AndFlip());
+    // buttons.button(4).onTrue(L1());
+    // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
-    buttons.button(8).onTrue(driveRotateAroundRobotCenter());
-    buttons.button(9).onTrue(driveRotateAroundTurretCenter());
     buttons.button(10).onTrue(resetBatman());
+    buttons.button(3).onTrue(turret.syncCommand());
+    buttons.button(8).whileTrue(intake.doTheThing());
+    buttons.button(9).whileTrue(antiJam());
+    // buttons.button(11).whileTrue(getOffTower());
+    buttons
+        .button(12)
+        .toggleOnTrue(
+            new InstantCommand(
+                    () -> {
+                      shouldUseQuest = !shouldUseQuest;
+                      if (shouldUseQuest) {
+                        batman.resetPose(new Pose3d(drive.getPose()));
+                      }
+                    })
+                .ignoringDisable(true));
   }
 
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      if (!batman.hasGlobalized()) {
-        batman.resetPose(new Pose3d(drive.getPose()));
-      }
+
+    // if (climber.getLiftPosition() > 20) {
+    //   intake.intakeIn();
+    // }
+
+    String autoName = autoChooser.get().getName();
+
+    Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
+    Logger.recordOutput("AutoName", autoName);
+
+    Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
+    Pose2d currentRobotPose = Util.flipIfRed(drive.getPose());
+
+    boolean isPoseSafe = false;
+    double poseDistance =
+        targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation());
+    if (poseDistance
+        < 0.5) { // Compare if the distance between the current and target pose is within 0.5 meters
+      isPoseSafe = true;
     }
 
-    Logger.recordOutput("AutoName", autoChooser.get().getName());
+    SmartDashboard.putBoolean("Starting Position/Starting Position is Safe", isPoseSafe);
+    SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
   public Pose2d getPoseBatman() {
     return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
-  }
-
-  public Command prepClimber() {
-    return climber.calibrate().withTimeout(0.5).andThen(climber.goToGrip());
   }
 
   public Command resetBatman() { // DO NOT FLIP IF RED
@@ -360,14 +371,21 @@ public class RobotContainer {
     return DriveCommands.rebuiltDrive(
         drive,
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65) : -controller.getLeftY(),
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
+            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65) : -controller.getLeftX(),
         () ->
             shooting
                 ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveTrench() {
+    return DriveCommands.trenchDrive(
+        drive,
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY());
   }
 
   public Command driveRebuiltTwo() {
@@ -379,6 +397,11 @@ public class RobotContainer {
             shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
         this::angleSupplier,
         this::turretRotSupplier);
+  }
+
+  public Command driveAtAngle(Supplier<Rotation2d> angle) {
+    return DriveCommands.joystickDriveAtAngle(
+        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), angle);
   }
 
   private double angleSupplier() {
@@ -395,42 +418,6 @@ public class RobotContainer {
         && Util.flipIfRed(drive.getPose()).getTranslation().getX() < Constants.HUB_POSITION.getX();
   }
 
-  public Command goToRightApproachPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToRightClimbPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(0.5, 3.0, 5.0, 10.0));
-  }
-
-  public Command getOffPoleRight() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0))),
-        new PathConstraints(0.5, 3.0, 5.0, 10.0));
-  }
-
-  public Command goToLeftApproachPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToLeftClimbPose() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.1, 4.60, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command getOffPoleLeft() {
-    return AutoBuilder.pathfindToPose(
-        Util.flipIfRed(new Pose2d(1.1, 5.33, Rotation2d.fromDegrees(90.0))),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
-  }
-
   public Command shoot() {
     return new ParallelCommandGroup(
         setShooting(true),
@@ -441,8 +428,12 @@ public class RobotContainer {
         intake.setShooting());
   }
 
-  private Command setShooting(boolean shoot) {
+  public Command setShooting(boolean shoot) {
     return new InstantCommand(() -> shooting = shoot);
+  }
+
+  public void stopShooting() {
+    shooting = false;
   }
 
   public Command stopShoot() {

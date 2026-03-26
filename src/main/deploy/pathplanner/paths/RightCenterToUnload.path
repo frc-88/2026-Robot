@@ -8,67 +8,49 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.047636141933294,
-        "y": 2.129242702992813
+        "x": 7.900912359139338,
+        "y": 3.562886140138511
       },
       "isLocked": false,
       "linkedName": "RightCenter"
     },
     {
       "anchor": {
-        "x": 6.203417721518987,
-        "y": 0.6498696682464435
+        "x": 6.892278481012657,
+        "y": 0.7743924050632915
       },
       "prevControl": {
-        "x": 6.949990101048912,
-        "y": 0.707301632016775
+        "x": 7.059519663918269,
+        "y": 0.960215941625084
       },
       "nextControl": {
-        "x": 5.732696202531645,
-        "y": 0.6136582278481012
+        "x": 6.705406464887652,
+        "y": 0.5667568315910613
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.5433056872037911,
-        "y": 0.6498696682464435
+        "x": 3.4938987341772143,
+        "y": 0.6251392405063279
       },
       "prevControl": {
-        "x": 0.7806907041401243,
-        "y": 0.7282811070429408
+        "x": 4.32053164556962,
+        "y": 0.6366202531645571
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Outpost"
+      "linkedName": "RightUnload"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": -177.88674068038338
-    },
-    {
-      "waypointRelativePos": 1.5,
-      "rotationDegrees": -179.59027612172116
+      "waypointRelativePos": 1.1,
+      "rotationDegrees": -1.2462874730364866
     }
   ],
-  "constraintZones": [
-    {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.4096276112624937,
-      "maxWaypointRelativePos": 2.0,
-      "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 0.5,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    }
-  ],
+  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -81,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.4152716567430378
   },
   "reversed": false,
   "folder": null,

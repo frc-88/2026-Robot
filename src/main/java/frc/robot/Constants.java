@@ -39,47 +39,42 @@ public final class Constants {
   public static ModeCode MODE = ModeCode.DEVELOPMENT;
 
   // Intake
-  public static final int INTAKE_PIVOT = 2;
-  public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
+  public static final int INTAKE_PIVOT = 14;
+  public static final int INTAKE_ROLLER = 15;
+  public static final int INTAKE_PIVOT_ROLLER = 16;
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
   // Spinner
-  public static final int SPINNER_MAIN = 17;
+  public static final int SPINNER_MAIN = 21;
 
   // Feeder
-  public static final int FEEDER_MAIN = 19;
+  public static final int FEEDER_MAIN = 4;
 
   // Shooter
-  public static final int SHOOTER_MAIN = 12;
-  public static final int SHOOTER_FOLLOWER = 5;
-  public static final int SHOOTER_CANCODER = 7;
+  public static final int SHOOTER_MAIN = 7;
+  public static final int SHOOTER_FOLLOWER = 6;
+  public static final int SHOOTER_CANCODER = 6;
   public static final double SHOOTER_GEAR_RATIO = 24.0 / 18.0;
-  public static final double HOOD_DEGREES_PER_ROTATION = 0;
 
   // Climber
-  public static final int CLIMBER_LIFT = 18;
-  public static final int CLIMBER_PIVOT = 16;
+  public static final int CLIMBER_LIFT = 16;
+  public static final int CLIMBER_PIVOT = 19;
   public static final int CLIMBER_CANRANGE = 7;
-  public static final int CLIMBER_PIGEON = 20;
   public static final double CLIMBER_PIVOT_ROTATIONS_TO_ROBOT_ROTATIONS = (144 * 37) / 9;
   public static final double CLIMBER_LIFT_ROTATIONS_TO_ROBOT_INCHES = (1.0 / 11.1125);
 
   // Turret
-  public static final int TURRET_MOTOR_ID = 6;
-  public static final int TURRET_RETRACTOMATIC_ID = 25;
-  public static final int TURRET_CANCODER_ID1 = 15; // TODO Remove
-  public static final int TURRET_CANCODER_ID2 = 12;
-  public static final int TURRET_CANCODER_GEAR_RATIO = 1;
-  public static final int TURRET_GEAR_RATIO = 1;
-  public static final double TURRET_COUNTS_PER_REV = 1;
+  public static final int TURRET_MOTOR_ID = 3;
+  public static final int TURRET_RETRACTOMATIC_ID = 17;
+  public static final int TURRET_CANCODER_ID2 = 3;
 
   // Drive
   public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
 
   // HOOD Milk
-  public static final int HOOD = 16;
+  public static final int HOOD = 5;
   public static final double MINION_ROT_TO_ANGLE = (1.0 / (287.0 / 54.0)) * 360.0;
 
   // Robot and Field constants
@@ -93,6 +88,13 @@ public final class Constants {
 
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(2.5, 1.0);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(2.5, 7.0);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
+
+  public static double HUB_RADIUS_TOLERANCE = Units.inchesToMeters((41.0 - 6.0) / 2.0);
+
+  public static double RIGHT_TRENCH_Y = Units.inchesToMeters(49.82 / 2.0);
+  public static double LEFT_TRENCH_Y = Constants.FIELD_WIDTH - Units.inchesToMeters(49.82 / 2.0);
+
+  public static double FUEL_SCORING_TIME = 0.25;
 }

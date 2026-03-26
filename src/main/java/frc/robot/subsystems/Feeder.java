@@ -4,13 +4,13 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -26,6 +26,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 // so much fuel goes by
 // suddenly I realize
@@ -45,7 +46,7 @@ public class Feeder extends SubsystemBase {
       new DoublePreferenceConstant("Feeder/FeedSpeed", 105.0);
   private final MotionMagicPIDPreferenceConstants p_feederConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Feeder/MotorPID", 0., 0., 0., 0., 0., 0., 0.0988, 0., 0.);
+          "Feeder/MotorPID", 0., 0., 0., 0.15886, 0., 0., 0.10665, 0.099049, 0.063801);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -54,7 +55,7 @@ public class Feeder extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> SignalLogger.writeString("state", state.toString())),
+              (state) -> Logger.recordOutput("Feeder/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private BooleanSupplier m_turretOnTarget;
@@ -82,9 +83,16 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kV = p_feederConfigConstants.getKV().getValue();
     feederConfig.Slot0.kS = p_feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    feederConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     m_feeder.getConfigurator().apply(feederConfig);
 
     m_feeder.getVelocity().setUpdateFrequency(100);
+  }
+
+  @AutoLogOutput
+  public boolean isHealthy() {
+    return m_feeder.isConnected() && m_feeder.isAlive();
   }
 
   @AutoLogOutput
@@ -100,6 +108,11 @@ public class Feeder extends SubsystemBase {
   @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_feeder.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getPosition() {
+    return m_feeder.getPosition().getValue();
   }
 
   private void setVoltage(Voltage volts) {

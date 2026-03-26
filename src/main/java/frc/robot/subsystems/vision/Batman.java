@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// can it deliver
+// pose prediction perfection
+// and survive the match?
+
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
 
@@ -50,6 +54,8 @@ public class Batman extends SubsystemBase {
 
   private QuestNav quest = new QuestNav();
 
+  public Batman() {}
+
   public void globalize(Pose3d globalPose) {
     resetPose(globalPose);
     hasGlobalized = true;
@@ -62,6 +68,11 @@ public class Batman extends SubsystemBase {
   @AutoLogOutput(key = "Quest/CurrentPose")
   public Pose2d getPose2d() {
     return currentPose.toPose2d();
+  }
+
+  @AutoLogOutput(key = "Quest/RawQuestPose")
+  public Pose2d getRawPose2d() {
+    return currentPose.transformBy(ROBOT_TO_QUEST).toPose2d();
   }
 
   public boolean isTracking() {
@@ -83,6 +94,7 @@ public class Batman extends SubsystemBase {
   public void resetPose(Pose3d pose) {
     quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
     Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+    hasGlobalized = true;
   }
 
   public boolean hasGlobalized() {

@@ -4,13 +4,13 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -26,6 +26,7 @@ import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 // yellow ball party
 // conga line around and up
@@ -45,7 +46,7 @@ public class HotTub extends SubsystemBase {
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.01, 0., 0.);
+          "Spinner/SpinnerMotors", 0., 0., 0., 0.17547, 0., 0., 0.11504, 0.18565, 0.01426);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -54,7 +55,7 @@ public class HotTub extends SubsystemBase {
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
-              (state) -> SignalLogger.writeString("state", state.toString())),
+              (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private final BooleanSupplier m_turretOnTarget;
@@ -81,7 +82,15 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.Slot0.kV = p_spinnerConfigConstants.getKV().getValue();
     spinnerConfig.Slot0.kS = p_spinnerConfigConstants.getKS().getValue();
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    spinnerConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
+  }
+
+  @AutoLogOutput
+  public boolean isHealthy() {
+    return m_spinner.isConnected() && m_spinner.isAlive();
   }
 
   @AutoLogOutput
@@ -97,6 +106,11 @@ public class HotTub extends SubsystemBase {
   @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_spinner.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getPosition() {
+    return m_spinner.getPosition().getValue();
   }
 
   private void setVoltage(Voltage volts) {
