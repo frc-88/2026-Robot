@@ -421,7 +421,7 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   public boolean onTarget() {
-    if (m_distance.getAsDouble() < 1.8) {
+    if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
       double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);

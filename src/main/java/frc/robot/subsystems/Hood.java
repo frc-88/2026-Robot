@@ -166,6 +166,8 @@ public class Hood extends SubsystemBase {
     } else {
       m_targetPitch = 15.0;
     }
+    // Lookup Table Building Override
+    // m_targetPitch = targetPos.getValue();
   }
 
   public Command setNotShooting() {
