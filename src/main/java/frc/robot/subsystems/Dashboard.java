@@ -36,7 +36,11 @@ public class Dashboard extends SubsystemBase {
 
     SmartDashboard.putString("Driver Dashboard/Match Time", gameTimeString);
 
-    char autoWinner = gameData.length() > 0 ? gameData.charAt(0) : null;
+    char autoWinner = 'a';
+    if (gameData.length() > 0) {
+      autoWinner = gameData.charAt(0);
+    }
+
     String currentMatchPeriod = "unknown";
 
     if (gameTimeInt < 0) { // ---------- END OF AUTO AND TELEOP ----------
