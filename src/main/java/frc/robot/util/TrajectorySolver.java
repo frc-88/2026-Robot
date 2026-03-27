@@ -232,7 +232,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else { // real
-      return 23.3 + 4.23 * (distance);
+      return 25.7 + 3.81 * (distance); // + 0.0 * (Math.pow(distance, 2.0));
     }
   }
 }
