@@ -210,11 +210,11 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.71344 + 0.11986 * distance;
+    return 0.78 + 0.0951 * distance;
   }
 
   public double lookupTimePrime(double distance) {
-    return 0.11986;
+    return 0.0951;
   }
 
   public double lookupAngle(double distance) {
@@ -232,7 +232,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else { // real
-      return 25.7 + 3.81 * (distance); // + 0.0 * (Math.pow(distance, 2.0));
+      return 25.7 + 3.81 * (distance);
     }
   }
 }
