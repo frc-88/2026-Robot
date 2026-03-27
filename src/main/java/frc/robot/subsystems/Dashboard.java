@@ -36,124 +36,117 @@ public class Dashboard extends SubsystemBase {
 
     SmartDashboard.putString("Driver Dashboard/Match Time", gameTimeString);
 
+    char autoWinner = gameData.length() > 0 ? gameData.charAt(0) : null;
     String currentMatchPeriod = "unknown";
 
-    if (gameData.length() > 0) {
-      if (gameTimeInt < 0) {
-        isHubActive = false;
-        currentMatchPeriod = "DISABLED";
-        periodTimeRemaining = gameTimeInt;
-      } else if (gameTimeInt >= 130) { // ---------- TRANSITION SHIFT ----------
-        isHubActive = true;
-        currentMatchPeriod = "TRANSITION SHIFT";
-        periodTimeRemaining = gameTimeInt - 130;
-
-      } else if (gameTimeInt >= 105) { // ---------- SHIFT 1 ----------
-        currentMatchPeriod = "SHIFT 1";
-        periodTimeRemaining = gameTimeInt - 105;
-        switch (gameData.charAt(0)) {
-          case 'B': // Blue case code (blue won autonomous, so red goes first)
-            if (weAreRed) {
-              isHubActive = true;
-            } else {
-              isHubActive = false;
-            }
-            break;
-          case 'R': // Red case code (red won autonomous, so blue goes first)
-            if (weAreRed) {
-              isHubActive = false;
-            } else {
-              isHubActive = true;
-            }
-            break;
-          default: // This is corrupt data
-            isHubActive = true;
-            break;
-        }
-      } else if (gameTimeInt >= 80) { // ---------- SHIFT 2 ----------
-        currentMatchPeriod = "SHIFT 2";
-        periodTimeRemaining = gameTimeInt - 80;
-        switch (gameData.charAt(0)) {
-          case 'B': // Blue case code (blue won autonomous, so red goes first)
-            if (weAreRed) {
-              isHubActive = false;
-            } else {
-              isHubActive = true;
-            }
-            break;
-          case 'R': // Red case code (red won autonomous, so blue goes first)
-            if (weAreRed) {
-              isHubActive = true;
-            } else {
-              isHubActive = false;
-            }
-            break;
-          default: // This is corrupt data
-            isHubActive = true;
-            break;
-        }
-      } else if (gameTimeInt >= 55) { // ---------- SHIFT 3 ----------
-        currentMatchPeriod = "SHIFT 3";
-        periodTimeRemaining = gameTimeInt - 55;
-        switch (gameData.charAt(0)) {
-          case 'B': // Blue case code (blue won autonomous, so red goes first)
-            if (weAreRed) {
-              isHubActive = true;
-            } else {
-              isHubActive = false;
-            }
-            break;
-          case 'R': // Red case code (red won autonomous, so blue goes first)
-            if (weAreRed) {
-              isHubActive = false;
-            } else {
-              isHubActive = true;
-            }
-            break;
-          default: // This is corrupt data
-            isHubActive = true;
-            break;
-        }
-      } else if (gameTimeInt >= 30) { // ---------- SHIFT 4 ----------
-        currentMatchPeriod = "SHIFT 4";
-        periodTimeRemaining = gameTimeInt - 30;
-        switch (gameData.charAt(0)) {
-          case 'B': // Blue case code (blue won autonomous, so red goes first)
-            if (weAreRed) {
-              isHubActive = false;
-            } else {
-              isHubActive = true;
-            }
-            break;
-          case 'R': // Red case code (red won autonomous, so blue goes first)
-            if (weAreRed) {
-              isHubActive = true;
-            } else {
-              isHubActive = false;
-            }
-            break;
-          default: // This is corrupt data
-            isHubActive = true;
-            break;
-        }
-      } else if (gameTimeInt < 30
-          && !DriverStation.isAutonomous()) { // ---------- END GAME ----------
-        currentMatchPeriod = "END GAME";
-        periodTimeRemaining = gameTimeInt;
-        isHubActive = true;
-      } else if (gameTimeInt <= 20 && DriverStation.isAutonomous()) {
-        currentMatchPeriod = "AUTONOMOUS";
-        periodTimeRemaining = gameTimeInt;
-        isHubActive = true;
-      } else {
-        currentMatchPeriod = "IDK BRUH";
-        isHubActive = false;
-        periodTimeRemaining = -1;
-      }
-
-    } else { // Code for no data received yet
+    if (gameTimeInt < 0) { // ---------- END OF AUTO AND TELEOP ----------
       isHubActive = false;
       currentMatchPeriod = "DISABLED";
+      periodTimeRemaining = gameTimeInt;
+    } else if (gameTimeInt >= 130) { // ---------- TRANSITION SHIFT ----------
+      isHubActive = true;
+      currentMatchPeriod = "TRANSITION SHIFT";
+      periodTimeRemaining = gameTimeInt - 130;
+    } else if (gameTimeInt >= 105) { // ---------- SHIFT 1 ----------
+      currentMatchPeriod = "SHIFT 1";
+      periodTimeRemaining = gameTimeInt - 105;
+      switch (autoWinner) {
+        case 'B': // Blue case code (blue won autonomous, so red goes first)
+          if (weAreRed) {
+            isHubActive = true;
+          } else {
+            isHubActive = false;
+          }
+          break;
+        case 'R': // Red case code (red won autonomous, so blue goes first)
+          if (weAreRed) {
+            isHubActive = false;
+          } else {
+            isHubActive = true;
+          }
+          break;
+        default: // No game data yet or bad data, assume hub is active
+          isHubActive = true;
+          break;
+      }
+    } else if (gameTimeInt >= 80) { // ---------- SHIFT 2 ----------
+      currentMatchPeriod = "SHIFT 2";
+      periodTimeRemaining = gameTimeInt - 80;
+      switch (autoWinner) {
+        case 'B': // Blue case code (blue won autonomous, so red goes first)
+          if (weAreRed) {
+            isHubActive = false;
+          } else {
+            isHubActive = true;
+          }
+          break;
+        case 'R': // Red case code (red won autonomous, so blue goes first)
+          if (weAreRed) {
+            isHubActive = true;
+          } else {
+            isHubActive = false;
+          }
+          break;
+        default: // No game data yet or bad data, assume hub is active
+          isHubActive = true;
+          break;
+      }
+    } else if (gameTimeInt >= 55) { // ---------- SHIFT 3 ----------
+      currentMatchPeriod = "SHIFT 3";
+      periodTimeRemaining = gameTimeInt - 55;
+      switch (autoWinner) {
+        case 'B': // Blue case code (blue won autonomous, so red goes first)
+          if (weAreRed) {
+            isHubActive = true;
+          } else {
+            isHubActive = false;
+          }
+          break;
+        case 'R': // Red case code (red won autonomous, so blue goes first)
+          if (weAreRed) {
+            isHubActive = false;
+          } else {
+            isHubActive = true;
+          }
+          break;
+        default: // No game data yet or bad data, assume hub is active
+          isHubActive = true;
+          break;
+      }
+    } else if (gameTimeInt >= 30) { // ---------- SHIFT 4 ----------
+      currentMatchPeriod = "SHIFT 4";
+      periodTimeRemaining = gameTimeInt - 30;
+      switch (autoWinner) {
+        case 'B': // Blue case code (blue won autonomous, so red goes first)
+          if (weAreRed) {
+            isHubActive = false;
+          } else {
+            isHubActive = true;
+          }
+          break;
+        case 'R': // Red case code (red won autonomous, so blue goes first)
+          if (weAreRed) {
+            isHubActive = true;
+          } else {
+            isHubActive = false;
+          }
+          break;
+        default: // No game data yet or bad data, assume hub is active
+          isHubActive = true;
+          break;
+      }
+    } else if (gameTimeInt < 30
+        && !DriverStation.isAutonomous()) { // ---------- END GAME ----------
+      currentMatchPeriod = "END GAME";
+      periodTimeRemaining = gameTimeInt;
+      isHubActive = true;
+    } else if (gameTimeInt <= 20
+        && DriverStation.isAutonomous()) { // ---------- AUTONOMOUS ----------
+      currentMatchPeriod = "AUTONOMOUS";
+      periodTimeRemaining = gameTimeInt;
+      isHubActive = true;
+    } else {
+      currentMatchPeriod = "IDK BRUH";
       isHubActive = false;
       periodTimeRemaining = -1;
     }
