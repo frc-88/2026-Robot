@@ -125,9 +125,9 @@ public class TrajectorySolver extends SubsystemBase {
     // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
     // Rotation2d.kZero));
-    // Logger.recordOutput(
-    //     "Trajectory/TurretToTargetRelativeVelocity",
-    //     new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
+    Logger.recordOutput(
+        "Trajectory/TurretToTargetRelativeVelocity",
+        new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
 
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
