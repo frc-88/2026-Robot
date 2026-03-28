@@ -130,6 +130,7 @@ public class Robot extends LoggedRobot {
     }
     m_robotContainer.startTargeting();
     m_robotContainer.stopShooting();
+    m_robotContainer.stopHood();
   }
 
   /** This function is called periodically during operator control. */

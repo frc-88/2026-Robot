@@ -441,6 +441,10 @@ public class RobotContainer {
     shooting = false;
   }
 
+  public void stopHood() {
+    hood.setNotShootingRegular();
+  }
+
   public Command stopShoot() {
     return new ParallelCommandGroup(
         setShooting(false),

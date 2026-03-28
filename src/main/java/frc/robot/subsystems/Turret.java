@@ -15,7 +15,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -424,13 +423,9 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
       return m_targeting
           && !m_circumnavigating
-          && Math.abs(getFacing() - m_target)
-              < (m_istargetingHub.getAsBoolean()
-                  ? Units.radiansToDegrees(Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse))
-                  : 20.0);
+          && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
     }
   }
 
