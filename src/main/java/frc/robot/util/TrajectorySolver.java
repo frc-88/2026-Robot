@@ -125,9 +125,9 @@ public class TrajectorySolver extends SubsystemBase {
     // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
     // Rotation2d.kZero));
-    // Logger.recordOutput(
-    //     "Trajectory/TurretToTargetRelativeVelocity",
-    //     new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
+    Logger.recordOutput(
+        "Trajectory/TurretToTargetRelativeVelocity",
+        new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
 
     if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
@@ -210,21 +210,21 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.71344 + 0.11986 * distance;
+    return 0.78 + 0.0951 * distance;
   }
 
   public double lookupTimePrime(double distance) {
-    return 0.11986;
+    return 0.0951;
   }
 
   public double lookupAngle(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else { // real
-      return 0.373
-          + 9.66 * distance
-          - 1.41 * (Math.pow(distance, 2.0))
-          + 0.0847 * (Math.pow(distance, 3.0));
+      return 2.33
+          + 8.31 * distance
+          - 1.12 * (Math.pow(distance, 2.0))
+          + 0.0647 * (Math.pow(distance, 3.0));
     }
   }
 
@@ -232,7 +232,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else { // real
-      return 23.3 + 4.23 * (distance);
+      return 25.7 + 3.81 * (distance);
     }
   }
 }

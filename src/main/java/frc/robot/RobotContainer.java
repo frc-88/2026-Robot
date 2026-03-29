@@ -80,6 +80,7 @@ public class RobotContainer {
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
+  private boolean shootOverride = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -236,7 +237,8 @@ public class RobotContainer {
                     > 25.0
                         - 3.0
                         + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
-            || (!trajectorySolver.getIsTargetingHub()));
+            || (!trajectorySolver.getIsTargetingHub())
+            || (shootOverride));
   }
 
   private void configureDriverController() {
@@ -295,7 +297,10 @@ public class RobotContainer {
   public void configureButtonBox() {
     // buttons.button(1).whileTrue(prepClimber());
     // buttons.button(2).onTrue(L1AndFlip());
-    // buttons.button(4).onTrue(L1());
+    buttons
+        .button(4)
+        .onTrue(new InstantCommand(() -> shootOverride = true))
+        .onFalse(new InstantCommand(() -> shootOverride = false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
@@ -434,6 +439,10 @@ public class RobotContainer {
 
   public void stopShooting() {
     shooting = false;
+  }
+
+  public void stopHood() {
+    hood.setNotShootingRegular();
   }
 
   public Command stopShoot() {
