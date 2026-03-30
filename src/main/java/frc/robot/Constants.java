@@ -54,7 +54,6 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 7;
   public static final int SHOOTER_FOLLOWER = 6;
-  public static final int SHOOTER_CANCODER = 6;
   public static final double SHOOTER_GEAR_RATIO = 24.0 / 18.0;
 
   // Climber
