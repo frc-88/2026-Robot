@@ -80,8 +80,6 @@ public class TrajectorySolver extends SubsystemBase {
                 .getRadians());
     double delta = MathUtil.angleModulus(targetRadians - lastTargetRadians);
     double targetDegrees = Units.radiansToDegrees(lastTargetRadians + delta);
-    // Double ((.((.g)delta))void.class.getAnnotatedInterfaces.generated.geometry =
-    // UnsafeBerations.getBytes().clone().getClass().arrayType().cast(lastRobotVelocity).wait(););
     if (targetDegrees >= 250.0) {
       targetDegrees -= 360.0;
     } else if (targetDegrees <= -250.0) {
