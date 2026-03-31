@@ -3,51 +3,51 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2475972872123915,
-        "y": 7.000821020738133
+        "x": 7.6498290598290595,
+        "y": 4.487207977207977
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.310647240081432,
-        "y": 6.660184836092218
+        "x": 7.780794797225317,
+        "y": 4.27231481492506
       },
       "isLocked": false,
-      "linkedName": "Start Point 1"
+      "linkedName": "LeftCenter"
     },
     {
       "anchor": {
-        "x": 1.5113209565064611,
-        "y": 5.581524484794832
+        "x": 6.892278481012657,
+        "y": 7.296
       },
       "prevControl": {
-        "x": 1.5662500793059584,
-        "y": 5.972823783520216
+        "x": 7.7491484788180225,
+        "y": 6.79352393915605
       },
       "nextControl": {
-        "x": 1.4675830383300776,
-        "y": 5.269948114412967
+        "x": 6.221030427118683,
+        "y": 7.6896257294965125
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.1173291139240495,
-        "y": 5.3323544303797465
+        "x": 3.494,
+        "y": 7.445
       },
       "prevControl": {
-        "x": 1.5951277848977827,
-        "y": 5.332879563744415
+        "x": 4.756161365362544,
+        "y": 7.232242093151705
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower Left Approach"
+      "linkedName": "LeftUnload"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.7687978650456119,
-      "rotationDegrees": 90.0
+      "waypointRelativePos": 1.1,
+      "rotationDegrees": -1.2462874730364868
     }
   ],
   "constraintZones": [],
@@ -62,14 +62,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": 90.0
+    "velocity": 0,
+    "rotation": -1.0416266760099164
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.9119775937312
+    "rotation": -90.49843386846109
   },
   "useDefaultConstraints": true
 }
