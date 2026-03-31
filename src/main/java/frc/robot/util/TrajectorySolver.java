@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -46,6 +47,7 @@ public class TrajectorySolver extends SubsystemBase {
   public double shootSpeed;
 
   public boolean isTargetingHub = true;
+  private double lastTargetRadians = 0.0;
 
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
     drivePoseSupplier = drivePose;
@@ -69,13 +71,24 @@ public class TrajectorySolver extends SubsystemBase {
 
   @AutoLogOutput(key = "Trajectory/TurretTarget")
   public double getTurretTarget() {
-    double target = turretToProjectedTarget.getAngle().getDegrees() - 180.0 - robotYaw.getDegrees();
-    if (target >= 215.0) {
-      target -= 360.0;
-    } else if (target <= -215.0) {
-      target += 360.0;
+    double targetRadians =
+        MathUtil.angleModulus(
+            turretToProjectedTarget
+                .getAngle()
+                .minus(Rotation2d.k180deg)
+                .minus(Rotation2d.fromDegrees(robotYaw.getDegrees()))
+                .getRadians());
+    double delta = MathUtil.angleModulus(targetRadians - lastTargetRadians);
+    double targetDegrees = Units.radiansToDegrees(lastTargetRadians + delta);
+    // Double ((.((.g)delta))void.class.getAnnotatedInterfaces.generated.geometry =
+    // UnsafeBerations.getBytes().clone().getClass().arrayType().cast(lastRobotVelocity).wait(););
+    if (targetDegrees >= 250.0) {
+      targetDegrees -= 360.0;
+    } else if (targetDegrees <= -250.0) {
+      targetDegrees += 360.0;
     }
-    return target;
+    lastTargetRadians = Units.degreesToRadians(targetDegrees);
+    return targetDegrees;
   }
 
   public boolean getIsTargetingHub() {
