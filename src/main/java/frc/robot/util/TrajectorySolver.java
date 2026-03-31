@@ -45,35 +45,35 @@ public class TrajectorySolver extends SubsystemBase {
 
   public double hoodAngle;
   public double shootSpeed;
-    private double lastTargetRadians = 0.0;
-  
-    public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
-      drivePoseSupplier = drivePose;
-      velocityPoseSupplier = velocityPose;
-      // accelerationTimer.start();
-    }
-  
-    @AutoLogOutput(key = "Trajectory/HoodAngle")
-    public double getAngle() {
-      return hoodAngle;
-    }
-  
-    @AutoLogOutput(key = "Trajectory/ShooterSpeed")
-    public double getShootSpeed() {
-      return shootSpeed;
-    }
-  
-    @AutoLogOutput(key = "Trajectory/TurretTarget")
-    public double getTurretTarget() {
-      double targetRadians =
-          MathUtil.angleModulus(
-              turretToProjectedTarget
-                  .getAngle()
-                  .minus(Rotation2d.k180deg)
-                  .minus(Rotation2d.fromDegrees(robotYaw.getDegrees()))
-                  .getRadians());
-      double delta = MathUtil.angleModulus(targetRadians - lastTargetRadians);
-      double targetDegrees = Units.radiansToDegrees(lastTargetRadians + delta);
+  private double lastTargetRadians = 0.0;
+
+  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
+    drivePoseSupplier = drivePose;
+    velocityPoseSupplier = velocityPose;
+    // accelerationTimer.start();
+  }
+
+  @AutoLogOutput(key = "Trajectory/HoodAngle")
+  public double getAngle() {
+    return hoodAngle;
+  }
+
+  @AutoLogOutput(key = "Trajectory/ShooterSpeed")
+  public double getShootSpeed() {
+    return shootSpeed;
+  }
+
+  @AutoLogOutput(key = "Trajectory/TurretTarget")
+  public double getTurretTarget() {
+    double targetRadians =
+        MathUtil.angleModulus(
+            turretToProjectedTarget
+                .getAngle()
+                .minus(Rotation2d.k180deg)
+                .minus(Rotation2d.fromDegrees(robotYaw.getDegrees()))
+                .getRadians());
+    double delta = MathUtil.angleModulus(targetRadians - lastTargetRadians);
+    double targetDegrees = Units.radiansToDegrees(lastTargetRadians + delta);
     if (targetDegrees >= 250.0) {
       targetDegrees -= 360.0;
     } else if (targetDegrees <= -250.0) {
