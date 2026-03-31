@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -44,32 +45,42 @@ public class TrajectorySolver extends SubsystemBase {
 
   public double hoodAngle;
   public double shootSpeed;
-
-  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
-    drivePoseSupplier = drivePose;
-    velocityPoseSupplier = velocityPose;
-    // accelerationTimer.start();
-  }
-
-  @AutoLogOutput(key = "Trajectory/HoodAngle")
-  public double getAngle() {
-    return hoodAngle;
-  }
-
-  @AutoLogOutput(key = "Trajectory/ShooterSpeed")
-  public double getShootSpeed() {
-    return shootSpeed;
-  }
-
-  @AutoLogOutput(key = "Trajectory/TurretTarget")
-  public double getTurretTarget() {
-    double target = turretToProjectedTarget.getAngle().getDegrees() - 180.0 - robotYaw.getDegrees();
-    if (target >= 215.0) {
-      target -= 360.0;
-    } else if (target <= -215.0) {
-      target += 360.0;
+    private double lastTargetRadians = 0.0;
+  
+    public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
+      drivePoseSupplier = drivePose;
+      velocityPoseSupplier = velocityPose;
+      // accelerationTimer.start();
     }
-    return target;
+  
+    @AutoLogOutput(key = "Trajectory/HoodAngle")
+    public double getAngle() {
+      return hoodAngle;
+    }
+  
+    @AutoLogOutput(key = "Trajectory/ShooterSpeed")
+    public double getShootSpeed() {
+      return shootSpeed;
+    }
+  
+    @AutoLogOutput(key = "Trajectory/TurretTarget")
+    public double getTurretTarget() {
+      double targetRadians =
+          MathUtil.angleModulus(
+              turretToProjectedTarget
+                  .getAngle()
+                  .minus(Rotation2d.k180deg)
+                  .minus(Rotation2d.fromDegrees(robotYaw.getDegrees()))
+                  .getRadians());
+      double delta = MathUtil.angleModulus(targetRadians - lastTargetRadians);
+      double targetDegrees = Units.radiansToDegrees(lastTargetRadians + delta);
+    if (targetDegrees >= 250.0) {
+      targetDegrees -= 360.0;
+    } else if (targetDegrees <= -250.0) {
+      targetDegrees += 360.0;
+    }
+    lastTargetRadians = Units.degreesToRadians(targetDegrees);
+    return targetDegrees;
   }
 
   public double getSimTarget() {
