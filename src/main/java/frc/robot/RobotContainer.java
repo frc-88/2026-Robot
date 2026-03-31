@@ -14,6 +14,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -76,6 +77,10 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
+
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(0.50);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(0.50);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(0.50);
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
@@ -376,12 +381,16 @@ public class RobotContainer {
     return DriveCommands.rebuiltDrive(
         drive,
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65) : -controller.getLeftY(),
-        () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65) : -controller.getLeftX(),
+            shooting
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                : -controller.getLeftY(),
         () ->
             shooting
-                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                : -controller.getLeftX(),
+        () ->
+            shooting
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
   }
