@@ -128,6 +128,16 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isMainConnected() {
+    return shooterMain.isConnected();
+  }
+
+  @AutoLogOutput
+  public boolean isFollowerConnected() {
+    return shooterFollower.isConnected();
+  }
+
+  @AutoLogOutput
   private double getVelocity() {
     return shooterMain.getVelocity().getValueAsDouble();
   }
