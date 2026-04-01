@@ -241,12 +241,12 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public boolean isMainConneced() {
+  public boolean isMainConnected() {
     return shooterMain.isConnected();
   }
 
   @AutoLogOutput
-  public boolean isFollowerConneced() {
+  public boolean isFollowerConnected() {
     return shooterFollower.isConnected();
   }
 

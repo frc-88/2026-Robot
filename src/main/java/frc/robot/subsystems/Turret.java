@@ -450,6 +450,10 @@ public class Turret extends SubsystemBase {
         this);
   }
 
+  public void justSetTargeting() {
+    m_targeting = true;
+  }
+
   public Command startTargeting() {
     return new InstantCommand(() -> m_targeting = true);
   }

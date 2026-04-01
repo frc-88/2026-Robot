@@ -223,7 +223,7 @@ public class RobotContainer {
   }
 
   public void startTargeting() {
-    turret.startTargeting();
+    turret.justSetTargeting();
   }
 
   public boolean onTarget() {
@@ -299,7 +299,7 @@ public class RobotContainer {
     // buttons.button(2).onTrue(L1AndFlip());
     buttons
         .button(4)
-        .onTrue(new InstantCommand(() -> shootOverride = true))
+        .onTrue(new InstantCommand(() -> shootOverride = true).alongWith(turret.startTargeting()))
         .onFalse(new InstantCommand(() -> shootOverride = false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
@@ -430,7 +430,8 @@ public class RobotContainer {
         hotTub.runSpinner(),
         feeder.runFeeder(),
         hood.setIsShooting(),
-        intake.setShooting());
+        intake.setShooting(),
+        turret.startTargeting());
   }
 
   public Command setShooting(boolean shoot) {
