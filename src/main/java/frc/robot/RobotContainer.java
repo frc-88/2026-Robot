@@ -80,7 +80,7 @@ public class RobotContainer {
 
   private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
   private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
-  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(1000000.50);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
@@ -296,7 +296,7 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.retractIntake());
+    controller.rightBumper().whileTrue(intake.intakeSpitCommand());
   }
 
   public void configureButtonBox() {
