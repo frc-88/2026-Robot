@@ -61,7 +61,7 @@ public class Simulation extends SubsystemBase {
                       .get()
                       .getTranslation()
                       .plus(
-                          Constants.robotToTurret
+                          Constants.ROBOT_TO_TURRET
                               .rotateBy(drivePose1.get().getRotation().plus(Rotation2d.kCCW_90deg))
                               .times(velocity1.get().getRotation().getRadians()))));
         }
@@ -75,7 +75,7 @@ public class Simulation extends SubsystemBase {
                   drivePose1
                       .get()
                       .getTranslation()
-                      .plus(Constants.robotToTurret.rotateBy(drivePose1.get().getRotation())),
+                      .plus(Constants.ROBOT_TO_TURRET.rotateBy(drivePose1.get().getRotation())),
                   speed,
                   yaw,
                   angle,
@@ -83,7 +83,7 @@ public class Simulation extends SubsystemBase {
                       .get()
                       .getTranslation()
                       .plus(
-                          (Constants.robotToTurret.rotateBy(
+                          (Constants.ROBOT_TO_TURRET.rotateBy(
                                   drivePose1.get().getRotation().plus(Rotation2d.kCCW_90deg)))
                               .times(velocity1.get().getRotation().getRadians()))));
         }
