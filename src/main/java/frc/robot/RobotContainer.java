@@ -78,9 +78,9 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private SlewRateLimiter xLimiter = new SlewRateLimiter(0.50);
-  private SlewRateLimiter yLimiter = new SlewRateLimiter(0.50);
-  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(0.50);
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(1000000.50);
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
