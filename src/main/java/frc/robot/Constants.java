@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -80,11 +81,12 @@ public final class Constants {
   public static final double FIELD_WIDTH = 8.07; // meters
   public static final double FIELD_LENGTH = 16.54; // meters
 
-  public static final Translation2d robotToTurret =
+  public static final Translation2d ROBOT_TO_TURRET =
       // new Translation2d(Units.inchesToMeters(-10.431),
       //     Units.inchesToMeters(8.992));
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
 
+        public static final double FIELD_MARGIN = Units.inchesToMeters(22.0);
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
   public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
