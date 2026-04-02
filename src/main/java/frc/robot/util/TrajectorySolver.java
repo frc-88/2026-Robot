@@ -69,7 +69,7 @@ public class TrajectorySolver extends SubsystemBase {
     return turretToProjectedTargetDistance;
   }
 
-  @AutoLogOutput(key = "Trajectory/TurretTarget")
+  @AutoLogOutput(key = "Trajectory/TurretTarget") // TODO: remove startup strangeness
   public double getTurretTarget() {
     double targetRadians =
         MathUtil.angleModulus(

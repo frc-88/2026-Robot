@@ -78,9 +78,9 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private SlewRateLimiter xLimiter = new SlewRateLimiter(0.50);
-  private SlewRateLimiter yLimiter = new SlewRateLimiter(0.50);
-  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(0.50);
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
 
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
@@ -228,7 +228,7 @@ public class RobotContainer {
   }
 
   public void startTargeting() {
-    turret.startTargeting();
+    turret.justSetTargeting();
   }
 
   public boolean onTarget() {
@@ -296,7 +296,7 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.retractIntake());
+    controller.rightBumper().whileTrue(intake.intakeSpitCommand());
   }
 
   public void configureButtonBox() {
@@ -304,7 +304,7 @@ public class RobotContainer {
     // buttons.button(2).onTrue(L1AndFlip());
     buttons
         .button(4)
-        .onTrue(new InstantCommand(() -> shootOverride = true))
+        .onTrue(new InstantCommand(() -> shootOverride = true).alongWith(turret.startTargeting()))
         .onFalse(new InstantCommand(() -> shootOverride = false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
@@ -439,7 +439,8 @@ public class RobotContainer {
         hotTub.runSpinner(),
         feeder.runFeeder(),
         hood.setIsShooting(),
-        intake.setShooting());
+        intake.setShooting(),
+        turret.startTargeting());
   }
 
   public Command setShooting(boolean shoot) {

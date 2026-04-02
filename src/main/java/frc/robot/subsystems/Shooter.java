@@ -241,6 +241,16 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public boolean isMainConnected() {
+    return shooterMain.isConnected();
+  }
+
+  @AutoLogOutput
+  public boolean isFollowerConnected() {
+    return shooterFollower.isConnected();
+  }
+
+  @AutoLogOutput
   private boolean isBeamBlocked() {
     return !feederBeamBreak.get();
   }
