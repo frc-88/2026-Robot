@@ -65,10 +65,10 @@ public class Hood extends SubsystemBase {
     hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(34.5);
+        hoodAngleDegreesToRotationsOfMinion(35.0 - 0.5);
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(13.5);
+        hoodAngleDegreesToRotationsOfMinion(13.4 + 0.5);
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
@@ -151,8 +151,8 @@ public class Hood extends SubsystemBase {
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (hood.getStatorCurrent().getValueAsDouble() > 25.0) {
-      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
-      m_calibrated = Math.abs(getAngle() - 13.5) < 1.0;
+      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.4));
+      m_calibrated = Math.abs(getAngle() - 13.4) < 1.0;
     }
   }
 
@@ -166,6 +166,12 @@ public class Hood extends SubsystemBase {
     } else {
       m_targetPitch = 15.0;
     }
+    // Lookup Table Building Override
+    // m_targetPitch = targetPos.getValue();
+  }
+
+  public void setNotShootingRegular() {
+    isShooting = false;
   }
 
   public Command setNotShooting() {

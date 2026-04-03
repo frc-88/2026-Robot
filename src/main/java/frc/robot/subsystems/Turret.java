@@ -15,7 +15,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -58,7 +57,7 @@ public class Turret extends SubsystemBase {
       new DoublePreferenceConstant("Turret/Sync Threshold", 0.75);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 100.0, 250.0, 0.0, 1.0, 0.0, 0.0, 0.01, 0.0, 0);
+          "Turret/PID", 100.0, 250.0, 0.0, 12.0, 0.0, 0.0, 0.12, 0.35, 0);
   private final DoublePreferenceConstant p_forwardLimit =
       new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
   private final DoublePreferenceConstant p_reverseLimit =
@@ -70,7 +69,7 @@ public class Turret extends SubsystemBase {
   private final DoublePreferenceConstant p_goingOutCurrent =
       new DoublePreferenceConstant("Turret/Out Current", 0.0);
   private final DoublePreferenceConstant p_goingInCurrent =
-      new DoublePreferenceConstant("Turret/In Current", -9.0);
+      new DoublePreferenceConstant("Turret/In Current", -25.0);
 
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
@@ -421,16 +420,12 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   public boolean onTarget() {
-    if (m_distance.getAsDouble() < 1.8) {
+    if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      double hypotenuse = Math.hypot(m_distance.getAsDouble(), Constants.HUB_RADIUS_TOLERANCE);
       return m_targeting
           && !m_circumnavigating
-          && Math.abs(getFacing() - m_target)
-              < (m_istargetingHub.getAsBoolean()
-                  ? Units.radiansToDegrees(Math.asin(Constants.HUB_RADIUS_TOLERANCE / hypotenuse))
-                  : 20.0);
+          && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
     }
   }
 
@@ -453,6 +448,10 @@ public class Turret extends SubsystemBase {
           m_retractomatic.stopMotor();
         },
         this);
+  }
+
+  public void justSetTargeting() {
+    m_targeting = true;
   }
 
   public Command startTargeting() {

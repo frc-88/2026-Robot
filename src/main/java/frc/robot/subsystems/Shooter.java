@@ -4,18 +4,13 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -45,7 +40,6 @@ public class Shooter extends SubsystemBase {
       new TalonFX(Constants.SHOOTER_MAIN, CANBus.roboRIO()); // forward +
   private final TalonFX shooterFollower =
       new TalonFX(Constants.SHOOTER_FOLLOWER, CANBus.roboRIO()); // forward -
-  private final CANcoder shooterCANcoder = new CANcoder(Constants.SHOOTER_CANCODER);
   private final DigitalInput feederBeamBreak = new DigitalInput(0);
 
   // output requests
@@ -61,7 +55,7 @@ public class Shooter extends SubsystemBase {
       new DoublePreferenceConstant("Shooter/IncreaseDelay", 0.0);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.19816, 0.0, 0.0, 0.1, 0.36882, 0.017346);
+          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
   private final Trigger feederBeamBreakTrigger = new Trigger(() -> isBeamBlocked());
 
   @SuppressWarnings("unused")
@@ -94,7 +88,6 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(DoubleSupplier speed) {
     m_targetSpeed = speed;
-    configureCANCoder();
     configureTalons();
     configureSmartDashboardButtons();
   }
@@ -110,12 +103,7 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kA = shooterConfigConstants.getKA().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
 
-    shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    shooterConfig.Feedback.FeedbackRemoteSensorID = Constants.SHOOTER_CANCODER;
-    shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    shooterConfig.Feedback.SensorToMechanismRatio = 1.0;
-    shooterConfig.Feedback.RotorToSensorRatio = Constants.SHOOTER_GEAR_RATIO;
+    shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.StatorCurrentLimit = 60.0;
@@ -136,13 +124,6 @@ public class Shooter extends SubsystemBase {
     // timeSinceBoostStarted.start();}));
     shooterMain.getVelocity().setUpdateFrequency(100);
     shooterMain.getMotorVoltage().setUpdateFrequency(500);
-  }
-
-  private void configureCANCoder() {
-    CANcoderConfiguration config = new CANcoderConfiguration();
-    config.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-
-    shooterCANcoder.getConfigurator().apply(config);
   }
 
   private void configureSmartDashboardButtons() {
@@ -206,14 +187,11 @@ public class Shooter extends SubsystemBase {
   }
 
   private void setShooterSpeed() {
-    setShooterSpeed(() -> targetVelocity * Constants.SHOOTER_GEAR_RATIO);
+    setShooterSpeed(() -> targetVelocity);
   }
 
   private boolean atShooterSpeed() {
-    return Math.abs(
-            shooterMain.getVelocity().getValueAsDouble()
-                - (targetVelocity * Constants.SHOOTER_GEAR_RATIO))
-        < 10.0;
+    return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
   }
 
   // This should eventually be moved to utils in base or something
@@ -234,10 +212,17 @@ public class Shooter extends SubsystemBase {
     return shooterMain.isConnected()
         && shooterMain.isAlive()
         && shooterFollower.isConnected()
-        && shooterFollower.isAlive()
-        && shooterCANcoder.isConnected()
-        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
-        && shooterCANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
+        && shooterFollower.isAlive();
+  }
+
+  @AutoLogOutput
+  public boolean isMainConnected() {
+    return shooterMain.isConnected();
+  }
+
+  @AutoLogOutput
+  public boolean isFollowerConnected() {
+    return shooterFollower.isConnected();
   }
 
   @AutoLogOutput
@@ -247,7 +232,7 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput
   private double getVelocity() {
-    return shooterMain.getVelocity().getValueAsDouble() / Constants.SHOOTER_GEAR_RATIO;
+    return shooterMain.getVelocity().getValueAsDouble();
   }
 
   @AutoLogOutput
@@ -273,16 +258,6 @@ public class Shooter extends SubsystemBase {
   @AutoLogOutput
   private double getFollowerCurrent() {
     return shooterFollower.getTorqueCurrent().getValueAsDouble();
-  }
-
-  @AutoLogOutput
-  private double getCANcoderVelocity() {
-    return shooterCANcoder.getVelocity().getValueAsDouble();
-  }
-
-  @AutoLogOutput
-  private double getCANcoderPosition() {
-    return shooterCANcoder.getPosition().getValueAsDouble();
   }
 
   public void periodic() {

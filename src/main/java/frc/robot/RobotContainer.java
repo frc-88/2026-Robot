@@ -14,6 +14,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -77,9 +78,14 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
+
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
+  private boolean shootOverride = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -222,7 +228,7 @@ public class RobotContainer {
   }
 
   public void startTargeting() {
-    turret.startTargeting();
+    turret.justSetTargeting();
   }
 
   public boolean onTarget() {
@@ -236,7 +242,8 @@ public class RobotContainer {
                     > 25.0
                         - 3.0
                         + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
-            || (!trajectorySolver.getIsTargetingHub()));
+            || (!trajectorySolver.getIsTargetingHub())
+            || (shootOverride));
   }
 
   private void configureDriverController() {
@@ -289,13 +296,16 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.retractIntake());
+    controller.rightBumper().whileTrue(intake.intakeSpitCommand());
   }
 
   public void configureButtonBox() {
     // buttons.button(1).whileTrue(prepClimber());
     // buttons.button(2).onTrue(L1AndFlip());
-    // buttons.button(4).onTrue(L1());
+    buttons
+        .button(4)
+        .onTrue(new InstantCommand(() -> shootOverride = true).alongWith(turret.startTargeting()))
+        .onFalse(new InstantCommand(() -> shootOverride = false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
@@ -371,12 +381,16 @@ public class RobotContainer {
     return DriveCommands.rebuiltDrive(
         drive,
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65) : -controller.getLeftY(),
-        () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65) : -controller.getLeftX(),
+            shooting
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                : -controller.getLeftY(),
         () ->
             shooting
-                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                : -controller.getLeftX(),
+        () ->
+            shooting
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
   }
@@ -425,7 +439,8 @@ public class RobotContainer {
         hotTub.runSpinner(),
         feeder.runFeeder(),
         hood.setIsShooting(),
-        intake.setShooting());
+        intake.setShooting(),
+        turret.startTargeting());
   }
 
   public Command setShooting(boolean shoot) {
@@ -434,6 +449,10 @@ public class RobotContainer {
 
   public void stopShooting() {
     shooting = false;
+  }
+
+  public void stopHood() {
+    hood.setNotShootingRegular();
   }
 
   public Command stopShoot() {
