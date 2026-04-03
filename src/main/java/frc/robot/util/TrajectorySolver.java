@@ -123,13 +123,33 @@ public class TrajectorySolver extends SubsystemBase {
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
     targetPosition = findTargetPosition(); // no velocity set
-    
-    if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN) || (robotPosition.getX() < Constants.FIELD_MARGIN)) {
-       robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+
+    boolean cancelX = false;
+    boolean cancelY = false;
+
+    if (robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+        && robotVelocity.getX() > 0.0) {
+      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+      cancelX = true;
     }
-    if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN) || (robotPosition.getY() < Constants.FIELD_MARGIN)) {
+    if (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0) {
+      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+      cancelX = true;
+    }
+
+    if (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0) {
       robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
+      cancelY = true;
     }
+
+    if (robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+        && robotVelocity.getY() > 0.0) {
+      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
+      cancelY = true;
+    }
+
+    Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
+    Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
