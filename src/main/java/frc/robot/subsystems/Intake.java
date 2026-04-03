@@ -223,6 +223,14 @@ public class Intake extends SubsystemBase {
     intakeInnerRoller.setControl(pivotRollerRequest.withVelocity(speed.getAsDouble()));
   }
 
+  private void rollerSpit() {
+    setRollerSpeed(() -> -70.0);
+  }
+
+  private void pivotRollerSpit() {
+    setPivotRollerSpeed(() -> -70.0);
+  }
+
   private void stopPivotRoller() {
     intakeInnerRoller.stopMotor();
   }
@@ -255,6 +263,12 @@ public class Intake extends SubsystemBase {
     goToRotations(0.0);
     stopRoller();
     stopPivotRoller();
+  }
+
+  public void intakeSpit() {
+    goToRotations(deployPositionRotations.getValue());
+    rollerSpit();
+    pivotRollerSpit();
   }
 
   private void theThing() {
@@ -325,6 +339,11 @@ public class Intake extends SubsystemBase {
   public Command retractIntake() {
     // TODO: determine proper retract angle, put it here
     return new RunCommand(() -> intakeIn(), this);
+  }
+
+  public Command intakeSpitCommand() {
+    // TODO: determine proper retract angle, put it here
+    return new RunCommand(() -> intakeSpit(), this);
   }
 
   public Command deployIntake() {

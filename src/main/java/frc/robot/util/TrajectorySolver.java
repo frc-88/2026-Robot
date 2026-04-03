@@ -14,21 +14,21 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class TrajectorySolver extends SubsystemBase {
-  private Translation2d robotToTurret = Constants.robotToTurret;
+  private Translation2d robotToTurret = Constants.ROBOT_TO_TURRET;
   private Translation2d targetPosition = Constants.HUB_POSITION;
 
   Supplier<Pose2d> drivePoseSupplier;
   Supplier<Pose2d> velocityPoseSupplier;
 
-  public Translation2d robotPosition = Translation2d.kZero; // m
-  public Rotation2d robotYaw = Rotation2d.kZero; // rad
+  private Translation2d robotPosition = Translation2d.kZero; // m
+  private Rotation2d robotYaw = Rotation2d.kZero; // rad
   public Translation2d robotVelocity = Translation2d.kZero; // m/s
-  public Translation2d lastRobotVelocity = Translation2d.kZero;
+  private Translation2d lastRobotVelocity = Translation2d.kZero;
   // public Timer accelerationTimer = new Timer();
   // public double lastTime = 0.0;
-  public double robotRotationalVelocity = 0.0; // rad/s
-  public Translation2d robotAcceleration = Translation2d.kZero; // m/s/s
-  public Translation2d targetVelocity = Translation2d.kZero;
+  private double robotRotationalVelocity = 0.0; // rad/s
+  private Translation2d robotAcceleration = Translation2d.kZero; // m/s/s
+  private Translation2d targetVelocity = Translation2d.kZero;
 
   private Translation2d turretToCurrentTarget;
   private Translation2d turretToTargetRelativeVelocity;
@@ -69,7 +69,7 @@ public class TrajectorySolver extends SubsystemBase {
     return turretToProjectedTargetDistance;
   }
 
-  @AutoLogOutput(key = "Trajectory/TurretTarget") //TODO: remove startup strangeness
+  @AutoLogOutput(key = "Trajectory/TurretTarget") // TODO: remove startup strangeness
   public double getTurretTarget() {
     double targetRadians =
         MathUtil.angleModulus(
@@ -123,6 +123,33 @@ public class TrajectorySolver extends SubsystemBase {
     turretPosition = robotPosition.plus(robotToTurret.rotateBy(robotYaw));
 
     targetPosition = findTargetPosition(); // no velocity set
+
+    boolean cancelX = false;
+    boolean cancelY = false;
+
+    if (robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+        && robotVelocity.getX() > 0.0) {
+      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+      cancelX = true;
+    }
+    if (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0) {
+      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+      cancelX = true;
+    }
+
+    if (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0) {
+      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
+      cancelY = true;
+    }
+
+    if (robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+        && robotVelocity.getY() > 0.0) {
+      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
+      cancelY = true;
+    }
+
+    Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
+    Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
