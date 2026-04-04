@@ -31,7 +31,7 @@ public class TrajectorySolver extends SubsystemBase {
   private Translation2d targetVelocity = Translation2d.kZero;
 
   private Translation2d turretToCurrentTarget;
-  private Translation2d turretToTargetRelativeVelocity;
+  private Translation2d turretVelocity;
   private Translation2d turretPosition;
   private Translation2d target = Constants.HUB_POSITION;
 
@@ -128,21 +128,23 @@ public class TrajectorySolver extends SubsystemBase {
     boolean cancelY = false;
 
     if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
-        && robotVelocity.getX() > 0.0) || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
+            && robotVelocity.getX() > 0.0)
+        || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
       robotVelocity = new Translation2d(0.0, robotVelocity.getY());
       cancelX = true;
       Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
     }
 
     if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
-        && robotVelocity.getY() > 0.0) || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
+            && robotVelocity.getY() > 0.0)
+        || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
       robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
       cancelY = true;
       Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
     }
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
-    turretToTargetRelativeVelocity =
+    turretVelocity =
         robotVelocity
             .plus(
                 robotToTurret
@@ -152,12 +154,12 @@ public class TrajectorySolver extends SubsystemBase {
 
     // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
-    // Rotation2d.kZero));
+    // Rotation2d.fromDegrees(getTurretTarget())));
     Logger.recordOutput(
-        "Trajectory/TurretToTargetRelativeVelocity",
-        new Pose2d(turretToTargetRelativeVelocity, Rotation2d.kZero));
+        "Trajectory/TurretVelocity",
+        new Pose2d(turretVelocity, Rotation2d.kZero));
 
-    if (turretToTargetRelativeVelocity.getNorm() > (1.0 / 25.0)) {
+    if (turretVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
@@ -167,12 +169,11 @@ public class TrajectorySolver extends SubsystemBase {
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
     }
     Logger.recordOutput("Trajectory/Distance", turretToProjectedTarget.getNorm());
-    // Logger.recordOutput("Trajectory/Yaw", turretToProjectedTarget.getAngle().getDegrees());
     Logger.recordOutput(
         "Trajectory/ProjectedHub",
         new Pose2d(turretToProjectedTarget.plus(turretPosition), Rotation2d.kZero));
 
-    if (turretToProjectedTargetDistance > 4.61 || turretToProjectedTargetDistance < 1.78) {
+    if (turretToProjectedTargetDistance > 5.50) {
       Logger.recordOutput("Trajectory/IsExtrapolating", true);
     } else {
       Logger.recordOutput("Trajectory/IsExtrapolating", false);
@@ -186,7 +187,7 @@ public class TrajectorySolver extends SubsystemBase {
     int i;
     for (i = 0; i < numberOfIterations; i++) {
       turretToProjectedTarget =
-          turretToCurrentTarget.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
+          turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
       turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
       timeOfFlight =
           timeOfFlight
@@ -194,15 +195,17 @@ public class TrajectorySolver extends SubsystemBase {
                   / (1.0
                       - (lookupTimePrime(turretToProjectedTargetDistance))
                           * (turretToProjectedTarget.dot(
-                                  turretToTargetRelativeVelocity.unaryMinus())
+                                  turretVelocity.unaryMinus())
                               / turretToProjectedTargetDistance));
     }
+    hasPreviousTimeOfFlightGuess = true;
     if (timeOfFlight > 5) {
       System.out.println("Newton Solution Diverged. TOF: " + timeOfFlight);
       timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
+      hasPreviousTimeOfFlightGuess = false;
     }
     turretToProjectedTarget =
-        turretToCurrentTarget.minus(turretToTargetRelativeVelocity.times(timeOfFlight));
+        turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
@@ -239,7 +242,7 @@ public class TrajectorySolver extends SubsystemBase {
   public double lookupTime(double distance) {
     if (!isTargetingHub) {
       return 0.78 + 0.0951 * distance;
-    } else { //real hub
+    } else { // real hub
       return 0.78 + 0.0951 * distance;
     }
   }
@@ -247,7 +250,7 @@ public class TrajectorySolver extends SubsystemBase {
   public double lookupTimePrime(double distance) {
     if (!isTargetingHub) {
       return 0.0951;
-    } else { //real hub
+    } else { // real hub
       return 0.0951;
     }
   }
@@ -258,14 +261,14 @@ public class TrajectorySolver extends SubsystemBase {
     } else {
       if (!isTargetingHub) {
         return 2.33
-          + 8.31 * distance
-          - 1.12 * (Math.pow(distance, 2.0))
-          + 0.0647 * (Math.pow(distance, 3.0));
+            + 8.31 * distance
+            - 1.12 * (Math.pow(distance, 2.0))
+            + 0.0647 * (Math.pow(distance, 3.0));
       } else { // real hub
         return 2.33
-          + 8.31 * distance
-          - 1.12 * (Math.pow(distance, 2.0))
-          + 0.0647 * (Math.pow(distance, 3.0));
+            + 8.31 * distance
+            - 1.12 * (Math.pow(distance, 2.0))
+            + 0.0647 * (Math.pow(distance, 3.0));
       }
     }
   }
