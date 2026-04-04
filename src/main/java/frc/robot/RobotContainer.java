@@ -443,6 +443,16 @@ public class RobotContainer {
         turret.startTargeting());
   }
 
+  public Command stopShoot() {
+    return new ParallelCommandGroup(
+        setShooting(false),
+        shooter.stopShooter(),
+        hotTub.stopSpinner(),
+        feeder.stopFeeder(),
+        hood.setNotShootingCommand(),
+        intake.setNotShooting());
+  }
+
   public Command setShooting(boolean shoot) {
     return new InstantCommand(() -> shooting = shoot);
   }
@@ -453,16 +463,6 @@ public class RobotContainer {
 
   public void stopHood() {
     hood.setNotShooting();
-  }
-
-  public Command stopShoot() {
-    return new ParallelCommandGroup(
-        setShooting(false),
-        shooter.stopShooter(),
-        hotTub.stopSpinner(),
-        feeder.stopFeeder(),
-        hood.setNotShootingCommand(),
-        intake.setNotShooting());
   }
 
   public Command antiJam() {
