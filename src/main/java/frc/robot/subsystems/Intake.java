@@ -40,13 +40,12 @@ public class Intake extends SubsystemBase {
       new DynamicMotionMagicVoltage(0.0, 0.1, 10.0);
   private final VelocityVoltage rollerRequest = new VelocityVoltage(0.0);
   private final VelocityVoltage pivotRollerRequest = new VelocityVoltage(0.0);
-  private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
   // preferences
   private final MotionMagicPIDPreferenceConstants
-      intakePivotConfigConstants = // VELOCITY: 50.0 ACCELERATION: 1000.0
+      intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-              "Intake/IntakePivotMotor", 10., 100., 0., 0., 0., 0., 0.11, 0., 0.);
+              "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
@@ -315,26 +314,22 @@ public class Intake extends SubsystemBase {
   }
 
   public Command retractIntake() {
-    // TODO: determine proper retract angle, put it here
     return new RunCommand(() -> intakeIn(), this);
   }
 
   public Command intakeSpitCommand() {
-    // TODO: determine proper retract angle, put it here
     return new RunCommand(() -> intakeSpit(), this);
   }
 
   public Command deployIntake() {
-    // TODO: determine proper deploy angle, put it here
     return new RunCommand(() -> intakeOut(), this);
   }
 
   public Command deployJustIntake() {
-    // TODO: determine proper deploy angle, put it here
     return new RunCommand(
-        () -> {
-          justIntakeOut();
-        },
+        () ->
+          justIntakeOut()
+        ,
         this);
   }
 
