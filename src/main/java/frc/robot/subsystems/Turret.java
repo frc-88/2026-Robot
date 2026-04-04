@@ -396,7 +396,7 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean isTracking() {
+  private boolean isTargeting() {
     return m_targeting;
   }
 
