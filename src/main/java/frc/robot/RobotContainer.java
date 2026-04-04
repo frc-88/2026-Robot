@@ -223,10 +223,6 @@ public class RobotContainer {
     // climber.setDefaultCommand(climber.stopall());
   }
 
-  public void disabledInit() {
-    shooter.resetBPS();
-  }
-
   public void startTargeting() {
     turret.justSetTargeting();
   }
