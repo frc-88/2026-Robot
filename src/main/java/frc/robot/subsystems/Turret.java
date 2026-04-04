@@ -81,7 +81,7 @@ public class Turret extends SubsystemBase {
   private double m_circumnavigationTarget;
   private DoubleSupplier m_distance;
 
-  private final LinearFilter f = LinearFilter.singlePoleIIR(0.3, 0.02);
+  private final LinearFilter filter = LinearFilter.singlePoleIIR(0.3, 0.02);
   private BooleanSupplier m_istargetingHub;
 
   // my head is spinning
@@ -108,9 +108,11 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData(
         "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
-    p_turretPID.addChangeHandler((Double unused) -> configureMotors());
-    p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
-    p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
+    if (Util.logif()) {
+      p_turretPID.addChangeHandler((Double unused) -> configureMotors());
+      p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
+      p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
+    }
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
@@ -145,11 +147,11 @@ public class Turret extends SubsystemBase {
   }
 
   private void configureCANCoder() {
-    CANcoderConfiguration canCoderCfg = new CANcoderConfiguration();
+    CANcoderConfiguration CANCoderCfg = new CANcoderConfiguration();
 
-    canCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
+    CANCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
 
-    m_CANcoder.getConfigurator().apply(canCoderCfg);
+    m_CANcoder.getConfigurator().apply(CANCoderCfg);
   }
 
   private void sync() {
@@ -270,7 +272,8 @@ public class Turret extends SubsystemBase {
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
 
-    if (f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0 || !m_targeting) {
+    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0
+        || !m_targeting) {
       m_retractomatic.stopMotor();
     } else {
       m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
@@ -278,8 +281,8 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public double getFilterThing() {
-    return f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble()));
+  public double getFilterVelocity() {
+    return filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble()));
   }
 
   private void aimAtTarget() {
@@ -318,7 +321,7 @@ public class Turret extends SubsystemBase {
     if (motorsHealthy() || !m_targeting) {
       if (spinCompensation) {
         m_turret.setControl(
-            motionMagicReq.withPosition(position - (0.01 * m_robotYawRate.getAsDouble())));
+            motionMagicReq.withPosition(position - (0.013 * m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
@@ -396,7 +399,7 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean isTracking() {
+  private boolean isTargeting() {
     return m_targeting;
   }
 
@@ -423,8 +426,7 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return m_targeting
-          && !m_circumnavigating
+      return !m_circumnavigating
           && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
     }
   }
@@ -460,13 +462,5 @@ public class Turret extends SubsystemBase {
 
   public Command stopTargeting() {
     return new InstantCommand(() -> m_targeting = false);
-  }
-
-  @Override
-  public void periodic() {
-    if (Util.logif()) {
-      SmartDashboard.putNumber(
-          "Turret/Constant", getFacing() / m_CANcoder.getAbsolutePosition().getValueAsDouble());
-    }
   }
 }

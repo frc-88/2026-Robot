@@ -296,7 +296,8 @@ public class Drive extends SubsystemBase {
 
   public void runVelocity2(ChassisSpeeds speeds, boolean turretRotation) {
     // Calculate module setpoints
-    ChassisSpeeds justOmega = ChassisSpeeds.discretize(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond), 0.02);
+    ChassisSpeeds justOmega =
+        ChassisSpeeds.discretize(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond), 0.02);
     SwerveDriveKinematics runKinematics = turretRotation ? kinematicsTurret : kinematics;
     SwerveModuleState[] setpointJustSpin = runKinematics.toSwerveModuleStates(justOmega);
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
@@ -305,9 +306,15 @@ public class Drive extends SubsystemBase {
 
     double max = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
     double min = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
-    for(int i = 0; i < setpointJustSpin.length; i++) {
-      max = Math.max(setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond, max);
-      min = Math.min(setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond, min);
+    for (int i = 0; i < setpointJustSpin.length; i++) {
+      max =
+          Math.max(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              max);
+      min =
+          Math.min(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              min);
     }
     double ratio = max / min;
     Logger.recordOutput("Drive/MinMaxRatio", ratio);

@@ -223,8 +223,6 @@ public class RobotContainer {
     // climber.setDefaultCommand(climber.stopall());
   }
 
-  public void disabledInit() {}
-
   public void startTargeting() {
     turret.justSetTargeting();
   }
@@ -436,9 +434,19 @@ public class RobotContainer {
         shooter.runShooter(),
         hotTub.runSpinner(),
         feeder.runFeeder(),
-        hood.setIsShooting(),
+        hood.setIsShootingCommand(),
         intake.setShooting(),
         turret.startTargeting());
+  }
+
+  public Command stopShoot() {
+    return new ParallelCommandGroup(
+        setShooting(false),
+        shooter.stopShooter(),
+        hotTub.stopSpinner(),
+        feeder.stopFeeder(),
+        hood.setNotShootingCommand(),
+        intake.setNotShooting());
   }
 
   public Command setShooting(boolean shoot) {
@@ -450,17 +458,7 @@ public class RobotContainer {
   }
 
   public void stopHood() {
-    hood.setNotShootingRegular();
-  }
-
-  public Command stopShoot() {
-    return new ParallelCommandGroup(
-        setShooting(false),
-        shooter.stopShooter(),
-        hotTub.stopSpinner(),
-        feeder.stopFeeder(),
-        hood.setNotShooting(),
-        intake.setNotShooting());
+    hood.setNotShooting();
   }
 
   public Command antiJam() {
