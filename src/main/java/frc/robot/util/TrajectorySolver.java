@@ -155,9 +155,7 @@ public class TrajectorySolver extends SubsystemBase {
     // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
     // Rotation2d.fromDegrees(getTurretTarget())));
-    Logger.recordOutput(
-        "Trajectory/TurretVelocity",
-        new Pose2d(turretVelocity, Rotation2d.kZero));
+    Logger.recordOutput("Trajectory/TurretVelocity", new Pose2d(turretVelocity, Rotation2d.kZero));
 
     if (turretVelocity.getNorm() > (1.0 / 25.0)) {
       newton();
@@ -186,16 +184,14 @@ public class TrajectorySolver extends SubsystemBase {
     } // otherwise use last value
     int i;
     for (i = 0; i < numberOfIterations; i++) {
-      turretToProjectedTarget =
-          turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
+      turretToProjectedTarget = turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
       turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
       timeOfFlight =
           timeOfFlight
               - (timeOfFlight - lookupTime(turretToProjectedTargetDistance))
                   / (1.0
                       - (lookupTimePrime(turretToProjectedTargetDistance))
-                          * (turretToProjectedTarget.dot(
-                                  turretVelocity.unaryMinus())
+                          * (turretToProjectedTarget.dot(turretVelocity.unaryMinus())
                               / turretToProjectedTargetDistance));
     }
     hasPreviousTimeOfFlightGuess = true;
@@ -204,8 +200,7 @@ public class TrajectorySolver extends SubsystemBase {
       timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
       hasPreviousTimeOfFlightGuess = false;
     }
-    turretToProjectedTarget =
-        turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
+    turretToProjectedTarget = turretToCurrentTarget.minus(turretVelocity.times(timeOfFlight));
     turretToProjectedTargetDistance = turretToProjectedTarget.getNorm();
     hoodAngle = lookupAngle(turretToProjectedTargetDistance);
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);

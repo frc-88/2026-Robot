@@ -132,7 +132,9 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData(
         "Intake/SetDeployed",
         new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
-    SmartDashboard.putData("Intake/SetZero", new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
+    SmartDashboard.putData(
+        "Intake/SetZero",
+        new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
   }
 
   public void periodic() {

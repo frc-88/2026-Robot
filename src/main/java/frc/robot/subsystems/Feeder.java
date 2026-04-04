@@ -14,12 +14,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -126,8 +124,7 @@ public class Feeder extends SubsystemBase {
 
   public Command runFeeder() {
     return new RunCommand(
-        () -> setFeederSpeed(() -> m_OnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0),
-        this);
+        () -> setFeederSpeed(() -> m_OnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0), this);
   }
 
   public Command antiJamFeeder() {
