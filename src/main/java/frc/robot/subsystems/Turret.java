@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -107,9 +108,11 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData(
         "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
-    p_turretPID.addChangeHandler((Double unused) -> configureMotors());
-    p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
-    p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
+    if (Util.logif()) {
+      p_turretPID.addChangeHandler((Double unused) -> configureMotors());
+      p_forwardLimit.addChangeHandler((Double unused) -> configureMotors());
+      p_reverseLimit.addChangeHandler((Double unused) -> configureMotors());
+    }
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
@@ -144,11 +147,11 @@ public class Turret extends SubsystemBase {
   }
 
   private void configureCANCoder() {
-    CANcoderConfiguration canCoderCfg = new CANcoderConfiguration();
+    CANcoderConfiguration CANCoderCfg = new CANcoderConfiguration();
 
-    canCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
+    CANCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
 
-    m_CANcoder.getConfigurator().apply(canCoderCfg);
+    m_CANcoder.getConfigurator().apply(CANCoderCfg);
   }
 
   private void sync() {
@@ -318,7 +321,7 @@ public class Turret extends SubsystemBase {
     if (motorsHealthy() || !m_targeting) {
       if (spinCompensation) {
         m_turret.setControl(
-            motionMagicReq.withPosition(position - (0.01 * m_robotYawRate.getAsDouble())));
+            motionMagicReq.withPosition(position - (0.013 * m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }
