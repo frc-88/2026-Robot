@@ -210,8 +210,11 @@ public class TrajectorySolver extends SubsystemBase {
     Translation2d turret = Util.flipIfRed(turretPosition);
 
     if (turret.getX() > Units.inchesToMeters(181.56)) {
-      if (turret.getY() > Units.inchesToMeters(158.32)) {
+      if (turret.getY() > Constants.FIELD_WIDTH * (2.0 / 3.0)) {
         target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
+        isTargetingHub = false;
+      } else if (turret.getY() > Constants.FIELD_WIDTH * (1.0 / 3.0)) {
+        target = Constants.MIDDLE_SHUTTLE_TARGET_POSITION;
         isTargetingHub = false;
       } else {
         target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
