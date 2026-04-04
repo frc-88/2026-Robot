@@ -81,7 +81,7 @@ public class Turret extends SubsystemBase {
   private double m_circumnavigationTarget;
   private DoubleSupplier m_distance;
 
-  private final LinearFilter f = LinearFilter.singlePoleIIR(0.3, 0.02);
+  private final LinearFilter filter = LinearFilter.singlePoleIIR(0.3, 0.02);
   private BooleanSupplier m_istargetingHub;
 
   // my head is spinning
@@ -270,7 +270,7 @@ public class Turret extends SubsystemBase {
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
 
-    if (f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0 || !m_targeting) {
+    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0 || !m_targeting) {
       m_retractomatic.stopMotor();
     } else {
       m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
@@ -278,8 +278,8 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public double getFilterThing() {
-    return f.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble()));
+  public double getFilterVelocity() {
+    return filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble()));
   }
 
   private void aimAtTarget() {
@@ -459,13 +459,5 @@ public class Turret extends SubsystemBase {
 
   public Command stopTargeting() {
     return new InstantCommand(() -> m_targeting = false);
-  }
-
-  @Override
-  public void periodic() {
-    if (Util.logif()) {
-      SmartDashboard.putNumber(
-          "Turret/Constant", getFacing() / m_CANcoder.getAbsolutePosition().getValueAsDouble());
-    }
   }
 }
