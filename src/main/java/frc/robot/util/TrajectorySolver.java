@@ -70,7 +70,7 @@ public class TrajectorySolver extends SubsystemBase {
     return turretToProjectedTargetDistance;
   }
 
-  @AutoLogOutput(key = "Trajectory/TurretTarget") // TODO: remove startup strangeness
+  @AutoLogOutput(key = "Trajectory/TurretTarget")
   public double getTurretTarget() {
     double targetRadians =
         MathUtil.angleModulus(
@@ -110,7 +110,6 @@ public class TrajectorySolver extends SubsystemBase {
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
     robotAcceleration = getAcceleration();
     lastRobotVelocity = robotVelocity;
-    // lastTime = accelerationTimer.get();
 
     // TODO tune number
     robotPosition =
@@ -128,29 +127,19 @@ public class TrajectorySolver extends SubsystemBase {
     boolean cancelX = false;
     boolean cancelY = false;
 
-    if (robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
-        && robotVelocity.getX() > 0.0) {
+    if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+        && robotVelocity.getX() > 0.0) || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
       robotVelocity = new Translation2d(0.0, robotVelocity.getY());
       cancelX = true;
-    }
-    if (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0) {
-      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
-      cancelX = true;
+      Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
     }
 
-    if (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0) {
+    if ((robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0) || (robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+        && robotVelocity.getY() > 0.0)) {
       robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
       cancelY = true;
+      Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
     }
-
-    if (robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
-        && robotVelocity.getY() > 0.0) {
-      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
-      cancelY = true;
-    }
-
-    Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
-    Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
 
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretToTargetRelativeVelocity =
