@@ -90,6 +90,7 @@ public class TrajectorySolver extends SubsystemBase {
     return targetDegrees;
   }
 
+  @AutoLogOutput
   public boolean getIsTargetingHub() {
     return isTargetingHub;
   }
@@ -108,6 +109,26 @@ public class TrajectorySolver extends SubsystemBase {
     robotVelocity = velocityPoseSupplier.get().getTranslation();
     robotYaw = drivePoseSupplier.get().getRotation();
     robotRotationalVelocity = velocityPoseSupplier.get().getRotation().getRadians();
+
+    boolean cancelX = false;
+    boolean cancelY = false;
+
+    if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+            && robotVelocity.getX() > 0.0)
+        || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
+      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
+      cancelX = true;
+    }
+
+    if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+            && robotVelocity.getY() > 0.0)
+        || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
+      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
+      cancelY = true;
+    }
+    Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
+    Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
+
     robotAcceleration = getAcceleration();
     lastRobotVelocity = robotVelocity;
 
@@ -124,25 +145,6 @@ public class TrajectorySolver extends SubsystemBase {
 
     targetPosition = findTargetPosition(); // no velocity set
 
-    boolean cancelX = false;
-    boolean cancelY = false;
-
-    if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
-            && robotVelocity.getX() > 0.0)
-        || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
-      robotVelocity = new Translation2d(0.0, robotVelocity.getY());
-      cancelX = true;
-      Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
-    }
-
-    if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
-            && robotVelocity.getY() > 0.0)
-        || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
-      robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
-      cancelY = true;
-      Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
-    }
-
     turretToCurrentTarget = targetPosition.minus(turretPosition);
     turretVelocity =
         robotVelocity
@@ -152,12 +154,11 @@ public class TrajectorySolver extends SubsystemBase {
                     .times(robotRotationalVelocity))
             .minus(targetVelocity);
 
-    // Logger.recordOutput("Trajectory/RobotPosition", drivePoseSupplier.get());
     // Logger.recordOutput("Trajectory/TurretPosition", new Pose2d(turretPosition,
     // Rotation2d.fromDegrees(getTurretTarget())));
     Logger.recordOutput("Trajectory/TurretVelocity", new Pose2d(turretVelocity, Rotation2d.kZero));
 
-    if (turretVelocity.getNorm() > (1.0 / 25.0)) {
+    if (turretVelocity.getNorm() > (1.0 / 50.0)) {
       newton();
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
@@ -211,13 +212,16 @@ public class TrajectorySolver extends SubsystemBase {
 
     if (turret.getX() > Units.inchesToMeters(181.56)) {
       if (turret.getY() > Constants.FIELD_WIDTH * (2.0 / 3.0)) {
+        target = Constants.MIDDLE_LEFT_SHUTTLE_TARGET_POSITION;
+        isTargetingHub = false;
+      } else if (turret.getY() > Constants.FIELD_WIDTH * (1.0 / 2.0)) {
         target = Constants.LEFT_SHUTTLE_TARGET_POSITION;
         isTargetingHub = false;
       } else if (turret.getY() > Constants.FIELD_WIDTH * (1.0 / 3.0)) {
-        target = Constants.MIDDLE_SHUTTLE_TARGET_POSITION;
+        target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
         isTargetingHub = false;
       } else {
-        target = Constants.RIGHT_SHUTTLE_TARGET_POSITION;
+        target = Constants.MIDDLE_RIGHT_SHUTTLE_TARGET_POSITION;
         isTargetingHub = false;
       }
     } else {
