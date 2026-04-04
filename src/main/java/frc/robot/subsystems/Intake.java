@@ -136,8 +136,6 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber(
-        "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPosition.getValue()));
     Logger.recordOutput("Intake/IsShooting", isShooting);
   }
 
