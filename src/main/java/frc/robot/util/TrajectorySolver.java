@@ -134,8 +134,8 @@ public class TrajectorySolver extends SubsystemBase {
       Logger.recordOutput("Trajectory/IsCancelingX", cancelX);
     }
 
-    if ((robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0) || (robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
-        && robotVelocity.getY() > 0.0)) {
+    if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+        && robotVelocity.getY() > 0.0) || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
       robotVelocity = new Translation2d(robotVelocity.getX(), 0.0);
       cancelY = true;
       Logger.recordOutput("Trajectory/IsCancelingY", cancelY);
