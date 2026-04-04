@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -42,10 +41,9 @@ public class Intake extends SubsystemBase {
   private final VelocityVoltage pivotRollerRequest = new VelocityVoltage(0.0);
 
   // preferences
-  private final MotionMagicPIDPreferenceConstants
-      intakePivotConfigConstants =
+  private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-              "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
+          "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
@@ -326,11 +324,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command deployJustIntake() {
-    return new RunCommand(
-        () ->
-          justIntakeOut()
-        ,
-        this);
+    return new RunCommand(() -> justIntakeOut(), this);
   }
 
   public Command doTheThing() {

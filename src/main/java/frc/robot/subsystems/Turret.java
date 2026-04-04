@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -270,7 +269,8 @@ public class Turret extends SubsystemBase {
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
 
-    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0 || !m_targeting) {
+    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0
+        || !m_targeting) {
       m_retractomatic.stopMotor();
     } else {
       m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
