@@ -61,7 +61,7 @@ public class HotTub extends SubsystemBase {
 
   private final BooleanSupplier m_turretOnTarget;
 
-  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(0.5);
+  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 2.0);
 
   public HotTub(BooleanSupplier turretOnTarget) {
     m_turretOnTarget = turretOnTarget;
@@ -147,7 +147,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> stopSpinnerMotors(), this);
+    return new RunCommand(() -> setSpinnerSpeed(() -> 0.0), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
