@@ -33,6 +33,7 @@ public class TrajectorySolver extends SubsystemBase {
   private Translation2d turretToCurrentTarget;
   private Translation2d turretToTargetRelativeVelocity;
   private Translation2d turretPosition;
+  private Translation2d target = Constants.HUB_POSITION;
 
   private boolean hasPreviousTimeOfFlightGuess = false;
   private double timeOfFlight = 0.0; // seconds
@@ -219,7 +220,6 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public Translation2d findTargetPosition() {
-    Translation2d target;
     Translation2d turret = Util.flipIfRed(turretPosition);
 
     if (turret.getX() > Units.inchesToMeters(181.56)) {
@@ -248,29 +248,52 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    return 0.78 + 0.0951 * distance;
+    if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
+        || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+      return 0.78 + 0.0951 * distance;
+    } else { //real hub
+      return 0.78 + 0.0951 * distance;
+    }
   }
 
   public double lookupTimePrime(double distance) {
-    return 0.0951;
+    if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
+        || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+      return 0.0951;
+    } else { //real hub
+      return 0.0951;
+    }
   }
 
   public double lookupAngle(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
-    } else { // real
-      return 2.33
+    } else {
+      if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
+          || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+        return 2.33
           + 8.31 * distance
           - 1.12 * (Math.pow(distance, 2.0))
           + 0.0647 * (Math.pow(distance, 3.0));
+      } else { // real hub
+        return 2.33
+          + 8.31 * distance
+          - 1.12 * (Math.pow(distance, 2.0))
+          + 0.0647 * (Math.pow(distance, 3.0));
+      }
     }
   }
 
   public double lookupSpeed(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
-    } else { // real
-      return 25.7 + 3.81 * (distance);
+    } else {
+      if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
+          || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+        return 25.7 + 3.81 * distance;
+      } else { // real hub
+        return 25.7 + 3.81 * distance;
+      }
     }
   }
 }
