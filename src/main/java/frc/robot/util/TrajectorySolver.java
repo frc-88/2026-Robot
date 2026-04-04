@@ -199,7 +199,7 @@ public class TrajectorySolver extends SubsystemBase {
                               / turretToProjectedTargetDistance));
     }
     hasPreviousTimeOfFlightGuess = true;
-    if (timeOfFlight > 5) {
+    if (timeOfFlight > 3.5) {
       System.out.println("Newton Solution Diverged. TOF: " + timeOfFlight);
       timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
       hasPreviousTimeOfFlightGuess = false;
