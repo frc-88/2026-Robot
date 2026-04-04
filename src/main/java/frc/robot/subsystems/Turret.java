@@ -182,6 +182,11 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private boolean isCircumnavigating() {
+    return m_circumnavigating;
+  }
+
+  @AutoLogOutput
   private Current getTurretCurrent() {
     return m_turret.getTorqueCurrent().getValue();
   }
@@ -296,7 +301,7 @@ public class Turret extends SubsystemBase {
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
 
-    if (isPositionSafe(target)) {
+    if (isFacingSafe(target)) {
       m_circumnavigating = false;
       goToPosition(turretFacingToFalconEncoderPosition(target), spinCompensation);
     } else if (m_circumnavigating && !isFacingSafe(target)) {

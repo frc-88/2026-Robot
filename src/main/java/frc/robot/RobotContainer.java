@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -89,6 +90,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    RobotController.setBrownoutVoltage(6.5);
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
@@ -228,6 +230,9 @@ public class RobotContainer {
   }
 
   public boolean onTarget() {
+    if (shootOverride) {
+      return true;
+    }
     return turret.onTarget()
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
@@ -238,8 +243,7 @@ public class RobotContainer {
                     > 25.0
                         - 3.0
                         + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
-            || (!trajectorySolver.getIsTargetingHub())
-            || (shootOverride));
+            || (!trajectorySolver.getIsTargetingHub()));
   }
 
   private void configureDriverController() {
@@ -377,15 +381,15 @@ public class RobotContainer {
     return DriveCommands.rebuiltDrive(
         drive,
         () ->
-            shooting
+            shooting && trajectorySolver.isTargetingHub
                 ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
                 : -controller.getLeftY(),
         () ->
-            shooting
+            shooting && trajectorySolver.isTargetingHub
                 ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
                 : -controller.getLeftX(),
         () ->
-            shooting
+            shooting && trajectorySolver.isTargetingHub
                 ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
@@ -443,7 +447,6 @@ public class RobotContainer {
     return new ParallelCommandGroup(
         setShooting(false),
         shooter.stopShooter(),
-        hotTub.stopSpinner(),
         feeder.stopFeeder(),
         hood.setNotShootingCommand(),
         intake.setNotShooting());
