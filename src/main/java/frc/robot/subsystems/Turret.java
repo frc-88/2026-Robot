@@ -423,8 +423,7 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return m_targeting
-          && !m_circumnavigating
+      return !m_circumnavigating
           && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
     }
   }

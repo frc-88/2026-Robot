@@ -438,7 +438,7 @@ public class RobotContainer {
         shooter.runShooter(),
         hotTub.runSpinner(),
         feeder.runFeeder(),
-        hood.setIsShooting(),
+        hood.setIsShootingCommand(),
         intake.setShooting(),
         turret.startTargeting());
   }
@@ -452,7 +452,7 @@ public class RobotContainer {
   }
 
   public void stopHood() {
-    hood.setNotShootingRegular();
+    hood.setNotShooting();
   }
 
   public Command stopShoot() {
@@ -461,7 +461,7 @@ public class RobotContainer {
         shooter.stopShooter(),
         hotTub.stopSpinner(),
         feeder.stopFeeder(),
-        hood.setNotShooting(),
+        hood.setNotShootingCommand(),
         intake.setNotShooting());
   }
 

@@ -38,7 +38,6 @@ public class Intake extends SubsystemBase {
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
   private final DynamicMotionMagicVoltage pivotRequestDynamic =
       new DynamicMotionMagicVoltage(0.0, 0.1, 10.0);
-  private final DutyCycleOut calibrationRequest = new DutyCycleOut(0.0);
   private final VelocityVoltage rollerRequest = new VelocityVoltage(0.0);
   private final VelocityVoltage pivotRollerRequest = new VelocityVoltage(0.0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
@@ -54,7 +53,7 @@ public class Intake extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants intakePivotRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakePivotRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
-  private final DoublePreferenceConstant targetPos =
+  private final DoublePreferenceConstant targetPosition =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
   private final DoublePreferenceConstant speed =
       new DoublePreferenceConstant("Intake/Speed", 100.0);
@@ -128,21 +127,17 @@ public class Intake extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("Intake/Calibrate", calibrateIntake());
-    // SmartDashboard.putData("Intake/JustPivot", deployJustIntake());
-    SmartDashboard.putData("Intake/SetPosition", pivotGoToPosition());
-    SmartDashboard.putData("Intake/SetRotations", pivotGoToRotations());
     SmartDashboard.putData("Intake/Retract", retractIntake());
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
-        "Intake/Set27.6",
+        "Intake/SetDeployed",
         new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
-    SmartDashboard.putData("Intake/Zero", zeroIntake().ignoringDisable(true));
+    SmartDashboard.putData("Intake/SetZero", new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
   }
 
   public void periodic() {
     SmartDashboard.putNumber(
-        "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPos.getValue()));
+        "Intake/Setpoint", intakePivotAngleDegreesToRotations(targetPosition.getValue()));
     Logger.recordOutput("Intake/IsShooting", isShooting);
   }
 
@@ -239,13 +234,6 @@ public class Intake extends SubsystemBase {
     intakePivot.setControl(pivotRequest.withPosition(intakePivotAngleDegreesToRotations(angle)));
   }
 
-  private void setCalibrate() {
-    intakePivot.setControl(calibrationRequest.withOutput(-0.1).withIgnoreSoftwareLimits(true));
-    if (intakePivot.getStatorCurrent().getValueAsDouble() > 20.0) {
-      intakePivot.setPosition(intakePivotAngleDegreesToRotations(0));
-    }
-  }
-
   private void intakeOut() {
     goToRotations(deployPositionRotations.getValue());
     setRollerSpeed();
@@ -306,10 +294,6 @@ public class Intake extends SubsystemBase {
     return new InstantCommand(() -> antiJam());
   }
 
-  public Command zeroIntake() {
-    return new InstantCommand(() -> intakePivot.setPosition(0.0));
-  }
-
   public Command runIntake() {
     return new RunCommand(
         () ->
@@ -322,18 +306,12 @@ public class Intake extends SubsystemBase {
     return new RunCommand(() -> stopRoller(), this);
   }
 
-  public Command calibrateIntake() {
-    return new RunCommand(() -> setCalibrate(), this)
-        .until(() -> intakePivot.getStatorCurrent().getValueAsDouble() > 30.0)
-        .andThen(stopIntake());
-  }
-
   public Command pivotGoToPosition() {
-    return new RunCommand(() -> setPosition(targetPos.getValue()), this);
+    return new RunCommand(() -> setPosition(targetPosition.getValue()), this);
   }
 
   public Command pivotGoToRotations() {
-    return new RunCommand(() -> goToRotations(targetPos.getValue()), this);
+    return new RunCommand(() -> goToRotations(targetPosition.getValue()), this);
   }
 
   public Command retractIntake() {

@@ -58,20 +58,11 @@ public class Feeder extends SubsystemBase {
               (state) -> Logger.recordOutput("Feeder/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
-  private BooleanSupplier m_turretOnTarget;
+  private BooleanSupplier m_OnTarget;
 
-  public Feeder(BooleanSupplier turretOnTarget) {
-    m_turretOnTarget = turretOnTarget;
+  public Feeder(BooleanSupplier OnTarget) {
+    m_OnTarget = OnTarget;
     configureTalons();
-
-    SmartDashboard.putData("Feeder/RunFeeder", runFeeder());
-    SmartDashboard.putData("Feeder/StopFeeder", stopFeeder());
-    SmartDashboard.putData(
-        "Feeder/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Feeder/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData("Feeder/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Feeder/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   private void configureTalons() {
@@ -135,7 +126,7 @@ public class Feeder extends SubsystemBase {
 
   public Command runFeeder() {
     return new RunCommand(
-        () -> setFeederSpeed(() -> m_turretOnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0),
+        () -> setFeederSpeed(() -> m_OnTarget.getAsBoolean() ? p_feedSpeed.getValue() : 0.0),
         this);
   }
 

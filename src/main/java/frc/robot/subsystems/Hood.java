@@ -170,15 +170,15 @@ public class Hood extends SubsystemBase {
     // m_targetPitch = targetPos.getValue();
   }
 
-  public void setNotShootingRegular() {
+  public void setNotShooting() {
     isShooting = false;
   }
 
-  public Command setNotShooting() {
+  public Command setNotShootingCommand() {
     return new InstantCommand(() -> isShooting = false);
   }
 
-  public Command setIsShooting() {
+  public Command setIsShootingCommand() {
     return new InstantCommand(() -> isShooting = true);
   }
 
