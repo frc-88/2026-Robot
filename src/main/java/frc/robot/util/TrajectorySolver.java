@@ -248,8 +248,7 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTime(double distance) {
-    if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
-        || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+    if (!isTargetingHub) {
       return 0.78 + 0.0951 * distance;
     } else { //real hub
       return 0.78 + 0.0951 * distance;
@@ -257,8 +256,7 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   public double lookupTimePrime(double distance) {
-    if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
-        || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+    if (!isTargetingHub) {
       return 0.0951;
     } else { //real hub
       return 0.0951;
@@ -269,8 +267,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else {
-      if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
-          || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+      if (!isTargetingHub) {
         return 2.33
           + 8.31 * distance
           - 1.12 * (Math.pow(distance, 2.0))
@@ -288,8 +285,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else {
-      if (target == Constants.LEFT_SHUTTLE_TARGET_POSITION
-          || target == Constants.RIGHT_SHUTTLE_TARGET_POSITION) {
+      if (!isTargetingHub) {
         return 25.7 + 3.81 * distance;
       } else { // real hub
         return 25.7 + 3.81 * distance;
