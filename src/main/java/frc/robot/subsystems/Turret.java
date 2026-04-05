@@ -165,9 +165,9 @@ public class Turret extends SubsystemBase {
     // position could cause the turret to move to unsafe positions.
     double newOffset =
         -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue();
-    if (newOffset > 1.0) {
+    if (newOffset > 0.5) {
       newOffset -= 1.0;
-    } else if (newOffset < -1.0) {
+    } else if (newOffset < -0.5) {
       newOffset += 1.0;
     }
 
