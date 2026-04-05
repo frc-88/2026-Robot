@@ -258,7 +258,7 @@ public class Turret extends SubsystemBase {
 
     // CCW side of minimum tether length, negative (clockwise) velocity, pull in
     if (currentFacingAngleRelative > 0.0 && currentVelocity < 0.0) { // CCW side of 0; going in
-      targetCurrent = -15.0; // p_goingInCurrent.getValue();
+      targetCurrent = p_goingInCurrent.getValue(); // p_goingInCurrent.getValue();
     } else if (currentFacingAngleRelative > 0.0
         && currentVelocity > 0.0) { // CCW side of 0; going out
       targetCurrent = p_goingOutCurrent.getValue();
