@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shoot Override True"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
