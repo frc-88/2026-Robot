@@ -208,23 +208,19 @@ public class RobotContainer {
       SmartDashboard.putData("AntiJam", antiJam());
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-
       SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
-
-      // SmartDashboard.putData("Prepclimb", prepClimber());
     }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 2.0*/ ));
+    intake.setDefaultCommand(intake.deployJustIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRebuilt());
-    // climber.setDefaultCommand(climber.stopall());
   }
 
   public void startTargeting() {
@@ -299,7 +295,7 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.intakeSpitCommand());
+    controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
   public void configureButtonBox() {
@@ -331,10 +327,6 @@ public class RobotContainer {
   }
 
   public void periodic() {
-
-    // if (climber.getLiftPosition() > 20) {
-    //   intake.intakeIn();
-    // }
 
     String autoName = autoChooser.get().getName();
 
