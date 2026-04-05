@@ -185,6 +185,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+    NamedCommands.registerCommand("Shoot Override True", setShootOverrideCommand(true));
+    NamedCommands.registerCommand("Shoot Override False", setShootOverrideCommand(false));
 
     // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
@@ -230,10 +232,11 @@ public class RobotContainer {
   }
 
   public boolean onTarget() {
-    if (shootOverride) {
+    if (shooting && shootOverride) {
       return true;
     }
     return turret.onTarget()
+        && shooting
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
@@ -304,8 +307,8 @@ public class RobotContainer {
     // buttons.button(2).onTrue(L1AndFlip());
     buttons
         .button(4)
-        .onTrue(new InstantCommand(() -> shootOverride = true).alongWith(turret.startTargeting()))
-        .onFalse(new InstantCommand(() -> shootOverride = false));
+        .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
+        .onFalse(setShootOverrideCommand(false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
@@ -471,6 +474,15 @@ public class RobotContainer {
         .alongWith(hotTub.antiJamSpinner())
         .alongWith(feeder.antiJamFeeder().alongWith(intake.antiJamIntake()));
   }
+
+  public Command setShootOverrideCommand(boolean override) {
+    return new InstantCommand(() -> shootOverride = override);
+  }
+
+  public void setShootOverride(boolean override) {
+    shootOverride = override;
+  }
+
   // /**
   //  * Use this to pass the autonomous command to the main {@link Robot} class.
   //  *
