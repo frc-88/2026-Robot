@@ -258,7 +258,7 @@ public class Intake extends SubsystemBase {
 
   private void theThing() {
     intakePivot.setControl(
-        pivotRequestDynamic.withAcceleration(100.0).withVelocity(10.0).withPosition(5.0));
+        pivotRequestDynamic.withAcceleration(100.0).withVelocity(2.0).withPosition(5.0));
     setRollerSpeed(() -> speed.getValue() / 10.0);
     setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
