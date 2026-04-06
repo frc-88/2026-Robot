@@ -241,7 +241,7 @@ public class Intake extends SubsystemBase {
     setRollerSpeed(
         () ->
             MathUtil.clamp(
-                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 65.0, 120.0));
+                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 90.0, 120.0));
   }
 
   public void intakeIn() {
