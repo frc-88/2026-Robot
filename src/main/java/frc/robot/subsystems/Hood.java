@@ -51,6 +51,7 @@ public class Hood extends SubsystemBase {
     m_pitch = pitch;
     configureMinion();
     configureSmartDashboardButtons();
+    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
   }
 
   private void configureMinion() {
@@ -80,6 +81,8 @@ public class Hood extends SubsystemBase {
     hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
 
     hood.getConfigurator().apply(hoodConfig);
+
+    // CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 
   private void configureSmartDashboardButtons() {
@@ -170,15 +173,15 @@ public class Hood extends SubsystemBase {
     // m_targetPitch = targetPos.getValue();
   }
 
-  public void setNotShootingRegular() {
+  public void setNotShooting() {
     isShooting = false;
   }
 
-  public Command setNotShooting() {
+  public Command setNotShootingCommand() {
     return new InstantCommand(() -> isShooting = false);
   }
 
-  public Command setIsShooting() {
+  public Command setIsShootingCommand() {
     return new InstantCommand(() -> isShooting = true);
   }
 

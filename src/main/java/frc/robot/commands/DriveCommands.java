@@ -378,17 +378,20 @@ public class DriveCommands {
     return Commands.run(
             () -> {
               double yFlipped = Util.flipIfRed(drive.getPose()).getY();
-
               double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
-
-              Logger.recordOutput("Trench/targetset", targetSet);
-
               if (!targetSet) {
                 yTarget = (yFlipped > 4.0) ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
-                rotationTarget =
-                    (rotationFlipped > -90.0 && rotationFlipped < 90.0)
-                        ? 0.0
-                        : Math.copySign(180.0, rotationFlipped);
+                if (rotationFlipped >= 180.0 - 45.0 || rotationFlipped < -180.0 + 45.0) {
+                  rotationTarget = Math.copySign(180.0, rotationFlipped);
+                } else if (rotationFlipped >= 90.0 - 45.0 && rotationFlipped < 90.0 + 45.0) {
+                  rotationTarget = 90.0;
+                  yTarget -= Units.inchesToMeters(4.5);
+                } else if (rotationFlipped >= 0.0 - 45.0 && rotationFlipped < 0.0 + 45.0) {
+                  rotationTarget = 0.0;
+                } else if (rotationFlipped >= -90.0 - 45.0 && rotationFlipped < -90.0 + 45.0) {
+                  rotationTarget = -90.0;
+                  yTarget += Units.inchesToMeters(4.5);
+                }
                 targetSet = true;
               }
 
@@ -396,8 +399,6 @@ public class DriveCommands {
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(
                       xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
-
-              Logger.recordOutput("Trench/YStick", yController.calculate(yFlipped, yTarget));
 
               // Calculate angular speed
               double omega =
