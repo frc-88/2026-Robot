@@ -257,7 +257,7 @@ public class Intake extends SubsystemBase {
 
   private void theThing() {
     if (intakePivot.getPosition().getValueAsDouble() > 5.0) {
-      intakePivot.setControl(theThingRequest.withOutput(-2.0));
+      intakePivot.setControl(theThingRequest.withOutput(-3.0));
     } else {
       intakePivot.stopMotor();
     }
