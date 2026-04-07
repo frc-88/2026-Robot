@@ -8,24 +8,34 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.AutoLogOutput;
+
+// whenever I lift
+// up and take a look around
+// yellow ball deluge
 
 public class Hood extends SubsystemBase {
+  // motors & devices
   private final TalonFXS hood = new TalonFXS(Constants.HOOD, CANBus.roboRIO());
 
+  // output requests
   private final MotionMagicVoltage request = new MotionMagicVoltage(0.0);
   private final DutyCycleOut calibrationRequest = new DutyCycleOut(0);
 
+  // preferences
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Hood/HoodMotor", 100., 250., 0., 0.5, 0., 0., 0.11, 0.2, 0.);
@@ -34,15 +44,14 @@ public class Hood extends SubsystemBase {
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
-
-  public boolean isShooting = false;
-
+  private boolean isShooting = false;
   private boolean m_calibrated = false;
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
     configureMinion();
     configureSmartDashboardButtons();
+    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
   }
 
   private void configureMinion() {
@@ -57,48 +66,69 @@ public class Hood extends SubsystemBase {
     hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(34.5);
+        hoodAngleDegreesToRotationsOfMinion(35.0 - 0.5);
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(13.5);
+        hoodAngleDegreesToRotationsOfMinion(13.4 + 0.5);
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
         hoodConfigConstants.getMaxVelocity().getValue();
     hoodConfig.MotionMagic.MotionMagicAcceleration =
         hoodConfigConstants.getMaxAcceleration().getValue();
+
+    hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+
     hood.getConfigurator().apply(hoodConfig);
+
+    // CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
   }
 
   private void configureSmartDashboardButtons() {
-    // SmartDashboard.putNumber("Hood/Position", hood.getPosition().getValueAsDouble());
-    if (Util.logif()) {
-      SmartDashboard.putData("Hood/Calibrate", calibrate());
-      SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
-      SmartDashboard.putData("Hood/SetPositionManual", setPositionTargeting());
-      SmartDashboard.putData("Hood/GoToZero", goToZero());
-    }
+    SmartDashboard.putData("Hood/Calibrate", calibrate());
+    SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+    SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
   }
 
-  public void periodic() {
-    if (isShooting) {
-      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 15.0, 34.0);
-    } else {
-      m_targetPitch = 15.0;
-    }
-    // Lookup Table Building Override
-    // m_targetPitch = targetPos.getValue();
+  @AutoLogOutput
+  public boolean isHealthy() {
+    return hood.isConnected() && hood.isAlive();
+  }
 
-    Logger.recordOutput("Hood/AngleSetpoint", m_pitch.getAsDouble());
-    Logger.recordOutput("Hood/isShooting", isShooting);
-    if (Util.logif()) {
-      SmartDashboard.putNumber("Hood/Current", hood.getStatorCurrent().getValueAsDouble());
-      // SmartDashboard.putNumber("Hood/TrajectorySetpoint", m_pitch.getAsDouble());
-      SmartDashboard.putNumber("Hood/CurrentPosition", hood.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber(
-          "Hood/CurrentAngle",
-          minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()));
-    }
+  @AutoLogOutput
+  private Voltage getVoltage() {
+    return hood.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getCurrent() {
+    return hood.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getVelocity() {
+    return hood.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getPosition() {
+    return hood.getPosition().getValue();
+  }
+
+  @AutoLogOutput
+  private double getAngle() {
+    return minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble());
+  }
+
+  @AutoLogOutput
+  private boolean getIsShooting() {
+    return isShooting;
+  }
+
+  @AutoLogOutput
+  private boolean getIsCalibrated() {
+    return m_calibrated;
   }
 
   private double hoodAngleDegreesToRotationsOfMinion(double hoodAngle) {
@@ -124,22 +154,35 @@ public class Hood extends SubsystemBase {
   private void setCalibrate() {
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (hood.getStatorCurrent().getValueAsDouble() > 25.0) {
-      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
-      m_calibrated =
-          Math.abs(minionRotationsToHoodAngleDegrees(hood.getPosition().getValueAsDouble()) - 13.5)
-              < 1.0;
+      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.4));
+      m_calibrated = Math.abs(getAngle() - 13.4) < 1.0;
     }
+    hood.getRawPulseWidthPosition();
   }
 
   private void stopHoodMotor() {
     hood.stopMotor();
   }
 
-  public Command setNotShooting() {
+  public void periodic() {
+    if (isShooting) {
+      m_targetPitch = MathUtil.clamp(m_pitch.getAsDouble(), 15.0, 34.0);
+    } else {
+      m_targetPitch = 15.0;
+    }
+    // Lookup Table Building Override
+    // m_targetPitch = targetPos.getValue();
+  }
+
+  public void setNotShooting() {
+    isShooting = false;
+  }
+
+  public Command setNotShootingCommand() {
     return new InstantCommand(() -> isShooting = false);
   }
 
-  public Command setIsShooting() {
+  public Command setIsShootingCommand() {
     return new InstantCommand(() -> isShooting = true);
   }
 
@@ -157,11 +200,7 @@ public class Hood extends SubsystemBase {
     return new RunCommand(() -> calibrateFirst(m_targetPitch), this);
   }
 
-  // public Command setPositionManual() {
-  //   return new RunCommand(() -> setPosition(25.0), this);
-  // }
-
-  public Command goToZero() {
-    return new RunCommand(() -> setPosition(0.0), this);
+  public Command setPositionManual() {
+    return new RunCommand(() -> calibrateFirst(targetPos.getValue()), this);
   }
 }

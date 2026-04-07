@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util;
 import java.text.DecimalFormat;
@@ -42,10 +43,17 @@ public class DriveCommands {
   private static final double ANGLE_KD = 0.04;
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
+
+  private static final double Y_KP = 4.0;
+
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+
+  private static boolean targetSet = false;
+  private static double rotationTarget;
+  private static double yTarget;
 
   private DriveCommands() {}
 
@@ -236,7 +244,7 @@ public class DriveCommands {
         drive);
   }
 
-  public static Command rebuiltDriveTwo(
+  public static Command rebuiltDriveTwo( // unused
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
@@ -350,6 +358,90 @@ public class DriveCommands {
         .beforeStarting(
             () ->
                 angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians()));
+  }
+
+  public static Command trenchDrive(Drive drive, DoubleSupplier xSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            5.0,
+            0.0,
+            0.0,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController yController =
+        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(4.5, 4.0));
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              double yFlipped = Util.flipIfRed(drive.getPose()).getY();
+              double rotationFlipped = Util.flipIfRed(drive.getPose()).getRotation().getDegrees();
+              if (!targetSet) {
+                yTarget = (yFlipped > 4.0) ? Constants.LEFT_TRENCH_Y : Constants.RIGHT_TRENCH_Y;
+                if (rotationFlipped >= 180.0 - 45.0 || rotationFlipped < -180.0 + 45.0) {
+                  rotationTarget = Math.copySign(180.0, rotationFlipped);
+                } else if (rotationFlipped >= 90.0 - 45.0 && rotationFlipped < 90.0 + 45.0) {
+                  rotationTarget = 90.0;
+                  yTarget -= Units.inchesToMeters(4.5);
+                } else if (rotationFlipped >= 0.0 - 45.0 && rotationFlipped < 0.0 + 45.0) {
+                  rotationTarget = 0.0;
+                } else if (rotationFlipped >= -90.0 - 45.0 && rotationFlipped < -90.0 + 45.0) {
+                  rotationTarget = -90.0;
+                  yTarget += Units.inchesToMeters(4.5);
+                }
+                targetSet = true;
+              }
+
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(
+                      xSupplier.getAsDouble(), yController.calculate(yFlipped, yTarget));
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      Units.degreesToRadians(rotationFlipped),
+                      Units.degreesToRadians(rotationTarget));
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocityAroundCenter(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(
+            () -> {
+              angleController.reset(
+                  Util.flipIfRed(drive.getPose()).getRotation().getRadians()
+                  // , drive.getChassisSpeedsFieldRelative().getRotation().getRadians()
+                  );
+              yController.reset(
+                  Util.flipIfRed(drive.getPose()).getTranslation().getY()
+                  //   ,
+                  //   drive
+                  //       .getChassisSpeedsFieldRelative()
+                  //       .rotateBy(Rotation2d.fromDegrees(180.0))
+                  //       .getY()
+                  );
+              targetSet = false;
+            })
+        .finallyDo(() -> targetSet = false);
   }
 
   /**

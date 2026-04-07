@@ -52,6 +52,10 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// mechanically
+// straight forward, easy to use
+// advantageously
+
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
   Pose3d[] poses = new Pose3d[2];
@@ -290,6 +294,47 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void runVelocity2(ChassisSpeeds speeds, boolean turretRotation) {
+    // Calculate module setpoints
+    ChassisSpeeds justOmega =
+        ChassisSpeeds.discretize(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond), 0.02);
+    SwerveDriveKinematics runKinematics = turretRotation ? kinematicsTurret : kinematics;
+    SwerveModuleState[] setpointJustSpin = runKinematics.toSwerveModuleStates(justOmega);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    SwerveModuleState[] setpointStates = runKinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+
+    double max = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
+    double min = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
+    for (int i = 0; i < setpointJustSpin.length; i++) {
+      max =
+          Math.max(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              max);
+      min =
+          Math.min(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              min);
+    }
+    double ratio = max / min;
+    Logger.recordOutput("Drive/MinMaxRatio", ratio);
+    // Log unoptimized setpoints and setpoint speeds
+    if (Util.logif()) {
+      Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+      Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    }
+
+    // Send setpoints to modules
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(setpointStates[i]);
+    }
+
+    // Log optimized setpoints (runSetpoint mutates each state)
+    if (Util.logif()) {
+      Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+  }
+
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {
     for (int i = 0; i < 4; i++) {
@@ -447,13 +492,13 @@ public class Drive extends SubsystemBase {
   public static Translation2d[] getModuleTranslationsAroundTurret() {
     return new Translation2d[] {
       new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY)
-          .minus(Constants.robotToTurret),
+          .minus(Constants.ROBOT_TO_TURRET),
       new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)
-          .minus(Constants.robotToTurret),
+          .minus(Constants.ROBOT_TO_TURRET),
       new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY)
-          .minus(Constants.robotToTurret),
+          .minus(Constants.ROBOT_TO_TURRET),
       new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
-          .minus(Constants.robotToTurret)
+          .minus(Constants.ROBOT_TO_TURRET)
     };
   }
 }

@@ -3,52 +3,57 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1173291139240495,
-        "y": 5.3323544303797465
+        "x": 3.4765954415954416,
+        "y": 5.869672364672365
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.1270794311011256,
-        "y": 5.020735213975142
+        "x": 3.1277492877492876,
+        "y": 6.528603988603988
       },
       "isLocked": false,
-      "linkedName": "Tower Left Approach"
+      "linkedName": "LeftBumpUnload"
     },
     {
       "anchor": {
-        "x": 1.0837178312151616,
-        "y": 4.649292685519442
+        "x": 4.083846153846153,
+        "y": 7.536381766381767
       },
       "prevControl": {
-        "x": 1.0837716350769728,
-        "y": 5.1221726499407465
+        "x": 3.295712250712251,
+        "y": 7.26505698005698
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftTrenchIntakeBack"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5501066098081026,
+      "rotationDegrees": 90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.5,
     "maxAcceleration": 1.0,
-    "maxAngularVelocity": 540.0,
+    "maxAngularVelocity": 400.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 0.001
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 90.0
+    "velocity": 0.5,
+    "rotation": 179.99
   },
   "useDefaultConstraints": false
 }

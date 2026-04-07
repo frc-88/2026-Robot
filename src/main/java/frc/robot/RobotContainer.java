@@ -9,19 +9,19 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 
-import com.ctre.phoenix6.unmanaged.Unmanaged;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.BatteryFuelGauge;
+import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
@@ -45,6 +46,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Batman;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import java.util.function.Supplier;
@@ -70,24 +72,33 @@ public class RobotContainer {
   private final Hood hood;
   private final Vision vision;
   private final Simulation simulation;
+  private final Dashboard dashboard = new Dashboard();
   // private final Climber climber = new Climber();
   private final BatteryFuelGauge batteryFuelGauge = new BatteryFuelGauge();
+
+  private final AutoStartPositions autoStartPositions = new AutoStartPositions();
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
+
   public final LoggedDashboardChooser<Command> autoChooser;
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
+  private boolean shootOverride = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    RobotController.setBrownoutVoltage(6.5);
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
-    if (!Util.logif()) {
-      Unmanaged.setPhoenixDiagnosticsStartTime(-1);
-    }
+    // if (!Util.logif()) {
+    //   Unmanaged.setPhoenixDiagnosticsStartTime(-1);
+    // }
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -106,7 +117,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+                new VisionIOLimelight(camera1Name, drive::getRotation),
+                new VisionIOLimelight(camera2Name, drive::getRotation));
         simulation = null;
         break;
 
@@ -152,9 +164,14 @@ public class RobotContainer {
         new TrajectorySolver(
             () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
             drive::getChassisSpeedsFieldRelative);
-    turret = new Turret(drive::getRate, trajectorySolver::getTurretTarget);
-    feeder = new Feeder(turret::onTarget);
-    hotTub = new HotTub(turret::onTarget);
+    turret =
+        new Turret(
+            () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
+            trajectorySolver::getTurretTarget,
+            trajectorySolver::getDistanceToProjectedTarget,
+            trajectorySolver::getIsTargetingHub);
+    feeder = new Feeder(this::onTarget);
+    hotTub = new HotTub(this::onTarget);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
@@ -166,17 +183,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
-    // NamedCommands.registerCommand("Climb L1", climber.gotoL1());
-
-    NamedCommands.registerCommand("Go To Climb Approach Right", goToTowerApproachPose());
-    NamedCommands.registerCommand("Go To Climb Approach Left", goToTowerApproachPose());
-
-    // NamedCommands.registerCommand("Get On Pole Right", getOnTower());
-    // NamedCommands.registerCommand("Get On Pole Left", getOnTower());
-
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
+    NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+    NamedCommands.registerCommand("Shoot Override True", setShootOverrideCommand(true));
+    NamedCommands.registerCommand("Shoot Override False", setShootOverrideCommand(false));
 
     // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
@@ -195,31 +207,44 @@ public class RobotContainer {
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
 
     if (Util.logif()) {
-      SmartDashboard.putData("goToTowerApproachPose", goToTowerApproachPose());
-      SmartDashboard.putData("PointForwards", drive.pointForwardsCommand());
-      // SmartDashboard.putData("goToClimbPose", getOnTower());
-      // SmartDashboard.putData("GetOffTower", getOffTower());
       SmartDashboard.putData("AntiJam", antiJam());
       SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
       SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-      // SmartDashboard.putData("Prepclimb", prepClimber());
+      SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
     }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
   private void configureDefaultCommands() {
     hotTub.setDefaultCommand(hotTub.stopSpinner());
-    intake.setDefaultCommand(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 2.0*/ ));
+    intake.setDefaultCommand(intake.deployJustIntake());
     feeder.setDefaultCommand(feeder.stopFeeder());
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRebuilt());
-    // climber.setDefaultCommand(climber.stopall());
   }
 
-  public void disabledInit() {
-    shooter.resetBPS();
+  public void startTargeting() {
+    turret.justSetTargeting();
+  }
+
+  public boolean onTarget() {
+    if (shooting && shootOverride) {
+      return true;
+    }
+    return turret.onTarget()
+        && shooting
+        && (dashboard.getIsHubActive()
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (dashboard.getIsHubActive() == false
+                && dashboard.getPeriodTimeRemaining()
+                    > 25.0
+                        - 3.0
+                        + (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+            || (!trajectorySolver.getIsTargetingHub()));
   }
 
   private void configureDriverController() {
@@ -269,23 +294,24 @@ public class RobotContainer {
     //                 drive)
     //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
-    controller
-        .leftBumper()
-        .toggleOnTrue(intake.deployJustIntake(/*() -> climber.getLiftPosition() > 20.0*/ ));
+    controller.leftBumper().whileTrue(driveTrench());
 
     controller.leftTrigger().whileTrue(intake.deployIntake());
-    controller.rightBumper().whileTrue(intake.doTheThing());
+    controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
   public void configureButtonBox() {
     // buttons.button(1).whileTrue(prepClimber());
     // buttons.button(2).onTrue(L1AndFlip());
-    // buttons.button(4).onTrue(L1());
+    buttons
+        .button(4)
+        .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
+        .onFalse(setShootOverrideCommand(false));
     // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
-    buttons.button(3).onTrue(turret.syncCommand());
+    buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
     // buttons.button(11).whileTrue(getOffTower());
@@ -304,12 +330,24 @@ public class RobotContainer {
 
   public void periodic() {
 
-    // if (climber.getLiftPosition() > 20) {
-    //   intake.intakeIn();
-    // }
+    String autoName = autoChooser.get().getName();
 
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
-    Logger.recordOutput("AutoName", autoChooser.get().getName());
+    Logger.recordOutput("AutoName", autoName);
+
+    Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
+    Pose2d currentRobotPose = Util.flipIfRed(drive.getPose());
+
+    boolean isPoseSafe = false;
+    double poseDistance =
+        targetStartingPose.getTranslation().getDistance(currentRobotPose.getTranslation());
+    if (poseDistance
+        < 0.5) { // Compare if the distance between the current and target pose is within 0.5 meters
+      isPoseSafe = true;
+    }
+
+    SmartDashboard.putBoolean("Starting Position/Starting Position is Safe", isPoseSafe);
+    SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
   public Pose2d getPoseBatman() {
@@ -340,14 +378,25 @@ public class RobotContainer {
     return DriveCommands.rebuiltDrive(
         drive,
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.75, 0.75) : -controller.getLeftY(),
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                : -controller.getLeftY(),
         () ->
-            shooting ? MathUtil.clamp(-controller.getLeftX(), -0.75, 0.75) : -controller.getLeftX(),
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                : -controller.getLeftX(),
         () ->
-            shooting
-                ? MathUtil.clamp(-controller.getRightX(), -0.75, 0.75)
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveTrench() {
+    return DriveCommands.trenchDrive(
+        drive,
+        () ->
+            shooting ? MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5) : -controller.getLeftY());
   }
 
   public Command driveRebuiltTwo() {
@@ -380,123 +429,36 @@ public class RobotContainer {
         && Util.flipIfRed(drive.getPose()).getTranslation().getX() < Constants.HUB_POSITION.getX();
   }
 
-  public Command goToRightApproachPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToRightClimbPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 3.00, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(0.25, 3.0, 5.0, 10.0));
-  }
-
-  public Command getOffPoleRight() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.025, 2.10, Rotation2d.fromDegrees(-90.0)),
-        new PathConstraints(0.5, 3.0, 5.0, 10.0));
-  }
-
-  public Command goToLeftApproachPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(1.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToLeftClimbPose() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 4.69, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(0.25, 3.0, 12.5, 20.0));
-  }
-
-  public Command getOffPoleLeft() {
-    return AutoBuilder.pathfindToPoseFlipped(
-        new Pose2d(1.144, 5.33, Rotation2d.fromDegrees(90.0)),
-        new PathConstraints(0.5, 3.0, 12.5, 20.0));
-  }
-
-  public Command goToTowerApproachPose() {
-    return new ConditionalCommand(
-        goToRightApproachPose(),
-        goToLeftApproachPose(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  public Command goToClimbPose() {
-    return new ConditionalCommand(
-        goToRightClimbPose(),
-        goToLeftClimbPose(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  public Command climberGetOffTower() {
-    return new ConditionalCommand(
-        getOffPoleRight(),
-        getOffPoleLeft(),
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791));
-  }
-
-  // public Command getOnTower() {
-  //   return (goToClimbPose().alongWith(climber.getOnPole())).until(() ->
-  // (climber.isFullyOnPole()));
-  // }
-
-  // public Command getOffTower() {
-  //   return (climberGetOffTower().alongWith(climber.goToGrip())).withTimeout(2.0);
-  // } // DO NOT MAKE THIS STOW AUTOMATICALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  // public Command prepClimber() {
-  //   return new ParallelDeadlineGroup(goToTowerApproachPose().andThen(getOnTower()));
-  // }
-
-  public Command climbDriveIn() {
-    return DriveCommands.joystickDrive(
-        drive,
-        () -> 0.0,
-        () -> (Util.flipIfRed(drive.getPose()).getTranslation().getY() < 3.791 ? 1.0 : -1.0) * 0.8,
-        () -> 0.0);
-  }
-
-  // public Command L1() {
-  //   return climber
-  //       .gotoL1()
-  //       .alongWith(intake.retractIntake())
-  //       .alongWith(
-  //           climbDriveIn().withTimeout(0.5).andThen(new RunCommand(() -> drive.stop(), drive)));
-  // }
-
-  // public Command L1AndFlip() {
-  //   return L1().until(() -> climber.isAtTuck())
-  //       .andThen(
-  //           climber
-  //               .flipCommand()
-  //               .alongWith(drive.pointForwardsCommand())
-  //               .alongWith(intake.retractIntake()));
-  // }
-
   public Command shoot() {
     return new ParallelCommandGroup(
         setShooting(true),
         shooter.runShooter(),
         hotTub.runSpinner(),
         feeder.runFeeder(),
-        hood.setIsShooting(),
-        intake.setShooting());
-  }
-
-  private Command setShooting(boolean shoot) {
-    return new InstantCommand(() -> shooting = shoot);
+        hood.setIsShootingCommand(),
+        intake.setShooting(),
+        turret.startTargeting());
   }
 
   public Command stopShoot() {
     return new ParallelCommandGroup(
         setShooting(false),
         shooter.stopShooter(),
-        hotTub.stopSpinner(),
         feeder.stopFeeder(),
-        hood.setNotShooting(),
+        hood.setNotShootingCommand(),
         intake.setNotShooting());
+  }
+
+  public Command setShooting(boolean shoot) {
+    return new InstantCommand(() -> shooting = shoot);
+  }
+
+  public void stopShooting() {
+    shooting = false;
+  }
+
+  public void stopHood() {
+    hood.setNotShooting();
   }
 
   public Command antiJam() {
@@ -506,6 +468,15 @@ public class RobotContainer {
         .alongWith(hotTub.antiJamSpinner())
         .alongWith(feeder.antiJamFeeder().alongWith(intake.antiJamIntake()));
   }
+
+  public Command setShootOverrideCommand(boolean override) {
+    return new InstantCommand(() -> shootOverride = override);
+  }
+
+  public void setShootOverride(boolean override) {
+    shootOverride = override;
+  }
+
   // /**
   //  * Use this to pass the autonomous command to the main {@link Robot} class.
   //  *
