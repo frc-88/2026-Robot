@@ -2,9 +2,9 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.MathUtil;
@@ -31,12 +31,11 @@ public class Intake extends SubsystemBase {
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
   private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
   private final TalonFX intakeInnerRoller =
-      new TalonFX(Constants.INTAKE_PIVOT_ROLLER, CANBus.roboRIO());
+      new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
 
   // output requests
   private final MotionMagicVoltage pivotRequest = new MotionMagicVoltage(0.0);
-  private final DynamicMotionMagicVoltage pivotRequestDynamic =
-      new DynamicMotionMagicVoltage(0.0, 0.1, 10.0);
+  private final VoltageOut theThingRequest = new VoltageOut(0.0);
   private final VelocityVoltage rollerRequest = new VelocityVoltage(0.0);
   private final VelocityVoltage pivotRollerRequest = new VelocityVoltage(0.0);
 
@@ -47,7 +46,7 @@ public class Intake extends SubsystemBase {
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
-  private final MotionMagicPIDPreferenceConstants intakePivotRollerConfigConstants =
+  private final MotionMagicPIDPreferenceConstants intakeInnerRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakePivotRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
   private final DoublePreferenceConstant targetPosition =
@@ -113,11 +112,11 @@ public class Intake extends SubsystemBase {
     intakeRoller.getConfigurator().apply(rollerConfig);
 
     TalonFXConfiguration innerRollerConfig = new TalonFXConfiguration();
-    innerRollerConfig.Slot0.kP = intakePivotRollerConfigConstants.getKP().getValue();
-    innerRollerConfig.Slot0.kI = intakePivotRollerConfigConstants.getKI().getValue();
-    innerRollerConfig.Slot0.kD = intakePivotRollerConfigConstants.getKD().getValue();
-    innerRollerConfig.Slot0.kV = intakePivotRollerConfigConstants.getKV().getValue();
-    innerRollerConfig.Slot0.kS = intakePivotRollerConfigConstants.getKS().getValue();
+    innerRollerConfig.Slot0.kP = intakeInnerRollerConfigConstants.getKP().getValue();
+    innerRollerConfig.Slot0.kI = intakeInnerRollerConfigConstants.getKI().getValue();
+    innerRollerConfig.Slot0.kD = intakeInnerRollerConfigConstants.getKD().getValue();
+    innerRollerConfig.Slot0.kV = intakeInnerRollerConfigConstants.getKV().getValue();
+    innerRollerConfig.Slot0.kS = intakeInnerRollerConfigConstants.getKS().getValue();
 
     innerRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     innerRollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
@@ -285,8 +284,11 @@ public class Intake extends SubsystemBase {
   }
 
   private void theThing() {
-    intakePivot.setControl(
-        pivotRequestDynamic.withAcceleration(100.0).withVelocity(2.0).withPosition(5.0));
+    if (intakePivot.getPosition().getValueAsDouble() > 5.0) {
+      intakePivot.setControl(theThingRequest.withOutput(-3.0));
+    } else {
+      intakePivot.stopMotor();
+    }
     setRollerSpeed(() -> speed.getValue() / 10.0);
     setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }

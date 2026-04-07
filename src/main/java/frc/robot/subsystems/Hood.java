@@ -157,6 +157,7 @@ public class Hood extends SubsystemBase {
       hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.4));
       m_calibrated = Math.abs(getAngle() - 13.4) < 1.0;
     }
+    hood.getRawPulseWidthPosition();
   }
 
   private void stopHoodMotor() {

@@ -61,7 +61,7 @@ public class HotTub extends SubsystemBase {
 
   private final BooleanSupplier m_turretOnTarget;
 
-  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 2.0);
+  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue());
 
   public HotTub(BooleanSupplier turretOnTarget) {
     m_turretOnTarget = turretOnTarget;
@@ -87,7 +87,7 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    spinnerConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+    spinnerConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
   }
 

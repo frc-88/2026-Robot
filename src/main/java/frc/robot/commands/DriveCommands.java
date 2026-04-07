@@ -44,7 +44,7 @@ public class DriveCommands {
   private static final double ANGLE_MAX_VELOCITY = 100.0;
   private static final double ANGLE_MAX_ACCELERATION = 100.0;
 
-  private static final double Y_KP = 3.0;
+  private static final double Y_KP = 4.0;
 
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
@@ -372,7 +372,7 @@ public class DriveCommands {
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     ProfiledPIDController yController =
-        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(3.0, 2.0));
+        new ProfiledPIDController(Y_KP, 0.0, 0.0, new TrapezoidProfile.Constraints(4.5, 4.0));
 
     // Construct command
     return Commands.run(
