@@ -196,7 +196,7 @@ public class Intake extends SubsystemBase {
   @AutoLogOutput
   private boolean isStalled() {
     return intakeRoller.getStatorCurrent().getValueAsDouble() > 20.0
-        && intakeRoller.getVelocity().getValueAsDouble() < 0.1;
+        && intakeRoller.getVelocity().getValueAsDouble() < 8.0;
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
