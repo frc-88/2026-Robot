@@ -42,12 +42,12 @@ public class TrajectorySolver extends SubsystemBase {
   private int numberOfIterations = 5;
 
   public DoublePreferenceConstant lagCompensation =
-      new DoublePreferenceConstant("Trajectory/LagCompensation", 0.02);
+      new DoublePreferenceConstant("Trajectory/LagCompensation", 0.01);
 
-  public double hoodAngle;
-  public double shootSpeed;
+  private double hoodAngle;
+  private double shootSpeed;
 
-  public boolean isTargetingHub = true;
+  private boolean isTargetingHub = true;
   private double lastTargetRadians = 0.0;
 
   public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
@@ -132,7 +132,6 @@ public class TrajectorySolver extends SubsystemBase {
     robotAcceleration = getAcceleration();
     lastRobotVelocity = robotVelocity;
 
-    // TODO tune number
     robotPosition =
         robotPosition
             .plus(robotVelocity.times(lagCompensation.getValue()))
@@ -162,7 +161,6 @@ public class TrajectorySolver extends SubsystemBase {
       newton();
     } else {
       turretToProjectedTarget = turretToCurrentTarget;
-
       hasPreviousTimeOfFlightGuess = false;
       hoodAngle = lookupAngle(turretToCurrentTarget.getNorm());
       shootSpeed = lookupSpeed(turretToCurrentTarget.getNorm());
@@ -179,7 +177,7 @@ public class TrajectorySolver extends SubsystemBase {
     }
   }
 
-  public void newton() {
+  private void newton() {
     if (!hasPreviousTimeOfFlightGuess) {
       timeOfFlight = lookupTime(turretToCurrentTarget.getNorm());
     } // otherwise use last value
@@ -207,7 +205,7 @@ public class TrajectorySolver extends SubsystemBase {
     shootSpeed = lookupSpeed(turretToProjectedTargetDistance);
   }
 
-  public Translation2d findTargetPosition() {
+  private Translation2d findTargetPosition() {
     Translation2d turret = Util.flipIfRed(turretPosition);
 
     if (turret.getX() > Units.inchesToMeters(181.56)) {
@@ -241,7 +239,7 @@ public class TrajectorySolver extends SubsystemBase {
     return robotVelocity.minus(lastRobotVelocity).div(0.02);
   }
 
-  public double lookupTime(double distance) {
+  private double lookupTime(double distance) {
     if (!isTargetingHub) {
       return 0.78 + 0.0951 * distance;
     } else { // real hub
@@ -249,7 +247,7 @@ public class TrajectorySolver extends SubsystemBase {
     }
   }
 
-  public double lookupTimePrime(double distance) {
+  private double lookupTimePrime(double distance) {
     if (!isTargetingHub) {
       return 0.0951;
     } else { // real hub
@@ -257,7 +255,7 @@ public class TrajectorySolver extends SubsystemBase {
     }
   }
 
-  public double lookupAngle(double distance) {
+  private double lookupAngle(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else {
@@ -275,7 +273,7 @@ public class TrajectorySolver extends SubsystemBase {
     }
   }
 
-  public double lookupSpeed(double distance) {
+  private double lookupSpeed(double distance) {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else {
