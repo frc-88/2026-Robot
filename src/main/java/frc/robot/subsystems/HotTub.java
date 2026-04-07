@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -43,7 +44,7 @@ public class HotTub extends SubsystemBase {
 
   // preferences
   private final DoublePreferenceConstant p_spinnerSpeed =
-      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
+      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 65.0);
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Spinner/SpinnerMotors", 0., 0., 0., 0.17547, 0., 0., 0.11504, 0.18565, 0.01426);
@@ -59,6 +60,8 @@ public class HotTub extends SubsystemBase {
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
   private final BooleanSupplier m_turretOnTarget;
+
+  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue());
 
   public HotTub(BooleanSupplier turretOnTarget) {
     m_turretOnTarget = turretOnTarget;
@@ -84,7 +87,7 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    spinnerConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+    spinnerConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
   }
 
@@ -118,7 +121,7 @@ public class HotTub extends SubsystemBase {
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
-    m_spinner.setControl(m_request.withVelocity(speed.getAsDouble()));
+    m_spinner.setControl(m_request.withVelocity(spinnerLimiter.calculate(speed.getAsDouble())));
   }
 
   private void stopSpinnerMotors() {
@@ -144,7 +147,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> stopSpinnerMotors(), this);
+    return new RunCommand(() -> setSpinnerSpeed(() -> 0.0), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

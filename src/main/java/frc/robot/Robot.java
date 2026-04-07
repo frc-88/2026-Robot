@@ -95,9 +95,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {
-    m_robotContainer.disabledInit();
-  }
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
@@ -130,6 +128,8 @@ public class Robot extends LoggedRobot {
     }
     m_robotContainer.startTargeting();
     m_robotContainer.stopShooting();
+    m_robotContainer.stopHood();
+    m_robotContainer.setShootOverride(false);
   }
 
   /** This function is called periodically during operator control. */

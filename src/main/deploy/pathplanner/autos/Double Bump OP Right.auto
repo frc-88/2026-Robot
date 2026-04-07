@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Shoot Override True"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -27,7 +21,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftDeepBumpChompei"
+                        "pathName": "RightDeepBumpChompei"
                       }
                     },
                     {
@@ -69,13 +63,13 @@
                           {
                             "type": "path",
                             "data": {
-                              "pathName": "LeftBumpUnloadToLeftTrench"
+                              "pathName": "RightBumpUnloadToRightTrench"
                             }
                           },
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 1.125
+                              "waitTime": 0.5
                             }
                           }
                         ]
@@ -142,7 +136,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftBumpChompei"
+                        "pathName": "RightBumpChompei"
                       }
                     },
                     {
@@ -180,7 +174,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftBumpUnloadToLeftTrench"
+                        "pathName": "RightBumpUnloadToRightTrench"
                       }
                     },
                     {
@@ -200,7 +194,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 2.25
+                                    "waitTime": 1.75
                                   }
                                 },
                                 {
