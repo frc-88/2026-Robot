@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -45,12 +44,9 @@ public class Turret extends SubsystemBase {
   private final CANcoder m_CANcoder = new CANcoder(Constants.TURRET_CANCODER_ID2, CANBus.roboRIO());
 
   private final MotionMagicVoltage motionMagicReq = new MotionMagicVoltage(0.0);
-  private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0.0);
   private final TorqueCurrentFOC torqueReq = new TorqueCurrentFOC(0.0);
 
   // Preferences
-  private final DoublePreferenceConstant p_proportion =
-      new DoublePreferenceConstant("Turret/Conversion Constant", -260.0);
   private final DoublePreferenceConstant p_limitBuffer =
       new DoublePreferenceConstant("Turret/Limit Buffer", 10.0);
   private final DoublePreferenceConstant p_syncThreshold =
@@ -65,7 +61,7 @@ public class Turret extends SubsystemBase {
   private final DoublePreferenceConstant p_spinCompensation =
       new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
-      new DoublePreferenceConstant("Turret/CANCoder50 Offset", -0.143311);
+      new DoublePreferenceConstant("Turret/CANCoder Offset", 0.435302734375);
   private final DoublePreferenceConstant p_goingOutCurrent =
       new DoublePreferenceConstant("Turret/Out Current", 0.0);
   private final DoublePreferenceConstant p_goingInCurrent =
@@ -165,9 +161,9 @@ public class Turret extends SubsystemBase {
     // position could cause the turret to move to unsafe positions.
     double newOffset =
         -m_CANcoder.getAbsolutePosition().getValueAsDouble() + p_CANcoderOffset.getValue();
-    if (newOffset > 1.0) {
+    if (newOffset > 0.5) {
       newOffset -= 1.0;
-    } else if (newOffset < -1.0) {
+    } else if (newOffset < -0.5) {
       newOffset += 1.0;
     }
 
@@ -179,6 +175,11 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput
   private Voltage getTurretVoltage() {
     return m_turret.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private boolean isCircumnavigating() {
+    return m_circumnavigating;
   }
 
   @AutoLogOutput
@@ -253,7 +254,7 @@ public class Turret extends SubsystemBase {
 
     // CCW side of minimum tether length, negative (clockwise) velocity, pull in
     if (currentFacingAngleRelative > 0.0 && currentVelocity < 0.0) { // CCW side of 0; going in
-      targetCurrent = -15.0; // p_goingInCurrent.getValue();
+      targetCurrent = p_goingInCurrent.getValue(); // p_goingInCurrent.getValue();
     } else if (currentFacingAngleRelative > 0.0
         && currentVelocity > 0.0) { // CCW side of 0; going out
       targetCurrent = p_goingOutCurrent.getValue();
@@ -296,7 +297,7 @@ public class Turret extends SubsystemBase {
   private void goToFacing(double target, boolean spinCompensation) {
     m_target = target;
 
-    if (isPositionSafe(target)) {
+    if (isFacingSafe(target)) {
       m_circumnavigating = false;
       goToPosition(turretFacingToFalconEncoderPosition(target), spinCompensation);
     } else if (m_circumnavigating && !isFacingSafe(target)) {
@@ -321,7 +322,7 @@ public class Turret extends SubsystemBase {
     if (motorsHealthy() || !m_targeting) {
       if (spinCompensation) {
         m_turret.setControl(
-            motionMagicReq.withPosition(position - (0.013 * m_robotYawRate.getAsDouble())));
+            motionMagicReq.withPosition(position - (0.015 * m_robotYawRate.getAsDouble())));
       } else {
         m_turret.setControl(motionMagicReq.withPosition(position));
       }

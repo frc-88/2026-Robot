@@ -241,7 +241,7 @@ public class Intake extends SubsystemBase {
     setRollerSpeed(
         () ->
             MathUtil.clamp(
-                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 65.0, 120.0));
+                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 90.0, 120.0));
   }
 
   public void intakeIn() {
@@ -258,7 +258,7 @@ public class Intake extends SubsystemBase {
 
   private void theThing() {
     intakePivot.setControl(
-        pivotRequestDynamic.withAcceleration(100.0).withVelocity(10.0).withPosition(5.0));
+        pivotRequestDynamic.withAcceleration(100.0).withVelocity(2.0).withPosition(5.0));
     setRollerSpeed(() -> speed.getValue() / 10.0);
     setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }

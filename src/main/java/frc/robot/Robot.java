@@ -129,6 +129,7 @@ public class Robot extends LoggedRobot {
     m_robotContainer.startTargeting();
     m_robotContainer.stopShooting();
     m_robotContainer.stopHood();
+    m_robotContainer.setShootOverride(false);
   }
 
   /** This function is called periodically during operator control. */

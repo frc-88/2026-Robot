@@ -88,9 +88,11 @@ public final class Constants {
   public static final double FIELD_MARGIN = Units.inchesToMeters(28.0);
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
-  public static Translation2d MIDDLE_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 4.0);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.0);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION =
+      new Translation2d(3.0, Constants.FIELD_WIDTH - 2.0);
+  public static Translation2d MIDDLE_LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.0);
+  public static Translation2d MIDDLE_RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 2.0);
 
   public static double HUB_RADIUS_TOLERANCE = Units.inchesToMeters((41.0 - 6.0) / 2.0);
 
