@@ -14,7 +14,6 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -49,8 +48,6 @@ public class Shooter extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants(
           "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
 
-  private double targetVelocity = 0;
-
   // SysId routine
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -58,10 +55,11 @@ public class Shooter extends SubsystemBase {
               Volts.of(0.5).per(Second), // lower default ramp rate
               Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
               null, // Use default timeout (10 s)
-              // Log state with Phoenix SignalLogger class
               (state) -> Logger.recordOutput("Shooter/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
-  private DoubleSupplier m_targetSpeed;
+
+  private final DoubleSupplier m_targetSpeed;
+  private double targetVelocity = 0;
 
   public Shooter(DoubleSupplier speed) {
     m_targetSpeed = speed;
@@ -79,17 +77,16 @@ public class Shooter extends SubsystemBase {
     shooterConfig.Slot0.kV = shooterConfigConstants.getKV().getValue();
     shooterConfig.Slot0.kA = shooterConfigConstants.getKA().getValue();
     shooterConfig.Slot0.kS = shooterConfigConstants.getKS().getValue();
-
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-
     shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.StatorCurrentLimit = 60.0;
-
     shooterMain.getConfigurator().apply(shooterConfig);
+
     shooterFollower.getConfigurator().apply(shooterFollowerConfig);
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     shooterMain.getVelocity().setUpdateFrequency(100);
+    // the motorVoltage signal frequency is effectively the follower update rate
     shooterMain.getMotorVoltage().setUpdateFrequency(500);
   }
 
@@ -124,7 +121,8 @@ public class Shooter extends SubsystemBase {
     return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
   }
 
-  public boolean isHealthy() {
+  @AutoLogOutput
+  private boolean isHealthy() {
     return shooterMain.isConnected()
         && shooterMain.isAlive()
         && shooterFollower.isConnected()
@@ -132,12 +130,12 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public boolean isMainConnected() {
+  private boolean isMainConnected() {
     return shooterMain.isConnected();
   }
 
   @AutoLogOutput
-  public boolean isFollowerConnected() {
+  private boolean isFollowerConnected() {
     return shooterFollower.isConnected();
   }
 
@@ -192,9 +190,5 @@ public class Shooter extends SubsystemBase {
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
-  }
-
-  public Command setVelocity(double velocity) {
-    return new InstantCommand(() -> targetVelocity = velocity);
   }
 }
