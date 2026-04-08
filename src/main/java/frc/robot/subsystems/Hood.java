@@ -38,9 +38,9 @@ public class Hood extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Hood/HoodMotor", 100., 250., 0., 0.5, 0., 0., 0.11, 0.2, 0.);
+          "Hood/HoodMotor", 100., 250., 0., 8.0, 0., 0., 0.08, 0.45, 0.);
   private final DoublePreferenceConstant targetPos =
-      new DoublePreferenceConstant("Hood/Target", 20.5);
+      new DoublePreferenceConstant("Hood/Target", 24.0);
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
