@@ -53,9 +53,9 @@ public class Hood extends SubsystemBase {
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
+    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
     configureMinion();
     configureSmartDashboardButtons();
-    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
   }
 
   private void configureMinion() {
@@ -86,7 +86,7 @@ public class Hood extends SubsystemBase {
 
     hood.getConfigurator().apply(hoodConfig);
 
-    CommandScheduler.getInstance().schedule(calibrate().ignoringDisable(true));
+    setCalibrate();
   }
 
   private void configureSmartDashboardButtons() {
