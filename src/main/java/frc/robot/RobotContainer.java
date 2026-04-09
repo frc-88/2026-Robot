@@ -298,21 +298,17 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
-  public void configureButtonBox() {
-    // buttons.button(1).whileTrue(prepClimber());
-    // buttons.button(2).onTrue(L1AndFlip());
+  public void configureButtonBox() { //1, 2, 5, 11 are open
     buttons
         .button(4)
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
         .onFalse(setShootOverrideCommand(false));
-    // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    // buttons.button(11).whileTrue(getOffTower());
     buttons
         .button(12)
         .toggleOnTrue(
