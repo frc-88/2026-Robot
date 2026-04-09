@@ -185,10 +185,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+    NamedCommands.registerCommand("Target 90", turret.aimAtFacingCommand(90.0));
+    NamedCommands.registerCommand("Target -90", turret.aimAtFacingCommand(-90.0));
     NamedCommands.registerCommand("Shoot Override True", setShootOverrideCommand(true));
     NamedCommands.registerCommand("Shoot Override False", setShootOverrideCommand(false));
-
-    // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -298,7 +298,7 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
-  public void configureButtonBox() { //1, 2, 5, 11 are open
+  public void configureButtonBox() { // 1, 2, 5, 11 are open
     buttons
         .button(4)
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
