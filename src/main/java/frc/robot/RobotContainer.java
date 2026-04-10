@@ -87,6 +87,7 @@ public class RobotContainer {
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
+  private String lastName = null;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -325,6 +326,10 @@ public class RobotContainer {
   public void periodic() {
 
     String autoName = autoChooser.get().getName();
+    if (lastName != autoName) {
+      drive.setPose(autoStartPositions.getStartingPose(autoChooser.get().getName()));
+      lastName = autoName;
+    }
 
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoName);
