@@ -223,7 +223,7 @@ public class Hood extends SubsystemBase {
   public Command hardStopCalibrate() {
     return new RunCommand(() -> hardCalibrate(), this)
         .until(() -> hood.getStatorCurrent().getValueAsDouble() > 10.0)
-        .andThen(stopHood());
+        .andThen(setPositionTargeting());
   }
 
   public Command setPositionTargeting() {

@@ -49,6 +49,7 @@ import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -246,17 +247,7 @@ public class RobotContainer {
   }
 
   private void configureDriverController() {
-    // controller
-    //     .a()
-    //     .toggleOnTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> 0.0,
-    //             () -> -controller.getLeftX(),
-    //             () -> Rotation2d.fromDegrees(-90.0)));
-    // controller.a().toggleOnTrue(driveRebuilt());
 
-    // Switch to X pattern when X button is pressed
     controller
         .x()
         .onTrue(
@@ -281,16 +272,6 @@ public class RobotContainer {
             driveAtAngle(() -> Rotation2d.fromDegrees(0.0))
                 .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller.leftBumper().whileTrue(driveTrench());
 
@@ -410,7 +391,16 @@ public class RobotContainer {
 
   public Command driveAtAngle(Supplier<Rotation2d> angle) {
     return DriveCommands.joystickDriveAtAngle(
-        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), angle);
+        drive,
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                : -controller.getLeftY(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                : -controller.getLeftX(),
+        angle);
   }
 
   private double angleSupplier() {
@@ -469,6 +459,11 @@ public class RobotContainer {
 
   public Command setShootOverrideCommand(boolean override) {
     return new InstantCommand(() -> shootOverride = override);
+  }
+
+  @AutoLogOutput
+  public boolean isShooting() {
+    return shooting;
   }
 
   public void setShootOverride(boolean override) {
