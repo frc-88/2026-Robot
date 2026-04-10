@@ -286,6 +286,7 @@ public class RobotContainer {
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
         .onFalse(setShootOverrideCommand(false));
     buttons.button(6).onTrue(intake.deployIntake());
+        buttons.button(2).onTrue(hood.hardStopCalibrate());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
