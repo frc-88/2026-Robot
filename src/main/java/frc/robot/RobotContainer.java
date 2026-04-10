@@ -88,6 +88,7 @@ public class RobotContainer {
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
+  private String lastName = null;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -186,10 +187,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+    NamedCommands.registerCommand("Target 90", turret.aimAtFacingCommand(90.0));
+    NamedCommands.registerCommand("Target -90", turret.aimAtFacingCommand(-90.0));
     NamedCommands.registerCommand("Shoot Override True", setShootOverrideCommand(true));
     NamedCommands.registerCommand("Shoot Override False", setShootOverrideCommand(false));
-
-    // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -279,21 +280,17 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
-  public void configureButtonBox() {
-    // buttons.button(1).whileTrue(prepClimber());
-    // buttons.button(2).onTrue(L1AndFlip());
+  public void configureButtonBox() { // 1, 2, 5, 11 are open
     buttons
         .button(4)
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
         .onFalse(setShootOverrideCommand(false));
-    // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    // buttons.button(11).whileTrue(getOffTower());
     buttons
         .button(12)
         .toggleOnTrue(
@@ -310,6 +307,10 @@ public class RobotContainer {
   public void periodic() {
 
     String autoName = autoChooser.get().getName();
+    if (lastName != autoName) {
+      drive.setPose(autoStartPositions.getStartingPose(autoChooser.get().getName()));
+      lastName = autoName;
+    }
 
     Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoName);

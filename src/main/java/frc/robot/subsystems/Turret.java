@@ -58,8 +58,6 @@ public class Turret extends SubsystemBase {
       new DoublePreferenceConstant("Turret/Forward Limit", 250.0);
   private final DoublePreferenceConstant p_reverseLimit =
       new DoublePreferenceConstant("Turret/Reverse Limit", -250.0);
-  private final DoublePreferenceConstant p_spinCompensation =
-      new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
       new DoublePreferenceConstant("Turret/CANCoder Offset", 0.440674);
   private final DoublePreferenceConstant p_goingOutCurrent =
@@ -290,6 +288,10 @@ public class Turret extends SubsystemBase {
     goToFacing(m_targeting ? getTargetFacing() : 0.0);
   }
 
+  private void aimAtFacing(double facing) {
+    goToFacing(facing);
+  }
+
   private void goToFacing(double target) {
     goToFacing(target, true);
   }
@@ -442,6 +444,10 @@ public class Turret extends SubsystemBase {
 
   public Command aim() {
     return new RunCommand(() -> aimAtTarget(), this);
+  }
+
+  public Command aimAtFacingCommand(double facing) {
+    return new RunCommand(() -> aimAtFacing(facing));
   }
 
   public Command stop() {
