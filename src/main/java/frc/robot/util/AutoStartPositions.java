@@ -53,11 +53,11 @@ public class AutoStartPositions {
         break;
 
       case "Double Bump OP Left":
-        startingPose = new Pose2d(4.350, 7.490, new Rotation2d());
+        startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
         break;
 
       case "Double Bump OP Right":
-        startingPose = new Pose2d(4.388, 0.622, new Rotation2d());
+        startingPose = new Pose2d(4.388, 0.622, Rotation2d.kCCW_90deg);
         break;
 
       default:
