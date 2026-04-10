@@ -323,7 +323,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
   }
 
-  public void periodic() {
+  public void disabledPeriodic() {
 
     String autoName = autoChooser.get().getName();
     if (lastName != autoName) {
