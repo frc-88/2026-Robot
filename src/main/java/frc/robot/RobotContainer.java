@@ -426,7 +426,8 @@ public class RobotContainer {
         feeder.runFeeder(),
         hood.setIsShootingCommand(),
         intake.setShooting(),
-        turret.startTargeting());
+        turret.startTargeting(),
+        turret.aim());
   }
 
   public Command stopShoot() {
