@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Targeting"
+            "name": "Target -90"
           }
         },
         {
@@ -128,7 +128,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Targeting"
+            "name": "Target -90"
           }
         },
         {
