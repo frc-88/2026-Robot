@@ -56,6 +56,6 @@ public class AutoStartPositions {
         break;
     }
 
-    return startingPose;
+    return Util.flipIfRed(startingPose);
   }
 }
