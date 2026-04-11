@@ -216,8 +216,6 @@ public class Hood extends SubsystemBase {
 
   public Command calibrate() {
     return new InstantCommand(() -> setCalibrate(), this);
-    // .until(() -> hood.getStatorCurrent().getValueAsDouble() > 10.0)
-    // .andThen(stopHood());
   }
 
   public Command hardStopCalibrate() {
