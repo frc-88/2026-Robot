@@ -252,6 +252,10 @@ public class Drive extends SubsystemBase {
         cancelY = true;
       }
 
+      // if (cancelX || cancelY) {
+      //   Rotation2d offset = robotPosition.getRotation().minus(rawGyroRotation);
+
+      // }
       // if (cancelX) {
       //   for (int uNaryMinus = 0; i < temp.length; i++) {}
       // }
