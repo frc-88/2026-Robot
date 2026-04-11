@@ -12,7 +12,7 @@
         "y": 7.348843115365449
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftFollowTheLeaderStart"
     },
     {
       "anchor": {
@@ -89,7 +89,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftBumpEnd"
     }
   ],
   "rotationTargets": [
