@@ -89,6 +89,7 @@ public class RobotContainer {
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
   private String lastName = null;
+  private boolean isPreAiming;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -137,7 +138,9 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+        simulation =
+            new Simulation(
+                drive::getPose, drive::getChassisSpeedsFieldRelative, this::getIsPreAiming);
         break;
 
       default:
@@ -163,7 +166,8 @@ public class RobotContainer {
     trajectorySolver =
         new TrajectorySolver(
             () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
-            drive::getChassisSpeedsFieldRelative);
+            drive::getChassisSpeedsFieldRelative,
+            this::getIsPreAiming);
     turret =
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
@@ -280,13 +284,14 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
-  public void configureButtonBox() { // 1, 2, 5, 11 are open
+  public void configureButtonBox() { // 5, 11 are open
     buttons
         .button(4)
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
         .onFalse(setShootOverrideCommand(false));
     buttons.button(6).onTrue(intake.deployIntake());
     buttons.button(2).onTrue(hood.hardStopCalibrate());
+    buttons.button(1).onTrue(setPreAimingCommand(true)).onFalse(setPreAimingCommand(false));
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
@@ -461,6 +466,14 @@ public class RobotContainer {
 
   public Command setShootOverrideCommand(boolean override) {
     return new InstantCommand(() -> shootOverride = override);
+  }
+
+  public Command setPreAimingCommand(boolean aim) {
+    return new InstantCommand(() -> isPreAiming = aim);
+  }
+
+  public boolean getIsPreAiming() {
+    return isPreAiming;
   }
 
   @AutoLogOutput
