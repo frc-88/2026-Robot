@@ -271,7 +271,7 @@ public class Turret extends SubsystemBase {
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
 
-    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0
+    if (Math.abs(filter.calculate(m_turret.getVelocity().getValueAsDouble())) < 4.0
         || !m_targeting) {
       m_retractomatic.stopMotor();
     } else {
