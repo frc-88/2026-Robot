@@ -100,6 +100,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
     SmartDashboard.putData(
+        "Turret/SetZeroTurret", new InstantCommand(() -> m_turret.setPosition(0.0)));
+    SmartDashboard.putData(
         "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
     if (Util.logif()) {
@@ -110,8 +112,9 @@ public class Turret extends SubsystemBase {
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
-    sync();
-    CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
+    // sync();
+    // CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
+    m_turret.setPosition(0.0);
   }
 
   private void configureMotors() {
