@@ -138,7 +138,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative, this::getIsPreAiming);
         break;
 
       default:
