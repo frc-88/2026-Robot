@@ -100,7 +100,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
     SmartDashboard.putData(
-        "Turret/SetZeroTurret", new InstantCommand(() -> m_turret.setPosition(0.0)));
+        "Turret/SetZeroTurret",
+        new InstantCommand(() -> m_turret.setPosition(0.0)).ignoringDisable(true));
     SmartDashboard.putData(
         "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
