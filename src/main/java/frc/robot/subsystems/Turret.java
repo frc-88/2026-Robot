@@ -36,7 +36,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 // circumnavigate the world
 // to keep you in sight
 
-//Subystem for clarity.
+//Subystem for clarity
 
 public class Turret extends SubsystemBase {
   // motors & devices
