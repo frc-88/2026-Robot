@@ -36,6 +36,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 // circumnavigate the world
 // to keep you in sight
 
+//Remove Turret Subystem for clarity.
+
 public class Turret extends SubsystemBase {
   // motors & devices
   private final TalonFX m_turret = new TalonFX(Constants.TURRET_MOTOR_ID, CANBus.roboRIO());
@@ -273,6 +275,7 @@ public class Turret extends SubsystemBase {
       System.out.println(
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
+    
 
     if (Math.abs(filter.calculate(m_turret.getVelocity().getValueAsDouble())) < 4.0
         || !m_targeting) {
