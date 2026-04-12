@@ -274,12 +274,12 @@ public class Turret extends SubsystemBase {
       System.out.println(
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
-    if (Math.abs(filter.calculate(m_turret.getVelocity().getValueAsDouble())) < 4.0
-        || !m_targeting) {
-      m_retractomatic.stopMotor();
-    } else {
-      m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
-    }
+    // if (Math.abs(filter.calculate(m_turret.getVelocity().getValueAsDouble())) < 4.0
+    //     || !m_targeting) {
+    //   m_retractomatic.stopMotor();
+    // } else {
+    m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
+    // }
   }
 
   @AutoLogOutput
