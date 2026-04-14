@@ -13,7 +13,9 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -55,9 +57,9 @@ public class Turret extends SubsystemBase {
       new MotionMagicPIDPreferenceConstants(
           "Turret/PID", 200.0, 300.0, 0.0, 12.0, 0.0, 0.0, 0.12, 0.35, 0);
   private final DoublePreferenceConstant p_forwardLimit =
-      new DoublePreferenceConstant("Turret/Forward Limit", 250.0);
+      new DoublePreferenceConstant("Turret/Forward Limit", 260.0);
   private final DoublePreferenceConstant p_reverseLimit =
-      new DoublePreferenceConstant("Turret/Reverse Limit", -250.0);
+      new DoublePreferenceConstant("Turret/Reverse Limit", -260.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
       new DoublePreferenceConstant("Turret/CANCoder Offset", 0.440674);
   private final DoublePreferenceConstant p_goingOutCurrent =
@@ -377,8 +379,9 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double facingError() {
-    return getFacing() - getTargetFacing();
+  private double getFacingError() {
+    return Units.radiansToDegrees(
+        MathUtil.angleModulus(Units.degreesToRadians(getFacing() - m_target)));
   }
 
   @AutoLogOutput
@@ -419,6 +422,14 @@ public class Turret extends SubsystemBase {
     return m_target;
   }
 
+  @AutoLogOutput
+  private double getErrorBound() {
+    return Units.radiansToDegrees(
+                  Math.asin(
+                      m_distance.getAsDouble()
+                          / Math.hypot(Constants.HUB_RADIUS_TOLERANCE, m_distance.getAsDouble())));
+  }
+
   private double turretEncoderPositionToFacing(double turretPosition) {
     return (turretPosition / (7.0 * (68.0 / 12.0)) * 360.0);
   }
@@ -432,8 +443,10 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return !m_circumnavigating
-          && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
+      return Math.abs(getFacingError())
+          < (m_istargetingHub.getAsBoolean()
+              ? getErrorBound()
+              : 20.0);
     }
   }
 
