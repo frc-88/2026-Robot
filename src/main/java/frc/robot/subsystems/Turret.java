@@ -418,16 +418,11 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getTarget() {
-    return m_target;
-  }
-
-  @AutoLogOutput
   private double getErrorBound() {
     return Units.radiansToDegrees(
-                  Math.asin(
-                      m_distance.getAsDouble()
-                          / Math.hypot(Constants.HUB_RADIUS_TOLERANCE, m_distance.getAsDouble())));
+        Math.asin(
+            Constants.HUB_RADIUS_TOLERANCE
+                / Math.hypot(Constants.HUB_RADIUS_TOLERANCE, m_distance.getAsDouble())));
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
@@ -444,9 +439,7 @@ public class Turret extends SubsystemBase {
       return false;
     } else {
       return Math.abs(getFacingError())
-          < (m_istargetingHub.getAsBoolean()
-              ? getErrorBound()
-              : 20.0);
+          < (m_istargetingHub.getAsBoolean() ? getErrorBound() : 20.0);
     }
   }
 
