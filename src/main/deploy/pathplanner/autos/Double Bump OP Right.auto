@@ -7,7 +7,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop Targeting"
+            "name": "Start Targeting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Override True"
           }
         },
         {
@@ -34,6 +40,12 @@
                       "type": "named",
                       "data": {
                         "name": "Don't Shoot"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Target 90"
                       }
                     }
                   ]
@@ -69,7 +81,7 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 0.5
+                              "waitTime": 1.125
                             }
                           }
                         ]
@@ -120,12 +132,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Stop Targeting"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -149,6 +155,12 @@
                       "type": "named",
                       "data": {
                         "name": "Intake Out"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Target 90"
                       }
                     }
                   ]
@@ -194,7 +206,7 @@
                                 {
                                   "type": "wait",
                                   "data": {
-                                    "waitTime": 1.75
+                                    "waitTime": 2.25
                                   }
                                 },
                                 {
