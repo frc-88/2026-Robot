@@ -3,8 +3,8 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.350464285714287,
-        "y": 0.579761904761905
+        "x": 4.3877651515151515,
+        "y": 0.6222979797979815
       },
       "prevControl": null,
       "nextControl": {
@@ -97,7 +97,7 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.321588089330028,
+      "minWaypointRelativePos": 0.32,
       "maxWaypointRelativePos": 2.2828784119106587,
       "constraints": {
         "maxVelocity": 1.0,
@@ -127,7 +127,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 0.4152716567430378
   },
   "useDefaultConstraints": true
 }
