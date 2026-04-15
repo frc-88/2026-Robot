@@ -49,6 +49,7 @@ import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -87,6 +88,8 @@ public class RobotContainer {
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
+  private String lastName = null;
+  private boolean isPreAiming;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -135,7 +138,9 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation));
-        simulation = new Simulation(drive::getPose, drive::getChassisSpeedsFieldRelative);
+        simulation =
+            new Simulation(
+                drive::getPose, drive::getChassisSpeedsFieldRelative, this::getIsPreAiming);
         break;
 
       default:
@@ -161,15 +166,16 @@ public class RobotContainer {
     trajectorySolver =
         new TrajectorySolver(
             () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
-            drive::getChassisSpeedsFieldRelative);
+            drive::getChassisSpeedsFieldRelative,
+            this::getIsPreAiming);
     turret =
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
             trajectorySolver::getTurretTarget,
             trajectorySolver::getDistanceToProjectedTarget,
             trajectorySolver::getIsTargetingHub);
-    feeder = new Feeder(this::onTarget);
-    hotTub = new HotTub(this::onTarget);
+    feeder = new Feeder(this::onTargetRobot);
+    hotTub = new HotTub(this::onTargetRobot);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
@@ -185,10 +191,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
+    NamedCommands.registerCommand("Target 90", turret.aimAtFacingCommand(90.0));
+    NamedCommands.registerCommand("Target -90", turret.aimAtFacingCommand(-90.0));
     NamedCommands.registerCommand("Shoot Override True", setShootOverrideCommand(true));
     NamedCommands.registerCommand("Shoot Override False", setShootOverrideCommand(false));
-
-    // NamedCommands.registerCommand("Auto Prep", new WaitCommand(0.1));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -227,7 +233,8 @@ public class RobotContainer {
     turret.justSetTargeting();
   }
 
-  public boolean onTarget() {
+  @AutoLogOutput
+  public boolean onTargetRobot() {
     if (shooting && shootOverride) {
       return true;
     }
@@ -246,17 +253,7 @@ public class RobotContainer {
   }
 
   private void configureDriverController() {
-    // controller
-    //     .a()
-    //     .toggleOnTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> 0.0,
-    //             () -> -controller.getLeftX(),
-    //             () -> Rotation2d.fromDegrees(-90.0)));
-    // controller.a().toggleOnTrue(driveRebuilt());
 
-    // Switch to X pattern when X button is pressed
     controller
         .x()
         .onTrue(
@@ -281,16 +278,6 @@ public class RobotContainer {
             driveAtAngle(() -> Rotation2d.fromDegrees(0.0))
                 .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //            .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller.leftBumper().whileTrue(driveTrench());
 
@@ -298,21 +285,19 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.intakeSpitCommand()).onFalse(intake.deployIntake());
   }
 
-  public void configureButtonBox() {
-    // buttons.button(1).whileTrue(prepClimber());
-    // buttons.button(2).onTrue(L1AndFlip());
+  public void configureButtonBox() { // 5, 11 are open
     buttons
         .button(4)
         .onTrue(setShootOverrideCommand(true).alongWith(turret.startTargeting()))
         .onFalse(setShootOverrideCommand(false));
-    // buttons.button(5).onTrue(climber.gotoStow());
     buttons.button(6).onTrue(intake.deployIntake());
+    buttons.button(2).onTrue(hood.hardStopCalibrate());
+    buttons.button(1).onTrue(setPreAimingCommand(true)).onFalse(setPreAimingCommand(false));
     buttons.button(7).onTrue(intake.retractIntake());
     buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    // buttons.button(11).whileTrue(getOffTower());
     buttons
         .button(12)
         .toggleOnTrue(
@@ -326,15 +311,18 @@ public class RobotContainer {
                 .ignoringDisable(true));
   }
 
-  public void periodic() {
+  public void disabledPeriodic() {
 
     String autoName = autoChooser.get().getName();
+    if (lastName != autoName) {
+      drive.setPose(autoStartPositions.getStartingPose(autoChooser.get().getName()));
+      lastName = autoName;
+    }
 
-    Logger.recordOutput("ShouldUseQuest", shouldUseQuest);
     Logger.recordOutput("AutoName", autoName);
 
     Pose2d targetStartingPose = autoStartPositions.getStartingPose(autoName);
-    Pose2d currentRobotPose = Util.flipIfRed(drive.getPose());
+    Pose2d currentRobotPose = drive.getPose();
 
     boolean isPoseSafe = false;
     double poseDistance =
@@ -410,7 +398,16 @@ public class RobotContainer {
 
   public Command driveAtAngle(Supplier<Rotation2d> angle) {
     return DriveCommands.joystickDriveAtAngle(
-        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), angle);
+        drive,
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                : -controller.getLeftY(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                : -controller.getLeftX(),
+        angle);
   }
 
   private double angleSupplier() {
@@ -435,7 +432,8 @@ public class RobotContainer {
         feeder.runFeeder(),
         hood.setIsShootingCommand(),
         intake.setShooting(),
-        turret.startTargeting());
+        turret.startTargeting(),
+        turret.aim());
   }
 
   public Command stopShoot() {
@@ -469,6 +467,24 @@ public class RobotContainer {
 
   public Command setShootOverrideCommand(boolean override) {
     return new InstantCommand(() -> shootOverride = override);
+  }
+
+  public Command setPreAimingCommand(boolean aim) {
+    return new InstantCommand(() -> isPreAiming = aim);
+  }
+
+  public boolean getIsPreAiming() {
+    return isPreAiming;
+  }
+
+  @AutoLogOutput
+  public boolean isShooting() {
+    return shooting;
+  }
+
+  @AutoLogOutput
+  public boolean isShootingOverride() {
+    return shootOverride;
   }
 
   public void setShootOverride(boolean override) {

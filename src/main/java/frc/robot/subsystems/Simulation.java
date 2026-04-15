@@ -10,6 +10,7 @@ import frc.robot.util.TrajectorySolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -26,10 +27,10 @@ public class Simulation extends SubsystemBase {
   Supplier<Pose2d> drivePose1;
   Supplier<Pose2d> velocity1;
 
-  public Simulation(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity) {
+  public Simulation(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocity, BooleanSupplier preAim) {
     drivePose1 = drivePose;
     velocity1 = velocity;
-    trajectorySolver = new TrajectorySolver(drivePose, velocity);
+    trajectorySolver = new TrajectorySolver(drivePose, velocity, preAim);
 
     for (int i = 0; i < 12; i++) {
       allFuel.add(

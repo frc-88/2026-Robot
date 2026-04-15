@@ -13,7 +13,9 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -53,19 +55,17 @@ public class Turret extends SubsystemBase {
       new DoublePreferenceConstant("Turret/Sync Threshold", 0.75);
   private final MotionMagicPIDPreferenceConstants p_turretPID =
       new MotionMagicPIDPreferenceConstants(
-          "Turret/PID", 100.0, 250.0, 0.0, 12.0, 0.0, 0.0, 0.12, 0.35, 0);
+          "Turret/PID", 200.0, 300.0, 0.0, 12.0, 0.0, 0.0, 0.12, 0.35, 0);
   private final DoublePreferenceConstant p_forwardLimit =
-      new DoublePreferenceConstant("Turret/Forward Limit", 225.0);
+      new DoublePreferenceConstant("Turret/Forward Limit", 260.0);
   private final DoublePreferenceConstant p_reverseLimit =
-      new DoublePreferenceConstant("Turret/Reverse Limit", -225.0);
-  private final DoublePreferenceConstant p_spinCompensation =
-      new DoublePreferenceConstant("Turret/Spin Compensation", 0.0);
+      new DoublePreferenceConstant("Turret/Reverse Limit", -260.0);
   private final DoublePreferenceConstant p_CANcoderOffset =
-      new DoublePreferenceConstant("Turret/CANCoder Offset", 0.435302734375);
+      new DoublePreferenceConstant("Turret/CANCoder Offset", 0.440674);
   private final DoublePreferenceConstant p_goingOutCurrent =
       new DoublePreferenceConstant("Turret/Out Current", 0.0);
   private final DoublePreferenceConstant p_goingInCurrent =
-      new DoublePreferenceConstant("Turret/In Current", -25.0);
+      new DoublePreferenceConstant("Turret/In Current", -15.0);
 
   private final DoubleSupplier m_robotYawRate;
   private final DoubleSupplier m_targetFacing;
@@ -102,6 +102,9 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
     SmartDashboard.putData("Turret/Stop Targeting", stopTargeting());
     SmartDashboard.putData(
+        "Turret/SetZeroTurret",
+        new InstantCommand(() -> m_turret.setPosition(0.0)).ignoringDisable(true));
+    SmartDashboard.putData(
         "Turret/CalibrateEncoderZero", calibrateEncoderCommand().ignoringDisable(true));
 
     if (Util.logif()) {
@@ -112,8 +115,9 @@ public class Turret extends SubsystemBase {
 
     m_CANcoder.setPosition(m_CANcoder.getAbsolutePosition().getValue());
 
-    sync();
-    CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
+    // sync();
+    // CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
+    m_turret.setPosition(0.0);
   }
 
   private void configureMotors() {
@@ -272,13 +276,12 @@ public class Turret extends SubsystemBase {
       System.out.println(
           "Strange Retractomatic State" + currentFacingAngleRelative + currentVelocity);
     }
-
-    if (filter.calculate(Math.abs(m_turret.getVelocity().getValueAsDouble())) < 5.0
-        || !m_targeting) {
-      m_retractomatic.stopMotor();
-    } else {
-      m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
-    }
+    // if (Math.abs(filter.calculate(m_turret.getVelocity().getValueAsDouble())) < 4.0
+    //     || !m_targeting) {
+    //   m_retractomatic.stopMotor();
+    // } else {
+    m_retractomatic.setControl(torqueReq.withOutput(targetCurrent));
+    // }
   }
 
   @AutoLogOutput
@@ -288,6 +291,10 @@ public class Turret extends SubsystemBase {
 
   private void aimAtTarget() {
     goToFacing(m_targeting ? getTargetFacing() : 0.0);
+  }
+
+  private void aimAtFacing(double facing) {
+    goToFacing(facing);
   }
 
   private void goToFacing(double target) {
@@ -372,8 +379,10 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double facingError() {
-    return getFacing() - getTargetFacing();
+  private double getFacingError() {
+    return Math.abs(
+        Units.radiansToDegrees(
+            MathUtil.angleModulus(Units.degreesToRadians(getFacing() - m_target))));
   }
 
   @AutoLogOutput
@@ -410,8 +419,11 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getTarget() {
-    return m_target;
+  private double getErrorBound() {
+    return Units.radiansToDegrees(
+        Math.asin(
+            Constants.HUB_RADIUS_TOLERANCE
+                / Math.hypot(Constants.HUB_RADIUS_TOLERANCE, m_distance.getAsDouble())));
   }
 
   private double turretEncoderPositionToFacing(double turretPosition) {
@@ -427,8 +439,7 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return !m_circumnavigating
-          && Math.abs(getFacing() - m_target) < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0);
+      return getFacingError() < (m_istargetingHub.getAsBoolean() ? getErrorBound() : 20.0);
     }
   }
 
@@ -442,6 +453,10 @@ public class Turret extends SubsystemBase {
 
   public Command aim() {
     return new RunCommand(() -> aimAtTarget(), this);
+  }
+
+  public Command aimAtFacingCommand(double facing) {
+    return new RunCommand(() -> aimAtFacing(facing));
   }
 
   public Command stop() {

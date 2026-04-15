@@ -43,10 +43,10 @@ public class Shooter extends SubsystemBase {
 
   // preferences
   private final DoublePreferenceConstant shootSpeed =
-      new DoublePreferenceConstant("Shooter/ShootSpeed", 37.3);
+      new DoublePreferenceConstant("Shooter/ShootSpeed", 44.75);
   private final MotionMagicPIDPreferenceConstants shooterConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.091582, 0.21515, 0.011146);
+          "Shooter/ShooterMotors", 0.0, 0.0, 0.0, 0.13985, 0.0, 0.0, 0.14, 0.36882, 0.011146);
 
   // SysId routine
   private final SysIdRoutine m_sysIdRoutine =

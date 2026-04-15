@@ -58,7 +58,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
-  Pose3d[] poses = new Pose3d[2];
+  SwerveModulePosition[] temp = new SwerveModulePosition[4];
   Pose3d newPose = Pose3d.kZero;
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
@@ -235,6 +235,32 @@ public class Drive extends SubsystemBase {
       Logger.recordOutput("Drive/RawGyro", rawGyroRotation);
 
       // Apply update
+      boolean cancelX = false;
+      boolean cancelY = false;
+      Pose2d robotPosition = getPose();
+      Translation2d robotVelocity = getChassisSpeedsFieldRelative().getTranslation();
+
+      if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+              && robotVelocity.getX() > 0.0)
+          || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
+        cancelX = true;
+      }
+
+      if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+              && robotVelocity.getY() > 0.0)
+          || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
+        cancelY = true;
+      }
+
+      // if (cancelX || cancelY) {
+      //   Rotation2d offset = robotPosition.getRotation().minus(rawGyroRotation);
+
+      // }
+      // if (cancelX) {
+      //   for (int uNaryMinus = 0; i < temp.length; i++) {}
+      // }
+
+      // if (cancelY) {}
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 

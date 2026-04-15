@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -49,11 +50,13 @@ public class TrajectorySolver extends SubsystemBase {
 
   private boolean isTargetingHub = true;
   private double lastTargetRadians = 0.0;
+  private BooleanSupplier isPreAimingSupplier;
 
-  public TrajectorySolver(Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose) {
+  public TrajectorySolver(
+      Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose, BooleanSupplier isPreAiming) {
     drivePoseSupplier = drivePose;
     velocityPoseSupplier = velocityPose;
-    // accelerationTimer.start();
+    isPreAimingSupplier = isPreAiming;
   }
 
   @AutoLogOutput(key = "Trajectory/HoodAngle")
@@ -227,6 +230,11 @@ public class TrajectorySolver extends SubsystemBase {
       isTargetingHub = true;
     }
 
+    if (isPreAimingSupplier.getAsBoolean()) {
+      target = Constants.HUB_POSITION;
+      isTargetingHub = true;
+    }
+
     return Util.flipIfRed(target);
   }
 
@@ -278,9 +286,9 @@ public class TrajectorySolver extends SubsystemBase {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else {
       if (!isTargetingHub) {
-        return 25.7 + 3.81 * distance;
+        return 26.1 + 3.86 * distance;
       } else { // real hub
-        return 25.7 + 3.81 * distance;
+        return /* OLD BLACK WHEELS: 25.7 + 3.81 * distance; */ 26.1 + 3.86 * distance;
       }
     }
   }

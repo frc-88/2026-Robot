@@ -27,7 +27,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftDeepBumpChompei"
+                        "pathName": "DeepRightDeepBumpChompei"
                       }
                     },
                     {
@@ -45,7 +45,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Target -90"
+                        "name": "Target 90"
                       }
                     }
                   ]
@@ -75,7 +75,7 @@
                           {
                             "type": "path",
                             "data": {
-                              "pathName": "LeftBumpUnloadToLeftTrench"
+                              "pathName": "RightBumpUnloadToRightTrench"
                             }
                           },
                           {
@@ -142,7 +142,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftBumpChompei"
+                        "pathName": "RightBumpChompei"
                       }
                     },
                     {
@@ -160,7 +160,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Target -90"
+                        "name": "Target 90"
                       }
                     }
                   ]
@@ -186,7 +186,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftBumpUnloadToLeftTrench"
+                        "pathName": "RightBumpUnloadToRightTrench"
                       }
                     },
                     {

@@ -2,11 +2,13 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
@@ -29,7 +31,10 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   // motors & devices
   private final TalonFX intakePivot = new TalonFX(Constants.INTAKE_PIVOT, CANBus.roboRIO());
-  private final TalonFX intakeRoller = new TalonFX(Constants.INTAKE_ROLLER, CANBus.roboRIO());
+  private final TalonFX intakeRollerMainLeft =
+      new TalonFX(Constants.INTAKE_ROLLER_MAIN_LEFT, CANBus.roboRIO());
+  private final TalonFX intakeRollerFollowerRight =
+      new TalonFX(Constants.INTAKE_ROLLER_FOLLOWER_RIGHT, CANBus.roboRIO());
   private final TalonFX intakeInnerRoller =
       new TalonFX(Constants.INTAKE_INNER_ROLLER, CANBus.roboRIO());
 
@@ -42,7 +47,7 @@ public class Intake extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants intakePivotConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Intake/IntakePivotMotor", 50., 1000., 0., 0., 0., 0., 0.11, 0., 0.);
+          "Intake/IntakePivotMotor", 50., 1000., 0., 1., 0., 0., 0.11, 0., 0.);
   private final MotionMagicPIDPreferenceConstants intakeRollerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Intake/IntakeRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
@@ -51,8 +56,7 @@ public class Intake extends SubsystemBase {
           "Intake/IntakePivotRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.);
   private final DoublePreferenceConstant targetPosition =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
-  private final DoublePreferenceConstant speed =
-      new DoublePreferenceConstant("Intake/Speed", 100.0);
+  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 80.0);
   private final DoublePreferenceConstant pivotRollerSpeed =
       new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);
   private final DoublePreferenceConstant deployPositionRotations =
@@ -107,9 +111,11 @@ public class Intake extends SubsystemBase {
 
     rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     rollerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
-    rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    intakeRoller.getConfigurator().apply(rollerConfig);
+    intakeRollerFollowerRight.getConfigurator().apply(rollerConfig);
+
+    rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    intakeRollerMainLeft.getConfigurator().apply(rollerConfig);
 
     TalonFXConfiguration innerRollerConfig = new TalonFXConfiguration();
     innerRollerConfig.Slot0.kP = intakeInnerRollerConfigConstants.getKP().getValue();
@@ -123,6 +129,10 @@ public class Intake extends SubsystemBase {
     innerRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     intakeInnerRoller.getConfigurator().apply(innerRollerConfig);
+
+    intakeRollerFollowerRight.setControl(
+        new Follower(Constants.INTAKE_ROLLER_MAIN_LEFT, MotorAlignmentValue.Opposed));
+    intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(500);
   }
 
   private void configureSmartDashboardButtons() {
@@ -144,8 +154,10 @@ public class Intake extends SubsystemBase {
   public boolean isHealthy() {
     return intakePivot.isConnected()
         && intakePivot.isAlive()
-        && intakeRoller.isConnected()
-        && intakeRoller.isAlive();
+        && intakeRollerMainLeft.isConnected()
+        && intakeRollerMainLeft.isAlive()
+        && intakeRollerFollowerRight.isConnected()
+        && intakeRollerFollowerRight.isAlive();
   }
 
   @AutoLogOutput
@@ -164,18 +176,33 @@ public class Intake extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private Current getRollerCurrent() {
-    return intakeRoller.getStatorCurrent().getValue();
+  private Current getRollerMainCurrent() {
+    return intakeRollerMainLeft.getStatorCurrent().getValue();
   }
 
   @AutoLogOutput
-  private double getRollerVoltage() {
-    return intakeRoller.getMotorVoltage().getValueAsDouble();
+  private Current getRollerFollowerCurrent() {
+    return intakeRollerFollowerRight.getStatorCurrent().getValue();
   }
 
   @AutoLogOutput
-  private double getRollerVelocity() {
-    return intakeRoller.getVelocity().getValueAsDouble();
+  private double getRollerMainVoltage() {
+    return intakeRollerMainLeft.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getRollerFollowerVoltage() {
+    return intakeRollerFollowerRight.getMotorVoltage().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getRollerMainVelocity() {
+    return intakeRollerMainLeft.getVelocity().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getRollerFollowerVelocity() {
+    return intakeRollerFollowerRight.getVelocity().getValueAsDouble();
   }
 
   @AutoLogOutput
@@ -195,8 +222,8 @@ public class Intake extends SubsystemBase {
 
   @AutoLogOutput
   private boolean isStalled() {
-    return intakeRoller.getStatorCurrent().getValueAsDouble() > 20.0
-        && intakeRoller.getVelocity().getValueAsDouble() < 8.0;
+    return intakeRollerMainLeft.getStatorCurrent().getValueAsDouble() > 20.0
+        && intakeRollerMainLeft.getVelocity().getValueAsDouble() < 8.0;
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
@@ -231,11 +258,11 @@ public class Intake extends SubsystemBase {
       paused = true;
     }
 
-    intakeRoller.setControl(rollerRequest.withVelocity(paused ? 0.0 : speed.getAsDouble()));
+    intakeRollerMainLeft.setControl(rollerRequest.withVelocity(paused ? 0.0 : speed.getAsDouble()));
   }
 
   private void stopRoller() {
-    intakeRoller.stopMotor();
+    intakeRollerMainLeft.stopMotor();
   }
 
   private void setPivotRollerSpeed(DoubleSupplier speed) {

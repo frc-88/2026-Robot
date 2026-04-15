@@ -27,7 +27,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftDeepBumpChompei"
+                        "pathName": "ShallowLeftDeepBumpChompei"
                       }
                     },
                     {
@@ -142,7 +142,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LeftBumpChompei"
+                        "pathName": "ShallowLeftBumpChompeiDeeper"
                       }
                     },
                     {
