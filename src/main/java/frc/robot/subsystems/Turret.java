@@ -380,8 +380,8 @@ public class Turret extends SubsystemBase {
 
   @AutoLogOutput
   private double getFacingError() {
-    return Units.radiansToDegrees(
-        MathUtil.angleModulus(Units.degreesToRadians(getFacing() - m_target)));
+    return Math.abs(Units.radiansToDegrees(
+        MathUtil.angleModulus(Units.degreesToRadians(getFacing() - m_target))));
   }
 
   @AutoLogOutput
@@ -438,7 +438,7 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return Math.abs(getFacingError())
+      return getFacingError()
           < (m_istargetingHub.getAsBoolean() ? getErrorBound() : 20.0);
     }
   }
