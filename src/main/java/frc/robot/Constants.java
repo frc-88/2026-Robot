@@ -42,7 +42,7 @@ public final class Constants {
   public static final int INTAKE_PIVOT = 2;
   public static final int INTAKE_ROLLER_MAIN_LEFT = 42;
   public static final int INTAKE_ROLLER_FOLLOWER_RIGHT = 43;
-  public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
+  public static final int INTAKE_INNER_ROLLER = 7;
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
