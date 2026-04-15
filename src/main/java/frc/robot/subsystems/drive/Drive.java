@@ -58,7 +58,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
-  Pose3d[] poses = new Pose3d[2];
+  SwerveModulePosition[] temp = new SwerveModulePosition[4];
   Pose3d newPose = Pose3d.kZero;
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
@@ -235,6 +235,32 @@ public class Drive extends SubsystemBase {
       Logger.recordOutput("Drive/RawGyro", rawGyroRotation);
 
       // Apply update
+      boolean cancelX = false;
+      boolean cancelY = false;
+      Pose2d robotPosition = getPose();
+      Translation2d robotVelocity = getChassisSpeedsFieldRelative().getTranslation();
+
+      if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
+              && robotVelocity.getX() > 0.0)
+          || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
+        cancelX = true;
+      }
+
+      if ((robotPosition.getY() > Constants.FIELD_WIDTH - Constants.FIELD_MARGIN
+              && robotVelocity.getY() > 0.0)
+          || (robotPosition.getY() < Constants.FIELD_MARGIN && robotVelocity.getY() < 0.0)) {
+        cancelY = true;
+      }
+
+      // if (cancelX || cancelY) {
+      //   Rotation2d offset = robotPosition.getRotation().minus(rawGyroRotation);
+
+      // }
+      // if (cancelX) {
+      //   for (int uNaryMinus = 0; i < temp.length; i++) {}
+      // }
+
+      // if (cancelY) {}
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
@@ -296,27 +322,27 @@ public class Drive extends SubsystemBase {
 
   public void runVelocity2(ChassisSpeeds speeds, boolean turretRotation) {
     // Calculate module setpoints
+    ChassisSpeeds justOmega =
+        ChassisSpeeds.discretize(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond), 0.02);
     SwerveDriveKinematics runKinematics = turretRotation ? kinematicsTurret : kinematics;
+    SwerveModuleState[] setpointJustSpin = runKinematics.toSwerveModuleStates(justOmega);
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = runKinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
-    SwerveModuleState[] thedude = getModuleStates();
-    ChassisSpeeds justOmega =
-        ChassisSpeeds.discretize(
-            new ChassisSpeeds(
-                0.0, 0.0, runKinematics.toChassisSpeeds(thedude).omegaRadiansPerSecond),
-            0.02);
-    SwerveModuleState[] setpointJustSpin = runKinematics.toSwerveModuleStates(justOmega);
 
-    double max = thedude[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
-    double min = thedude[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
+    double max = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
+    double min = setpointStates[0].speedMetersPerSecond - setpointJustSpin[0].speedMetersPerSecond;
     for (int i = 0; i < setpointJustSpin.length; i++) {
       max =
-          Math.max(thedude[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond, max);
+          Math.max(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              max);
       min =
-          Math.min(thedude[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond, min);
+          Math.min(
+              setpointStates[i].speedMetersPerSecond - setpointJustSpin[i].speedMetersPerSecond,
+              min);
     }
-    double ratio = min == 0.0 ? 0.0 : max / min;
+    double ratio = max / min;
     Logger.recordOutput("Drive/MinMaxRatio", ratio);
     // Log unoptimized setpoints and setpoint speeds
     if (Util.logif()) {

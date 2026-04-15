@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+// can it deliver
+// pose prediction perfection
+// and survive the match?
+
 public class Batman extends SubsystemBase {
   public double bestScore = 0;
 

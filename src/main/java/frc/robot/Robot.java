@@ -84,7 +84,6 @@ public class Robot extends LoggedRobot {
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
-    m_robotContainer.periodic();
     CommandScheduler.getInstance().run();
 
     // Return to non-RT thread priority (do not modify the first argument)
@@ -95,13 +94,13 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {
-    m_robotContainer.disabledInit();
-  }
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    m_robotContainer.disabledPeriodic();
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -128,6 +127,10 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    m_robotContainer.startTargeting();
+    m_robotContainer.stopShooting();
+    m_robotContainer.stopHood();
+    m_robotContainer.setShootOverride(false);
   }
 
   /** This function is called periodically during operator control. */
