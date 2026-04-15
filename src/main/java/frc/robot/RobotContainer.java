@@ -174,8 +174,8 @@ public class RobotContainer {
             trajectorySolver::getTurretTarget,
             trajectorySolver::getDistanceToProjectedTarget,
             trajectorySolver::getIsTargetingHub);
-    feeder = new Feeder(this::onTarget);
-    hotTub = new HotTub(this::onTarget);
+    feeder = new Feeder(this::onTargetRobot);
+    hotTub = new HotTub(this::onTargetRobot);
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
@@ -233,7 +233,8 @@ public class RobotContainer {
     turret.justSetTargeting();
   }
 
-  public boolean onTarget() {
+  @AutoLogOutput
+  public boolean onTargetRobot() {
     if (shooting && shootOverride) {
       return true;
     }
@@ -479,6 +480,11 @@ public class RobotContainer {
   @AutoLogOutput
   public boolean isShooting() {
     return shooting;
+  }
+
+  @AutoLogOutput
+  public boolean isShootingOverride() {
+    return shootOverride;
   }
 
   public void setShootOverride(boolean override) {
