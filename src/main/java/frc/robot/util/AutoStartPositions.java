@@ -76,6 +76,14 @@ public class AutoStartPositions {
         startingPose = new Pose2d(4.388, 0.622, Rotation2d.kCCW_90deg);
         break;
 
+      case "SimpleCenterDepot":
+        startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
+        break;
+
+      case "CenterDepot & Outpost":
+        startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
+        break;
+
       default:
         break;
     }
