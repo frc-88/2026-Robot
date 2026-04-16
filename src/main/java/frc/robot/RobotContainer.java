@@ -183,6 +183,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
     NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
+    NamedCommands.registerCommand("Intake Spit", intake.intakeSpitCommand().withTimeout(0.2));
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
