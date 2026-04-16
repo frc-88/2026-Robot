@@ -441,6 +441,7 @@ public class RobotContainer {
     return new ParallelCommandGroup(
         setShooting(false),
         shooter.stopShooter(),
+        hotTub.stopSpinner(),
         feeder.stopFeeder(),
         hood.setNotShootingCommand(),
         intake.setNotShooting());
