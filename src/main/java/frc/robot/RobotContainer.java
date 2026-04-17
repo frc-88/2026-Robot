@@ -80,8 +80,8 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
-  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.75);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.75);
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
 
   public final LoggedDashboardChooser<Command> autoChooser;
@@ -366,11 +366,11 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
