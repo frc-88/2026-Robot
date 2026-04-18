@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.350464285714287,
-        "y": 0.579761904761905
+        "x": 4.3877651515151515,
+        "y": 0.6222979797979815
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.998288159771754,
-        "y": 0.832681883024251
+        "x": 8.03558902557262,
+        "y": 0.8752179580603274
       },
       "isLocked": false,
       "linkedName": "RightTrenchStart"
@@ -41,7 +41,7 @@
       },
       "nextControl": {
         "x": 7.203828379699219,
-        "y": 3.6145262435627996
+        "y": 3.6145262435627994
       },
       "isLocked": false,
       "linkedName": null
@@ -121,7 +121,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.99
+    "rotation": 179.99
   },
   "reversed": false,
   "folder": null,

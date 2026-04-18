@@ -61,7 +61,7 @@ public class HotTub extends SubsystemBase {
 
   private final BooleanSupplier m_turretOnTarget;
 
-  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 2.0);
+  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 4.0);
 
   public HotTub(BooleanSupplier turretOnTarget) {
     m_turretOnTarget = turretOnTarget;
@@ -109,6 +109,12 @@ public class HotTub extends SubsystemBase {
   @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_spinner.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private boolean isStalled() {
+    return m_spinner.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_spinner.getVelocity().getValueAsDouble() < 8.0;
   }
 
   @AutoLogOutput

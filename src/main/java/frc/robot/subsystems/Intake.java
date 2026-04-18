@@ -60,7 +60,7 @@ public class Intake extends SubsystemBase {
   private final DoublePreferenceConstant pivotRollerSpeed =
       new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);
   private final DoublePreferenceConstant deployPositionRotations =
-      new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
+      new DoublePreferenceConstant("Intake/DeployPosition", 27.06);
 
   private boolean isShooting = false;
   private boolean paused = false;
@@ -140,10 +140,14 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
         "Intake/SetDeployed",
-        new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
+        new InstantCommand(() -> intakePivot.setPosition(27.06)).ignoringDisable(true));
     SmartDashboard.putData(
         "Intake/SetZero",
         new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
+
+    SmartDashboard.putData(
+        "Intake/SetTooHigh",
+        new InstantCommand(() -> intakePivot.setPosition(26.0)).ignoringDisable(true));
   }
 
   public void periodic() {

@@ -439,7 +439,7 @@ public class Turret extends SubsystemBase {
     if (m_distance.getAsDouble() < 1.76) {
       return false;
     } else {
-      return getFacingError() < (m_istargetingHub.getAsBoolean() ? getErrorBound() : 20.0);
+      return getFacingError() < (m_istargetingHub.getAsBoolean() ? 9.0 : 20.0); // getErrorBound()
     }
   }
 

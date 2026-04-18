@@ -80,8 +80,8 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
-  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.75);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.75);
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
 
   public final LoggedDashboardChooser<Command> autoChooser;
@@ -183,6 +183,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
     NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
+    NamedCommands.registerCommand("Intake Spit", intake.intakeSpitCommand().withTimeout(0.2));
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
@@ -365,11 +366,11 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
@@ -440,6 +441,7 @@ public class RobotContainer {
     return new ParallelCommandGroup(
         setShooting(false),
         shooter.stopShooter(),
+        hotTub.stopSpinner(),
         feeder.stopFeeder(),
         hood.setNotShootingCommand(),
         intake.setNotShooting());
