@@ -140,18 +140,23 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
         "Intake/SetDeployed",
-        new InstantCommand(() -> intakePivot.setPosition(27.06)).ignoringDisable(true));
+        new InstantCommand(() -> intakePivot.setPosition(deployPositionRotations.getValue()))
+            .ignoringDisable(true));
     SmartDashboard.putData(
         "Intake/SetZero",
         new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
 
     SmartDashboard.putData(
         "Intake/SetTooHigh",
-        new InstantCommand(() -> intakePivot.setPosition(26.0)).ignoringDisable(true));
+        new InstantCommand(() -> intakePivot.setPosition(deployPositionRotations.getValue() - 1.0))
+            .ignoringDisable(true));
   }
 
   public void periodic() {
     Logger.recordOutput("Intake/IsShooting", isShooting);
+    // if(isStalledPivot()) {
+    //   intakePivot.setPosition(deployPositionRotations.getValue());
+    // }
   }
 
   @AutoLogOutput
@@ -225,9 +230,15 @@ public class Intake extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean isStalled() {
+  private boolean isStalledRoller() {
     return intakeRollerMainLeft.getStatorCurrent().getValueAsDouble() > 20.0
         && intakeRollerMainLeft.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private boolean isStalledPivot() {
+    return intakePivot.getStatorCurrent().getValueAsDouble() > 7.0
+        && intakePivot.getVelocity().getValueAsDouble() < 8.0;
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
@@ -243,7 +254,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void setRollerSpeed(DoubleSupplier speed) {
-    if (isStalled()) {
+    if (isStalledRoller()) {
       stallCounter++;
     } else if (!paused) {
       stallCounter = 0;
