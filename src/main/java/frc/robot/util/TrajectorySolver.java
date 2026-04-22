@@ -51,6 +51,7 @@ public class TrajectorySolver extends SubsystemBase {
   private boolean isTargetingHub = true;
   private double lastTargetRadians = 0.0;
   private BooleanSupplier isPreAimingSupplier;
+  private boolean isFullField;
 
   public TrajectorySolver(
       Supplier<Pose2d> drivePose, Supplier<Pose2d> velocityPose, BooleanSupplier isPreAiming) {
@@ -230,6 +231,10 @@ public class TrajectorySolver extends SubsystemBase {
       isTargetingHub = true;
     }
 
+    if (turret.getX() > Constants.FIELD_LENGTH - Units.inchesToMeters(181.56)) {
+      isFullField = true;
+    }
+
     if (isPreAimingSupplier.getAsBoolean()) {
       target = Constants.HUB_POSITION;
       isTargetingHub = true;
@@ -248,7 +253,7 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   private double lookupTime(double distance) {
-    if (!isTargetingHub) {
+    if (isFullField) {
       return 0.78 + 0.0951 * distance;
     } else { // real hub
       return 0.78 + 0.0951 * distance;
@@ -256,7 +261,7 @@ public class TrajectorySolver extends SubsystemBase {
   }
 
   private double lookupTimePrime(double distance) {
-    if (!isTargetingHub) {
+    if (isFullField) {
       return 0.0951;
     } else { // real hub
       return 0.0951;
@@ -267,7 +272,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else {
-      if (!isTargetingHub) {
+      if (isFullField) {
         return 2.33
             + 8.31 * distance
             - 1.12 * (Math.pow(distance, 2.0))
@@ -285,7 +290,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (Constants.currentMode == Mode.SIM) {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else {
-      if (!isTargetingHub) {
+      if (isFullField) {
         return 26.1 + 3.86 * distance;
       } else { // real hub
         return /* OLD BLACK WHEELS: 25.7 + 3.81 * distance; */ 26.1 + 3.86 * distance;
