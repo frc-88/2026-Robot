@@ -191,46 +191,6 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
           omega *= drive.getMaxAngularSpeedRadPerSec();
 
-          //   if (omega == 0.0) {
-          //     // rotate in direction of translation
-          //     // Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
-          //     double omegaFast =
-          //         angleController.calculate(
-          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
-          //             linearVelocity.getAngle().getRadians());
-          //     omegaFast =
-          //         MathUtil.clamp(
-          //             omegaFast,
-          //             -drive.getMaxAngularSpeedRadPerSec(),
-          //             drive.getMaxAngularSpeedRadPerSec());
-
-          //     double omegaSlow =
-          //         angleControllerSlow.calculate(
-          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
-          //             linearVelocity.getAngle().getRadians());
-          //     omegaSlow =
-          //         MathUtil.clamp(
-          //             omegaSlow,
-          //             -drive.getMaxAngularSpeedRadPerSec(),
-          //             drive.getMaxAngularSpeedRadPerSec());
-          //     omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
-          //     // omega *= Math.sqrt(linearVelocity.getNorm());
-          //   } else {
-          //     // Square rotation value for more precise control
-          //     // Logger.recordOutput("Heading", 400.0);
-          //     omega = Math.copySign(omega * omega, omega);
-          //     omega *= drive.getMaxAngularSpeedRadPerSec();
-          //     angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
-          //
-          // angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
-          //   }
-
-          // omega = MathUtil.clamp(omega, -1.0, 1.0);
-
-          // Logger.recordOutput("OmegaTarget", omega);
-
-          // Convert to field relative speeds & send command
-
           double x = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
           double y = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
