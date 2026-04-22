@@ -6,7 +6,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -38,7 +38,7 @@ public class HotTub extends SubsystemBase {
   private final TalonFX m_spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
 
   // output requests
-  private final VelocityDutyCycle m_request = new VelocityDutyCycle(0.0);
+  private final VelocityVoltage m_request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
@@ -132,9 +132,7 @@ public class HotTub extends SubsystemBase {
       m_spinner.stopMotor();
       return;
     }
-    m_spinner.setControl(
-        m_request.withVelocity(
-            /*spinnerLimiter.calculate(speed.getAsDouble())*/ speed.getAsDouble()));
+    m_spinner.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
   private void stopSpinnerMotors() {
