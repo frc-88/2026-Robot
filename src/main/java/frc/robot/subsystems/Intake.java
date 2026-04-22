@@ -331,7 +331,7 @@ public class Intake extends SubsystemBase {
     } else {
       intakePivot.stopMotor();
     }
-    setRollerSpeed(() -> speed.getValue() / 10.0);
+    setRollerSpeed(() -> speed.getValue() * 1.0);
     setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
 
