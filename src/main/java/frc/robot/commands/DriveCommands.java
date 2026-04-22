@@ -55,6 +55,10 @@ public class DriveCommands {
   private static double rotationTarget;
   private static double yTarget;
 
+  private static SlewRateLimiter xLimiter = new SlewRateLimiter(5.0, -10000000.0, 0.0);
+  private static SlewRateLimiter yLimiter = new SlewRateLimiter(5.0, -10000000.0, 0.0);
+  private static SlewRateLimiter rotationLimiter = new SlewRateLimiter(8.0, -1000000.0, 0.0);
+
   private DriveCommands() {}
 
   public static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
@@ -145,6 +149,149 @@ public class DriveCommands {
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));
+        },
+        drive);
+  }
+
+  public static Command rebuiltDriveSomething(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier,
+      BooleanSupplier turretRotSupplier,
+      BooleanSupplier shouldSlow) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    ProfiledPIDController angleControllerSlow =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(
+                ANGLE_MAX_VELOCITY * 0.5, ANGLE_MAX_ACCELERATION * 0.5));
+    angleControllerSlow.enableContinuousInput(-Math.PI, Math.PI);
+
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+          omega = Math.copySign(omega * omega, omega);
+          omega *= drive.getMaxAngularSpeedRadPerSec();
+
+          //   if (omega == 0.0) {
+          //     // rotate in direction of translation
+          //     // Logger.recordOutput("Heading", linearVelocity.getAngle().getDegrees());
+          //     double omegaFast =
+          //         angleController.calculate(
+          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+          //             linearVelocity.getAngle().getRadians());
+          //     omegaFast =
+          //         MathUtil.clamp(
+          //             omegaFast,
+          //             -drive.getMaxAngularSpeedRadPerSec(),
+          //             drive.getMaxAngularSpeedRadPerSec());
+
+          //     double omegaSlow =
+          //         angleControllerSlow.calculate(
+          //             Util.flipIfRed(drive.getPose()).getRotation().getRadians(),
+          //             linearVelocity.getAngle().getRadians());
+          //     omegaSlow =
+          //         MathUtil.clamp(
+          //             omegaSlow,
+          //             -drive.getMaxAngularSpeedRadPerSec(),
+          //             drive.getMaxAngularSpeedRadPerSec());
+          //     omega = turretRotSupplier.getAsBoolean() ? omegaSlow : omegaFast;
+          //     // omega *= Math.sqrt(linearVelocity.getNorm());
+          //   } else {
+          //     // Square rotation value for more precise control
+          //     // Logger.recordOutput("Heading", 400.0);
+          //     omega = Math.copySign(omega * omega, omega);
+          //     omega *= drive.getMaxAngularSpeedRadPerSec();
+          //     angleController.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+          //
+          // angleControllerSlow.reset(Util.flipIfRed(drive.getPose()).getRotation().getRadians());
+          //   }
+
+          // omega = MathUtil.clamp(omega, -1.0, 1.0);
+
+          // Logger.recordOutput("OmegaTarget", omega);
+
+          // Convert to field relative speeds & send command
+
+          double x = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
+          double y = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
+
+          if (shouldSlow.getAsBoolean()) {
+
+            double val =
+                MathUtil.clamp(
+                    x,
+                    -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
+                    0.65 * drive.getMaxLinearSpeedMetersPerSec());
+            x =
+                Math.copySign(
+                    xLimiter.calculate(
+                        Math.abs(
+                            MathUtil.clamp(
+                                x,
+                                -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
+                                0.65 * drive.getMaxLinearSpeedMetersPerSec()))),
+                    val);
+
+            val =
+                MathUtil.clamp(
+                    y,
+                    -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
+                    0.65 * drive.getMaxLinearSpeedMetersPerSec());
+            y =
+                Math.copySign(
+                    yLimiter.calculate(
+                        Math.abs(
+                            MathUtil.clamp(
+                                y,
+                                -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
+                                0.65 * drive.getMaxLinearSpeedMetersPerSec()))),
+                    val);
+            val =
+                MathUtil.clamp(
+                    omega,
+                    -0.75 * drive.getMaxAngularSpeedRadPerSec(),
+                    0.75 * drive.getMaxAngularSpeedRadPerSec());
+            omega =
+                Math.copySign(
+                    rotationLimiter.calculate(
+                        Math.abs(
+                            MathUtil.clamp(
+                                omega,
+                                -0.75 * drive.getMaxAngularSpeedRadPerSec(),
+                                0.75 * drive.getMaxAngularSpeedRadPerSec()))),
+                    val);
+          }
+
+          ChassisSpeeds speeds = new ChassisSpeeds(x, y, omega);
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()),
+              turretRotSupplier.getAsBoolean());
         },
         drive);
   }

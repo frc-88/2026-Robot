@@ -227,7 +227,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRebuilt());
+    drive.setDefaultCommand(driveRebuiltSOMETHING());
   }
 
   public void startTargeting() {
@@ -377,6 +377,16 @@ public class RobotContainer {
                 ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveRebuiltSOMETHING() {
+    return DriveCommands.rebuiltDriveSomething(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX(),
+        this::turretRotSupplier,
+        () -> shooting && trajectorySolver.getIsTargetingHub());
   }
 
   public Command driveTrench() {
