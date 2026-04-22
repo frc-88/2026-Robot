@@ -59,12 +59,12 @@ public class HotTub extends SubsystemBase {
               (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
-  private final BooleanSupplier m_turretOnTarget;
+  private final BooleanSupplier m_onTargetRobot;
 
   private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 4.0);
 
-  public HotTub(BooleanSupplier turretOnTarget) {
-    m_turretOnTarget = turretOnTarget;
+  public HotTub(BooleanSupplier onTargetRobot) {
+    m_onTargetRobot = onTargetRobot;
 
     configureTalons();
     SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
@@ -85,6 +85,7 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.Slot0.kV = p_spinnerConfigConstants.getKV().getValue();
     spinnerConfig.Slot0.kS = p_spinnerConfigConstants.getKS().getValue();
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    spinnerConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.25;
 
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
@@ -127,7 +128,13 @@ public class HotTub extends SubsystemBase {
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
-    m_spinner.setControl(m_request.withVelocity(spinnerLimiter.calculate(speed.getAsDouble())));
+    if (speed.getAsDouble() == 0.0) {
+      m_spinner.stopMotor();
+      return;
+    }
+    m_spinner.setControl(
+        m_request.withVelocity(
+            /*spinnerLimiter.calculate(speed.getAsDouble())*/ speed.getAsDouble()));
   }
 
   private void stopSpinnerMotors() {
@@ -142,9 +149,7 @@ public class HotTub extends SubsystemBase {
 
   public Command runSpinner() {
     return new RunCommand(
-        () ->
-            setSpinnerSpeed(
-                () -> m_turretOnTarget.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
+        () -> setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
         this);
   }
 
@@ -153,7 +158,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> 0.0), this);
+    return new RunCommand(() -> stopSpinnerMotors(), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
