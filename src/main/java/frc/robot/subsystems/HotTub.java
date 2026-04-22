@@ -149,7 +149,8 @@ public class HotTub extends SubsystemBase {
 
   public Command runSpinner() {
     return new RunCommand(
-        () -> setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
+        () ->
+            setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
         this);
   }
 
