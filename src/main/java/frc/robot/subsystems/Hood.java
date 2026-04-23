@@ -38,9 +38,12 @@ public class Hood extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Hood/HoodMotor", 100., 250., 0., 0.5, 0., 0., 0.11, 0.2, 0.);
+          "Hood/HoodMotor", 100., 250., 0., 8.0, 0., 0., 0.08, 0.45, 0.);
   private final DoublePreferenceConstant targetPos =
-      new DoublePreferenceConstant("Hood/Target", 20.5);
+      new DoublePreferenceConstant("Hood/Target", 24.0);
+  public DoublePreferenceConstant encoderOffset20Deg =
+      new DoublePreferenceConstant(
+          "Hood/EncoderOffset", 0.585938); // what the SRX encoder reads when hood is at 20 deg
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
@@ -49,6 +52,7 @@ public class Hood extends SubsystemBase {
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
+    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
     configureMinion();
     configureSmartDashboardButtons();
   }
@@ -65,21 +69,28 @@ public class Hood extends SubsystemBase {
     hoodConfig.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(34.5);
+        hoodAngleDegreesToRotationsOfMinion(35.0 - 0.5);
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        hoodAngleDegreesToRotationsOfMinion(13.5);
+        hoodAngleDegreesToRotationsOfMinion(13.4 + 0.5);
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     hoodConfig.MotionMagic.MotionMagicCruiseVelocity =
         hoodConfigConstants.getMaxVelocity().getValue();
     hoodConfig.MotionMagic.MotionMagicAcceleration =
         hoodConfigConstants.getMaxAcceleration().getValue();
+
+    hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+
     hood.getConfigurator().apply(hoodConfig);
+
+    setCalibrate();
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("Hood/Calibrate", calibrate());
+    SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
+    SmartDashboard.putData("Hood/HardCalibrate", hardStopCalibrate());
     SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
     SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
   }
@@ -144,12 +155,33 @@ public class Hood extends SubsystemBase {
     hood.setControl(request.withPosition(hoodAngleDegreesToRotationsOfMinion(angle)));
   }
 
-  private void setCalibrate() {
+  private void hardCalibrate() { // TODO: add manual button
     hood.setControl(calibrationRequest.withOutput(-0.16).withIgnoreSoftwareLimits(true));
     if (hood.getStatorCurrent().getValueAsDouble() > 25.0) {
-      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
-      m_calibrated = Math.abs(getAngle() - 13.5) < 1.0;
+      hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.4));
+      m_calibrated = Math.abs(getAngle() - 13.4) < 1.0;
     }
+  }
+
+  private void setCalibrate() {
+    hood.setPosition(
+        hoodAngleDegreesToRotationsOfMinion(
+            20.0
+                + encoderRotationsToHoodDegrees(
+                    -hood.getRawPulseWidthPosition().getValueAsDouble()
+                        + encoderOffset20Deg.getValue())));
+    m_calibrated = true;
+  }
+
+  @AutoLogOutput
+  public double getPulseWidthDeg() {
+    return 20.0
+        + encoderRotationsToHoodDegrees(
+            -hood.getRawPulseWidthPosition().getValueAsDouble() + encoderOffset20Deg.getValue());
+  }
+
+  private double encoderRotationsToHoodDegrees(double rotations) {
+    return rotations * (30.0 / 287.0) * 360.0;
   }
 
   private void stopHoodMotor() {
@@ -162,13 +194,19 @@ public class Hood extends SubsystemBase {
     } else {
       m_targetPitch = 15.0;
     }
+    // Lookup Table Building Override
+    // m_targetPitch = targetPos.getValue();
   }
 
-  public Command setNotShooting() {
+  public void setNotShooting() {
+    isShooting = false;
+  }
+
+  public Command setNotShootingCommand() {
     return new InstantCommand(() -> isShooting = false);
   }
 
-  public Command setIsShooting() {
+  public Command setIsShootingCommand() {
     return new InstantCommand(() -> isShooting = true);
   }
 
@@ -177,9 +215,13 @@ public class Hood extends SubsystemBase {
   }
 
   public Command calibrate() {
-    return new RunCommand(() -> setCalibrate(), this)
+    return new InstantCommand(() -> setCalibrate(), this);
+  }
+
+  public Command hardStopCalibrate() {
+    return new RunCommand(() -> hardCalibrate(), this)
         .until(() -> hood.getStatorCurrent().getValueAsDouble() > 10.0)
-        .andThen(stopHood());
+        .andThen(setPositionTargeting());
   }
 
   public Command setPositionTargeting() {

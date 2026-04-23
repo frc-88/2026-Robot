@@ -31,6 +31,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+// if we see further
+// it is because, like Newton,
+// we stand on giants
+
 public class Vision extends SubsystemBase {
   // private Batman batman = new Batman();
   private final VisionConsumer consumer;
@@ -105,10 +109,12 @@ public class Vision extends SubsystemBase {
 
       double maxX = 0., minX = 16., maxY = 0., minY = 8.;
       for (var observation : inputs[cameraIndex].poseObservations) {
-        minX = Math.min(observation.pose().getX(), minX);
-        maxX = Math.max(observation.pose().getX(), maxX);
-        minY = Math.min(observation.pose().getY(), minY);
-        maxY = Math.max(observation.pose().getY(), maxY);
+        if (observation.tagCount() != 0) {
+          minX = Math.min(observation.pose().getX(), minX);
+          maxX = Math.max(observation.pose().getX(), maxX);
+          minY = Math.min(observation.pose().getY(), minY);
+          maxY = Math.max(observation.pose().getY(), maxY);
+        }
       }
 
       double variance = new Translation2d(maxX - minX, maxY - minX).getNorm();

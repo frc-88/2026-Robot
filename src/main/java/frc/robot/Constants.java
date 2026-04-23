@@ -40,7 +40,9 @@ public final class Constants {
 
   // Intake
   public static final int INTAKE_PIVOT = 2;
-  public static final int INTAKE_ROLLER = 7; // TODO change to match PDP port
+  public static final int INTAKE_ROLLER_MAIN_LEFT = 42;
+  public static final int INTAKE_ROLLER_FOLLOWER_RIGHT = 43;
+  public static final int INTAKE_INNER_ROLLER = 7;
   public static final double INTAKE_PIVOT_MOTOR_ROTATIONS_TO_ROTATIONS =
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
@@ -53,7 +55,6 @@ public final class Constants {
   // Shooter
   public static final int SHOOTER_MAIN = 12;
   public static final int SHOOTER_FOLLOWER = 5;
-  public static final int SHOOTER_CANCODER = 7;
   public static final double SHOOTER_GEAR_RATIO = 24.0 / 18.0;
 
   // Climber
@@ -80,16 +81,24 @@ public final class Constants {
   public static final double FIELD_WIDTH = 8.07; // meters
   public static final double FIELD_LENGTH = 16.54; // meters
 
-  public static final Translation2d robotToTurret =
+  public static final Translation2d ROBOT_TO_TURRET =
       // new Translation2d(Units.inchesToMeters(-10.431),
       //     Units.inchesToMeters(8.992));
       new Translation2d(Units.inchesToMeters(-6.745), Units.inchesToMeters(-5.750));
 
+  public static final double FIELD_MARGIN = Units.inchesToMeters(28.0);
   public static Translation2d HUB_POSITION =
       new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.84));
-  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.5);
-  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.5);
+  public static Translation2d RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 1.0);
+  public static Translation2d LEFT_SHUTTLE_TARGET_POSITION =
+      new Translation2d(3.0, Constants.FIELD_WIDTH - 2.0);
+  public static Translation2d MIDDLE_LEFT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 6.0);
+  public static Translation2d MIDDLE_RIGHT_SHUTTLE_TARGET_POSITION = new Translation2d(3.0, 2.0);
+
+  public static double HUB_RADIUS_TOLERANCE = Units.inchesToMeters((41.0 - 6.0) / 2.0);
 
   public static double RIGHT_TRENCH_Y = Units.inchesToMeters(49.82 / 2.0);
   public static double LEFT_TRENCH_Y = Constants.FIELD_WIDTH - Units.inchesToMeters(49.82 / 2.0);
+
+  public static double FUEL_SCORING_TIME = 0.25;
 }
