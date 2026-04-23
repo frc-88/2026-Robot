@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -253,11 +254,11 @@ public class RobotContainer {
             driveAtAngle(() -> Rotation2d.fromDegrees(180.0))
                 .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    controller
-        .b()
-        .onTrue(
-            driveAtAngle(() -> Rotation2d.fromDegrees(-90.0))
-                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         driveAtAngle(() -> Rotation2d.fromDegrees(-90.0))
+    //             .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
     controller
         .y()
@@ -265,16 +266,15 @@ public class RobotContainer {
             driveAtAngle(() -> Rotation2d.fromDegrees(0.0))
                 .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
 
-    // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //            .ignoringDisable(true));
+    controller
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
     controller.rightTrigger().onTrue(shoot()).onFalse(stopShoot());
     controller.leftBumper().whileTrue(driveTrench());
 
