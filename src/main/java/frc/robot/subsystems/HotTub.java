@@ -108,6 +108,11 @@ public class HotTub extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return m_spinner.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_spinner.getVelocity().getValue();
   }

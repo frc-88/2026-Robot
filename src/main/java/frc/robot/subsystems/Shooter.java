@@ -165,8 +165,18 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private double getMainSupplyCurrent() {
+    return shooterMain.getSupplyCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
   private double getFollowerCurrent() {
     return shooterFollower.getTorqueCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerSupplyCurrent() {
+    return shooterFollower.getSupplyCurrent().getValueAsDouble();
   }
 
   public void periodic() {
