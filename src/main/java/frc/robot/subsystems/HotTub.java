@@ -133,6 +133,7 @@ public class HotTub extends SubsystemBase {
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
+    Logger.recordOutput("Spinner/SpinnerCommand", "SetSpeed");
     if (speed.getAsDouble() == 0.0) {
       m_spinner.stopMotor();
       return;
@@ -141,10 +142,12 @@ public class HotTub extends SubsystemBase {
   }
 
   private void stopSpinnerMotors() {
+    Logger.recordOutput("Spinner/SpinnerCommand", "Stop");
     m_spinner.stopMotor();
   }
 
   private void antiJam() {
+    Logger.recordOutput("Spinner/SpinnerCommand", "AntiJam");
     m_spinner.setControl(antiJamRequest.withOutput(-1.0));
   }
 

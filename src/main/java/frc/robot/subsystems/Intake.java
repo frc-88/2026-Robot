@@ -334,18 +334,21 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeIn() {
+    Logger.recordOutput("Intake/IntakeCommand", "IntakeIn");
     goToRotations(0.0);
     stopRoller();
     stopPivotRoller();
   }
 
   public void intakeSpit() {
+    Logger.recordOutput("Intake/IntakeCommand", "IntakeSpit");
     goToRotations(deployPositionRotations.getValue());
     rollerSpit();
     pivotRollerSpit();
   }
 
   private void theThing() {
+    Logger.recordOutput("Intake/IntakeCommand", "TheThing");
     if (intakePivot.getPosition().getValueAsDouble() > 5.0) {
       intakePivot.setControl(theThingRequest.withOutput(-3.0));
     } else {
@@ -356,6 +359,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void justIntakeOut() {
+    Logger.recordOutput("Intake/IntakeCommand", "JustIntakeOut");
     if (isShooting) {
       goToRotations(deployPositionRotations.getValue());
       setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
@@ -368,6 +372,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void antiJam() {
+    Logger.recordOutput("Intake/IntakeCommand", "AntiJam");
     setRollerSpeed(() -> -speed.getValue());
   }
 

@@ -247,12 +247,14 @@ public class Turret extends SubsystemBase {
     return encodersHealthy() && motorsHealthy();
   }
 
+  @AutoLogOutput
   private boolean encodersHealthy() {
     return m_CANcoder.isConnected()
         && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Red
         && m_CANcoder.getMagnetHealth().getValue() != MagnetHealthValue.Magnet_Invalid;
   }
 
+  @AutoLogOutput
   private boolean motorsHealthy() {
     return m_turret.isConnected()
         && m_turret.isAlive()
@@ -400,10 +402,12 @@ public class Turret extends SubsystemBase {
     return m_targetFacing.getAsDouble();
   }
 
+  @AutoLogOutput
   private boolean isFacingSafe(double degrees) {
     return isPositionSafe(turretFacingToFalconEncoderPosition(degrees));
   }
 
+  @AutoLogOutput
   private boolean isPositionSafe(double position) {
     return (position
             < turretFacingToFalconEncoderPosition(

@@ -114,14 +114,17 @@ public class Feeder extends SubsystemBase {
   }
 
   private void setFeederSpeed(DoubleSupplier speed) {
+    Logger.recordOutput("Feeder/FeederCommand", "SetSpeed");
     m_feeder.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
   private void stopFeederMotors() {
+    Logger.recordOutput("Feeder/FeederCommand", "Stop");
     m_feeder.stopMotor();
   }
 
   private void antiJam() {
+    Logger.recordOutput("Feeder/FeederCommand", "AntiJam");
     m_feeder.setControl(antiJamRequest.withOutput(-1.0));
   }
 

@@ -116,7 +116,7 @@ public class Shooter extends SubsystemBase {
   private void setShooterSpeed() {
     setShooterSpeed(() -> targetVelocity);
   }
-
+  @AutoLogOutput
   private boolean atShooterSpeed() {
     return Math.abs(shooterMain.getVelocity().getValueAsDouble() - targetVelocity) < 10.0;
   }
@@ -187,10 +187,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runShooter() {
+    Logger.recordOutput("Shooter/ShooterCommand", "RunShooter");
     return new RunCommand(() -> setShooterSpeed(), this);
   }
 
   public Command stopShooter() {
+    Logger.recordOutput("Shooter/ShooterCommand", "StopShooter");
     return new RunCommand(() -> shooterMain.stopMotor(), this);
   }
 
