@@ -17,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 2.0
                 }
               },
               {
@@ -31,6 +31,25 @@
                 "data": {
                   "name": "Intake In"
                 }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.75
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot Override True"
+                      }
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -42,7 +61,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.0
+                  "waitTime": 2.0
                 }
               },
               {
@@ -73,7 +92,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LeftFollowTheLeaderNutrons"
+                  "pathName": "LeftFollowTheLeaderNUTrons"
                 }
               },
               {
@@ -95,6 +114,12 @@
           "type": "deadline",
           "data": {
             "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 7.0
+                }
+              },
               {
                 "type": "path",
                 "data": {
