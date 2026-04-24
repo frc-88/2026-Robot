@@ -273,10 +273,7 @@ public class TrajectorySolver extends SubsystemBase {
       return 91.33289 - 11.95018 * distance + 0.880906 * (Math.pow(distance, 2.0));
     } else {
       if (isFullField) {
-        return 2.33
-            + 8.31 * distance
-            - 1.12 * (Math.pow(distance, 2.0))
-            + 0.0647 * (Math.pow(distance, 3.0));
+        return 34.0;
       } else { // real hub
         return 2.33
             + 8.31 * distance
@@ -291,7 +288,7 @@ public class TrajectorySolver extends SubsystemBase {
       return 5.3731 + 0.356504 * (distance) + 0.0279446 * (Math.pow(distance, 2.0));
     } else {
       if (isFullField) {
-        return 26.1 + 3.86 * distance;
+        return 85.0;
       } else { // real hub
         return /* OLD BLACK WHEELS: 25.7 + 3.81 * distance; */ 26.1 + 3.86 * distance;
       }
