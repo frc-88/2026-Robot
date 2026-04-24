@@ -6,7 +6,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -15,12 +15,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
@@ -38,7 +36,7 @@ public class HotTub extends SubsystemBase {
   private final TalonFX m_spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
 
   // output requests
-  private final VelocityDutyCycle m_request = new VelocityDutyCycle(0.0);
+  private final VelocityVoltage m_request = new VelocityVoltage(0.0);
   private final VoltageOut m_voltReq = new VoltageOut(0.0);
   private final DutyCycleOut antiJamRequest = new DutyCycleOut(0.0);
 
@@ -59,22 +57,22 @@ public class HotTub extends SubsystemBase {
               (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
           new SysIdRoutine.Mechanism(this::setVoltage, null, this));
 
-  private final BooleanSupplier m_turretOnTarget;
+  private final BooleanSupplier m_onTargetRobot;
 
-  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 2.0);
+  private SlewRateLimiter spinnerLimiter = new SlewRateLimiter(p_spinnerSpeed.getValue() * 4.0);
 
-  public HotTub(BooleanSupplier turretOnTarget) {
-    m_turretOnTarget = turretOnTarget;
+  public HotTub(BooleanSupplier onTargetRobot) {
+    m_onTargetRobot = onTargetRobot;
 
     configureTalons();
-    SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
-    SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
-    SmartDashboard.putData(
-        "Spinner/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Spinner/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData("Spinner/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Spinner/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    // SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
+    // SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
+    // SmartDashboard.putData(
+    //     "Spinner/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Spinner/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData("Spinner/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData("Spinner/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   private void configureTalons() {
@@ -85,6 +83,7 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.Slot0.kV = p_spinnerConfigConstants.getKV().getValue();
     spinnerConfig.Slot0.kS = p_spinnerConfigConstants.getKS().getValue();
     spinnerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    spinnerConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.25;
 
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
@@ -112,6 +111,12 @@ public class HotTub extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private boolean isStalled() {
+    return m_spinner.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_spinner.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
   private Angle getPosition() {
     return m_spinner.getPosition().getValue();
   }
@@ -121,7 +126,11 @@ public class HotTub extends SubsystemBase {
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
-    m_spinner.setControl(m_request.withVelocity(spinnerLimiter.calculate(speed.getAsDouble())));
+    if (speed.getAsDouble() == 0.0) {
+      m_spinner.stopMotor();
+      return;
+    }
+    m_spinner.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
   private void stopSpinnerMotors() {
@@ -137,8 +146,7 @@ public class HotTub extends SubsystemBase {
   public Command runSpinner() {
     return new RunCommand(
         () ->
-            setSpinnerSpeed(
-                () -> m_turretOnTarget.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
+            setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
         this);
   }
 
@@ -147,7 +155,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> setSpinnerSpeed(() -> 0.0), this);
+    return new RunCommand(() -> stopSpinnerMotors(), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

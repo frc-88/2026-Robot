@@ -89,10 +89,10 @@ public class Hood extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
+    // SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
     SmartDashboard.putData("Hood/HardCalibrate", hardStopCalibrate());
-    SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
-    SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
+    // SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+    // SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
   }
 
   @AutoLogOutput

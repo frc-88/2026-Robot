@@ -49,7 +49,7 @@ public class AutoStartPositions {
         break;
 
       case "SimpleCenter":
-        startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
+        startingPose = new Pose2d(3.585746835443037, 4.035, Rotation2d.kCCW_90deg);
         break;
 
       case "Double Bump OP Left":
@@ -77,11 +77,11 @@ public class AutoStartPositions {
         break;
 
       case "SimpleCenterDepot":
-        startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
+        startingPose = new Pose2d(3.585746835443037, 4.035, Rotation2d.kCCW_90deg);
         break;
 
       case "CenterDepot & Outpost":
-        startingPose = new Pose2d(3.585746835443037, 4.035, new Rotation2d());
+        startingPose = new Pose2d(3.585746835443037, 4.035, Rotation2d.kCCW_90deg);
         break;
 
       default:
