@@ -112,8 +112,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
-                this::getPoseBatman);
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -132,8 +131,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight),
-                this::getPoseBatman);
+                new ModuleIOSim(TunerConstants.BackRight));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -152,8 +150,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {},
-                this::getPoseBatman);
+                new ModuleIO() {});
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -165,7 +162,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
+            () -> drive.getPose(),
             drive::getChassisSpeedsFieldRelative,
             this::getIsPreAiming);
     turret =
@@ -189,7 +186,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
-    NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
     NamedCommands.registerCommand("Target 90", turret.aimAtFacingCommand(90.0));
@@ -210,13 +206,6 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     SmartDashboard.putData(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-
-    if (Util.logif()) {
-      SmartDashboard.putData("AntiJam", antiJam());
-      SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
-      SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-      SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
-    }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
@@ -295,21 +284,21 @@ public class RobotContainer {
     buttons.button(2).onTrue(hood.hardStopCalibrate());
     buttons.button(1).onTrue(setPreAimingCommand(true)).onFalse(setPreAimingCommand(false));
     buttons.button(7).onTrue(intake.retractIntake());
-    buttons.button(10).onTrue(resetBatman());
+    //buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    buttons
-        .button(12)
-        .toggleOnTrue(
-            new InstantCommand(
-                    () -> {
-                      shouldUseQuest = !shouldUseQuest;
-                      if (shouldUseQuest) {
-                        batman.resetPose(new Pose3d(drive.getPose()));
-                      }
-                    })
-                .ignoringDisable(true));
+    // buttons
+    //     .button(12)
+    //     .toggleOnTrue(
+    //         new InstantCommand(
+    //                 () -> {
+    //                   shouldUseQuest = !shouldUseQuest;
+    //                   if (shouldUseQuest) {
+    //                     batman.resetPose(new Pose3d(drive.getPose()));
+    //                   }
+    //                 })
+    //             .ignoringDisable(true));
   }
 
   public void disabledPeriodic() {
@@ -337,13 +326,13 @@ public class RobotContainer {
     SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
-  public Pose2d getPoseBatman() {
-    return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
-  }
+  // public Pose2d getPoseBatman() {
+  //   return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
+  // }
 
-  public Command resetBatman() { // DO NOT FLIP IF RED
-    return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
-  }
+  // public Command resetBatman() { // DO NOT FLIP IF RED
+  //   return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
+  // }
 
   public Command driveRotateAroundRobotCenter() {
     return DriveCommands.joystickDrive(
