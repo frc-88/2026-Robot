@@ -16,7 +16,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
@@ -146,11 +145,7 @@ public class RobotContainer {
         gyro = new GyroIO() {};
         drive =
             new Drive(
-                gyro,
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -162,9 +157,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> drive.getPose(),
-            drive::getChassisSpeedsFieldRelative,
-            this::getIsPreAiming);
+            () -> drive.getPose(), drive::getChassisSpeedsFieldRelative, this::getIsPreAiming);
     turret =
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
@@ -284,7 +277,7 @@ public class RobotContainer {
     buttons.button(2).onTrue(hood.hardStopCalibrate());
     buttons.button(1).onTrue(setPreAimingCommand(true)).onFalse(setPreAimingCommand(false));
     buttons.button(7).onTrue(intake.retractIntake());
-    //buttons.button(10).onTrue(resetBatman());
+    // buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());

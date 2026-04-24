@@ -12,14 +12,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
-import frc.robot.util.Util;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -91,14 +88,14 @@ public class Shooter extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    if (Util.logif()) {
-      SmartDashboard.putData(
-          "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-      SmartDashboard.putData(
-          "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-      SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-      SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
-    }
+    // if (Util.logif()) {
+    //   SmartDashboard.putData(
+    //       "Shooter/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    //   SmartDashboard.putData(
+    //       "Shooter/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    //   SmartDashboard.putData("Shooter/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    //   SmartDashboard.putData("Shooter/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    // }
   }
 
   private void setShooterSpeed(DoubleSupplier speed) {

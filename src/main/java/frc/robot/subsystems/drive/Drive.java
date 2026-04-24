@@ -48,7 +48,6 @@ import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 

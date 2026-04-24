@@ -67,14 +67,14 @@ public class HotTub extends SubsystemBase {
     m_onTargetRobot = onTargetRobot;
 
     configureTalons();
-    SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
-    SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
-    SmartDashboard.putData(
-        "Spinner/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
-    SmartDashboard.putData(
-        "Spinner/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
-    SmartDashboard.putData("Spinner/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
-    SmartDashboard.putData("Spinner/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
+    // SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
+    // SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
+    // SmartDashboard.putData(
+    //     "Spinner/SysId/Quasistatic Forward", sysIdQuasistatic(Direction.kForward));
+    // SmartDashboard.putData(
+    //     "Spinner/SysId/Quasistatic Reverse", sysIdQuasistatic(Direction.kReverse));
+    // SmartDashboard.putData("Spinner/SysId/Dynamic Forward", sysIdDynamic(Direction.kForward));
+    // SmartDashboard.putData("Spinner/SysId/Dynamic Reverse", sysIdDynamic(Direction.kReverse));
   }
 
   private void configureTalons() {

@@ -14,6 +14,7 @@ public class Dashboard extends SubsystemBase {
   private double periodTimeRemaining = 0;
 
   private boolean isHubActive = true;
+  private double currGamTim = 0.0;
 
   public Dashboard() {}
 
