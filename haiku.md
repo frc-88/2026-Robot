@@ -1,4 +1,4 @@
-# TJ² 2026 Robot Haiku
+# TJ^2 2026 Robot Haiku
 
 goddess of the moon
 
