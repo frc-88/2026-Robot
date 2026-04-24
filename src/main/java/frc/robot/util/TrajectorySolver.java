@@ -233,6 +233,8 @@ public class TrajectorySolver extends SubsystemBase {
 
     if (turret.getX() > Constants.FIELD_LENGTH - Units.inchesToMeters(181.56)) {
       isFullField = true;
+    } else {
+      isFullField = false;
     }
 
     if (isPreAimingSupplier.getAsBoolean()) {
