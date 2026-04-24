@@ -10,6 +10,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -68,6 +70,7 @@ public class Intake extends SubsystemBase {
   private int stopCounter = 0;
 
   DoubleSupplier m_drivespeed;
+  private Debouncer stallDebouncer = new Debouncer(3.0, DebounceType.kRising);
 
   public Intake(DoubleSupplier speed) {
     m_drivespeed = speed;
@@ -237,8 +240,10 @@ public class Intake extends SubsystemBase {
 
   @AutoLogOutput
   private boolean isStalledPivot() {
-    return intakePivot.getStatorCurrent().getValueAsDouble() > 7.0
-        && intakePivot.getVelocity().getValueAsDouble() < 8.0;
+    return stallDebouncer.calculate(
+        intakePivot.getPosition().getValueAsDouble() > 10.0
+            && intakePivot.getStatorCurrent().getValueAsDouble() > 4.0
+            && intakePivot.getVelocity().getValueAsDouble() < 8.0);
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
@@ -250,6 +255,9 @@ public class Intake extends SubsystemBase {
   }
 
   private void goToRotations(double minionRotations) {
+    if (isStalledPivot() && minionRotations == deployPositionRotations.getValue()) {
+      intakePivot.setPosition(deployPositionRotations.getValue());
+    }
     intakePivot.setControl(pivotRequest.withPosition(minionRotations));
   }
 
