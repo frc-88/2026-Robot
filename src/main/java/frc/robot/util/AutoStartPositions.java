@@ -13,39 +13,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class AutoStartPositions {
   public Pose2d getStartingPose(String autoName) {
-    Pose2d startingPose = new Pose2d(0, 0, new Rotation2d());
+    Pose2d startingPose = new Pose2d(0, 0, Rotation2d.kZero);
 
     switch (autoName) {
-      case "Chompei Left & Depot":
-        startingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d());
-        break;
-
       case "Double Chompei Left":
-        startingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d());
-        break;
-
-      case "Fast Chompei Left & Depot":
-        startingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d());
-        break;
-
-      case "Chompei Right & Outpost":
-        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
+        startingPose = new Pose2d(4.3877651515151515, 7.4, Rotation2d.kZero);
         break;
 
       case "Double Chompei Right":
-        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
-        break;
-
-      case "Fast Chompei Right & Outpost":
-        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
-        break;
-
-      case "Double Bump Chompei Left":
-        startingPose = new Pose2d(4.3877651515151515, 7.4, new Rotation2d());
-        break;
-
-      case "Double Bump Chompei Right":
-        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, new Rotation2d());
+        startingPose = new Pose2d(4.3877651515151515, 0.6222979797979815, Rotation2d.kZero);
         break;
 
       case "SimpleCenter":
@@ -56,19 +32,11 @@ public class AutoStartPositions {
         startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
         break;
 
-      case "Deep Double Bump OP Left":
-        startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
-        break;
-
       case "Shallow Double Bump OP Left":
         startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
         break;
 
       case "Double Bump OP Right":
-        startingPose = new Pose2d(4.388, 0.622, Rotation2d.kCCW_90deg);
-        break;
-
-      case "Deep Double Bump OP Right":
         startingPose = new Pose2d(4.388, 0.622, Rotation2d.kCCW_90deg);
         break;
 
@@ -82,6 +50,19 @@ public class AutoStartPositions {
 
       case "CenterDepot & Outpost":
         startingPose = new Pose2d(3.585746835443037, 4.035, Rotation2d.kCCW_90deg);
+        break;
+
+      case "Left Follow The Leader Nutrons":
+        startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
+        break;
+      case "Right Follow The Leader Nutrons":
+        startingPose = new Pose2d(3.560, 0.664, Rotation2d.kZero);
+        break;
+      case "Left Follow The Leader Wyndham":
+        startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
+        break;
+      case "Right Follow The Leader Wyndham":
+        startingPose = new Pose2d(3.560, 0.664, Rotation2d.kZero);
         break;
 
       default:
