@@ -281,6 +281,7 @@ public class RobotContainer {
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
+    buttons.button(5).onTrue(intake.setTooHigh());
     // buttons
     //     .button(12)
     //     .toggleOnTrue(

@@ -149,10 +149,7 @@ public class Intake extends SubsystemBase {
         "Intake/SetZero",
         new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
 
-    SmartDashboard.putData(
-        "Intake/SetTooHigh",
-        new InstantCommand(() -> intakePivot.setPosition(deployPositionRotations.getValue() - 1.0))
-            .ignoringDisable(true));
+    SmartDashboard.putData("Intake/SetTooHigh", setTooHigh());
   }
 
   public void periodic() {
@@ -369,6 +366,12 @@ public class Intake extends SubsystemBase {
 
   public Command antiJamIntake() {
     return new InstantCommand(() -> antiJam());
+  }
+
+  public Command setTooHigh() {
+    return new InstantCommand(
+            () -> intakePivot.setPosition(deployPositionRotations.getValue() - 1.0))
+        .ignoringDisable(true);
   }
 
   public Command runIntake() {
