@@ -136,6 +136,8 @@ public class Intake extends SubsystemBase {
     intakeRollerFollowerRight.setControl(
         new Follower(Constants.INTAKE_ROLLER_MAIN_LEFT, MotorAlignmentValue.Opposed));
     intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(500);
+
+    deployPositionRotations.setValue(30.0);
   }
 
   private void configureSmartDashboardButtons() {
@@ -238,7 +240,7 @@ public class Intake extends SubsystemBase {
   @AutoLogOutput
   private boolean isStalledPivot() {
     return stallDebouncer.calculate(
-        intakePivot.getPosition().getValueAsDouble() > 10.0
+        intakePivot.getPosition().getValueAsDouble() > 25.0
             && intakePivot.getStatorCurrent().getValueAsDouble() > 4.0
             && intakePivot.getVelocity().getValueAsDouble() < 8.0);
   }
@@ -253,7 +255,8 @@ public class Intake extends SubsystemBase {
 
   private void goToRotations(double minionRotations) {
     if (isStalledPivot() && minionRotations == deployPositionRotations.getValue()) {
-      intakePivot.setPosition(deployPositionRotations.getValue());
+      deployPositionRotations.setValue(intakePivot.getPosition().getValueAsDouble());
+      // intakePivot.setPosition(deployPositionRotations.getValue());
     }
     intakePivot.setControl(pivotRequest.withPosition(minionRotations));
   }
@@ -369,9 +372,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setTooHigh() {
-    return new InstantCommand(
-            () -> intakePivot.setPosition(deployPositionRotations.getValue() - 1.0))
-        .ignoringDisable(true);
+    return new InstantCommand(() -> deployPositionRotations.setValue(30.0)).ignoringDisable(true);
   }
 
   public Command runIntake() {
