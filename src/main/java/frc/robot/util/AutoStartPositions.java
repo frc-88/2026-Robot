@@ -32,6 +32,10 @@ public class AutoStartPositions {
         startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
         break;
 
+      case "Q47 Double Bump OP Left":
+        startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
+        break;
+
       case "Shallow Double Bump OP Left":
         startingPose = new Pose2d(4.350, 7.490, Rotation2d.kCW_90deg);
         break;
