@@ -117,7 +117,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 7.5
+                  "waitTime": 5.5
                 }
               },
               {
@@ -143,7 +143,7 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 1.75
+                              "waitTime": 4.75
                             }
                           },
                           {
@@ -158,7 +158,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Don't Shoot"
+                        "name": "Shoot"
                       }
                     }
                   ]
