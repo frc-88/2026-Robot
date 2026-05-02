@@ -5,14 +5,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import gg.questnav.questnav.PoseFrame;
-import gg.questnav.questnav.QuestNav;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 // can it deliver
 // pose prediction perfection
@@ -52,14 +46,14 @@ public class Batman extends SubsystemBase {
   //         Units.inchesToMeters(0.0),
   //         new Rotation3d(0, 0, Units.degreesToRadians(-180.0)));
 
-  private QuestNav quest = new QuestNav();
+  // private QuestNav quest = new QuestNav();
 
   public Batman() {}
 
-  public void globalize(Pose3d globalPose) {
-    resetPose(globalPose);
-    hasGlobalized = true;
-  }
+  // public void globalize(Pose3d globalPose) {
+  //   resetPose(globalPose);
+  //   hasGlobalized = true;
+  // }
 
   public Pose3d getPose() {
     return currentPose;
@@ -75,27 +69,27 @@ public class Batman extends SubsystemBase {
     return currentPose.transformBy(ROBOT_TO_QUEST).toPose2d();
   }
 
-  public boolean isTracking() {
-    return quest.isTracking();
-  }
+  // public boolean isTracking() {
+  //   return quest.isTracking();
+  // }
 
-  public boolean shouldUse() {
-    return shouldUse;
-  }
+  // public boolean shouldUse() {
+  //   return shouldUse;
+  // }
 
-  public boolean isConnected() {
-    return quest.isConnected();
-  }
+  // public boolean isConnected() {
+  //   return quest.isConnected();
+  // }
 
-  public int getBatteryPercent() {
-    return quest.getBatteryPercent().orElse(-1);
-  }
+  // public int getBatteryPercent() {
+  //   return quest.getBatteryPercent().orElse(-1);
+  // }
 
-  public void resetPose(Pose3d pose) {
-    quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
-    Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
-    hasGlobalized = true;
-  }
+  // public void resetPose(Pose3d pose) {
+  //   quest.setPose(pose.transformBy(ROBOT_TO_QUEST));
+  //   Logger.recordOutput("Batman/ResetPose", pose.toPose2d());
+  //   hasGlobalized = true;
+  // }
 
   public boolean hasGlobalized() {
     return hasGlobalized;
@@ -103,25 +97,25 @@ public class Batman extends SubsystemBase {
 
   @Override
   public void periodic() {
-    quest.commandPeriodic();
-    Logger.recordOutput("Quest/Battery", getBatteryPercent());
-    Logger.recordOutput("Quest/IsConnected", isConnected());
+    // quest.commandPeriodic();
+    // Logger.recordOutput("Quest/Battery", getBatteryPercent());
+    // Logger.recordOutput("Quest/IsConnected", isConnected());
 
-    if (!isConnected() || !isTracking()) {
-      shouldUse = false;
-      hasGlobalized = false;
-    } else {
-      shouldUse = true;
-      PoseFrame[] poses = quest.getAllUnreadPoseFrames();
-      if (poses.length > 0) {
-        currentPose = poses[poses.length - 1].questPose3d();
-        currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
-      }
-    }
-    Logger.recordOutput("Quest/ShouldUse", shouldUse);
+    // if (!isConnected() || !isTracking()) {
+    //   shouldUse = false;
+    //   hasGlobalized = false;
+    // } else {
+    //   shouldUse = true;
+    //   PoseFrame[] poses = quest.getAllUnreadPoseFrames();
+    //   if (poses.length > 0) {
+    //     currentPose = poses[poses.length - 1].questPose3d();
+    //     currentPose = currentPose.transformBy(ROBOT_TO_QUEST.inverse());
+    //   }
+    // }
+    // Logger.recordOutput("Quest/ShouldUse", shouldUse);
   }
 
-  public Command resetQuestPose(Supplier<Pose3d> pose) {
-    return new InstantCommand(() -> globalize(pose.get()));
-  }
+  // public Command resetQuestPose(Supplier<Pose3d> pose) {
+  //   return new InstantCommand(() -> globalize(pose.get()));
+  // }
 }

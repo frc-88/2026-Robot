@@ -31,6 +31,25 @@
                 "data": {
                   "name": "Intake In"
                 }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.75
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot Override True"
+                      }
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -42,7 +61,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LeftFollowTheLeader"
+                  "pathName": "RightFollowTheLeaderWyndham"
                 }
               },
               {
@@ -65,9 +84,15 @@
           "data": {
             "commands": [
               {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.5
+                }
+              },
+              {
                 "type": "path",
                 "data": {
-                  "pathName": "LeftBumpToDepot"
+                  "pathName": "RightBumpToDepot"
                 }
               },
               {
@@ -87,13 +112,13 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 1.75
+                              "waitTime": 4.75
                             }
                           },
                           {
                             "type": "named",
                             "data": {
-                              "name": "Shoot"
+                              "name": "Don't Shoot"
                             }
                           }
                         ]
@@ -102,7 +127,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Don't Shoot"
+                        "name": "Shoot"
                       }
                     }
                   ]

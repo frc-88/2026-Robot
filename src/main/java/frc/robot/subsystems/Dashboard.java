@@ -11,9 +11,10 @@ import frc.robot.util.Util;
 
 public class Dashboard extends SubsystemBase {
   /** Creates a new Dashboard. */
-  private double periodTimeRemaining = 0;
+  private double periodTimeRemaining = 0.0;
 
   private boolean isHubActive = true;
+  private double currGamTim = 0.0;
 
   public Dashboard() {}
 
@@ -46,14 +47,14 @@ public class Dashboard extends SubsystemBase {
     if (gameTimeInt < 0) { // ---------- END OF AUTO AND TELEOP ----------
       isHubActive = false;
       currentMatchPeriod = "DISABLED";
-      periodTimeRemaining = gameTimeInt;
+      periodTimeRemaining = gameTime;
     } else if (gameTimeInt >= 130) { // ---------- TRANSITION SHIFT ----------
       isHubActive = true;
       currentMatchPeriod = "TRANSITION SHIFT";
-      periodTimeRemaining = gameTimeInt - 130;
+      periodTimeRemaining = gameTime - 130.0;
     } else if (gameTimeInt >= 105) { // ---------- SHIFT 1 ----------
       currentMatchPeriod = "SHIFT 1";
-      periodTimeRemaining = gameTimeInt - 105;
+      periodTimeRemaining = gameTime - 105.0;
       switch (autoWinner) {
         case 'B': // Blue case code (blue won autonomous, so red goes first)
           if (weAreRed) {
@@ -75,7 +76,7 @@ public class Dashboard extends SubsystemBase {
       }
     } else if (gameTimeInt >= 80) { // ---------- SHIFT 2 ----------
       currentMatchPeriod = "SHIFT 2";
-      periodTimeRemaining = gameTimeInt - 80;
+      periodTimeRemaining = gameTime - 80.0;
       switch (autoWinner) {
         case 'B': // Blue case code (blue won autonomous, so red goes first)
           if (weAreRed) {
@@ -97,7 +98,7 @@ public class Dashboard extends SubsystemBase {
       }
     } else if (gameTimeInt >= 55) { // ---------- SHIFT 3 ----------
       currentMatchPeriod = "SHIFT 3";
-      periodTimeRemaining = gameTimeInt - 55;
+      periodTimeRemaining = gameTime - 55.0;
       switch (autoWinner) {
         case 'B': // Blue case code (blue won autonomous, so red goes first)
           if (weAreRed) {
@@ -119,7 +120,7 @@ public class Dashboard extends SubsystemBase {
       }
     } else if (gameTimeInt >= 30) { // ---------- SHIFT 4 ----------
       currentMatchPeriod = "SHIFT 4";
-      periodTimeRemaining = gameTimeInt - 30;
+      periodTimeRemaining = gameTime - 30.0;
       switch (autoWinner) {
         case 'B': // Blue case code (blue won autonomous, so red goes first)
           if (weAreRed) {
@@ -142,12 +143,12 @@ public class Dashboard extends SubsystemBase {
     } else if (gameTimeInt < 30
         && !DriverStation.isAutonomous()) { // ---------- END GAME ----------
       currentMatchPeriod = "END GAME";
-      periodTimeRemaining = gameTimeInt;
+      periodTimeRemaining = gameTime;
       isHubActive = true;
     } else if (gameTimeInt <= 20
         && DriverStation.isAutonomous()) { // ---------- AUTONOMOUS ----------
       currentMatchPeriod = "AUTONOMOUS";
-      periodTimeRemaining = gameTimeInt;
+      periodTimeRemaining = gameTime;
       isHubActive = true;
     } else {
       currentMatchPeriod = "IDK BRUH";
@@ -157,7 +158,7 @@ public class Dashboard extends SubsystemBase {
 
     SmartDashboard.putBoolean("Driver Dashboard/Hub Active", isHubActive);
     SmartDashboard.putString("Driver Dashboard/Current Match Period", currentMatchPeriod);
-    SmartDashboard.putNumber("Driver Dashboard/Period Time", periodTimeRemaining);
+    SmartDashboard.putNumber("Driver Dashboard/Period Time", Math.ceil(periodTimeRemaining));
     SmartDashboard.putString("Driver Dashboard/GameData", gameData);
   }
 

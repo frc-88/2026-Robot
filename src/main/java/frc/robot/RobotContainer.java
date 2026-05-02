@@ -16,7 +16,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
@@ -80,8 +79,8 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private CommandGenericHID buttons = new CommandGenericHID(1);
 
-  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.0);
-  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.0);
+  private SlewRateLimiter xLimiter = new SlewRateLimiter(1.75);
+  private SlewRateLimiter yLimiter = new SlewRateLimiter(1.75);
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(5.0);
 
   public final LoggedDashboardChooser<Command> autoChooser;
@@ -112,8 +111,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
-                this::getPoseBatman);
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -132,8 +130,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight),
-                this::getPoseBatman);
+                new ModuleIOSim(TunerConstants.BackRight));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -148,12 +145,7 @@ public class RobotContainer {
         gyro = new GyroIO() {};
         drive =
             new Drive(
-                gyro,
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                this::getPoseBatman);
+                gyro, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -165,9 +157,7 @@ public class RobotContainer {
 
     trajectorySolver =
         new TrajectorySolver(
-            () -> ((batman.shouldUse() && shouldUseQuest) ? batman.getPose2d() : drive.getPose()),
-            drive::getChassisSpeedsFieldRelative,
-            this::getIsPreAiming);
+            () -> drive.getPose(), drive::getChassisSpeedsFieldRelative, this::getIsPreAiming);
     turret =
         new Turret(
             () -> drive.getChassisSpeedsFieldRelative().getRotation().getDegrees(),
@@ -183,12 +173,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
     NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
+    NamedCommands.registerCommand("Intake Spit", intake.intakeSpitCommand().withTimeout(0.2));
 
     NamedCommands.registerCommand("Shoot", shoot());
     NamedCommands.registerCommand("Don't Shoot", stopShoot());
 
     NamedCommands.registerCommand("Calibrate Hood", hood.calibrate());
-    NamedCommands.registerCommand("Reset Batman", resetBatman());
     NamedCommands.registerCommand("Start Targeting", turret.startTargeting());
     NamedCommands.registerCommand("Stop Targeting", turret.stopTargeting());
     NamedCommands.registerCommand("Target 90", turret.aimAtFacingCommand(90.0));
@@ -209,13 +199,6 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     SmartDashboard.putData(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-
-    if (Util.logif()) {
-      SmartDashboard.putData("AntiJam", antiJam());
-      SmartDashboard.putData("Drive/RotateAroundTurretCenter", driveRotateAroundTurretCenter());
-      SmartDashboard.putData("Drive/RotateAroundRobotCenter", driveRotateAroundRobotCenter());
-      SmartDashboard.putData("Drive/TrenchAlign", driveTrench());
-    }
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 
@@ -226,7 +209,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.stopShooter());
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
-    drive.setDefaultCommand(driveRebuilt());
+    drive.setDefaultCommand(driveRebuiltSOMETHING());
   }
 
   public void startTargeting() {
@@ -294,21 +277,22 @@ public class RobotContainer {
     buttons.button(2).onTrue(hood.hardStopCalibrate());
     buttons.button(1).onTrue(setPreAimingCommand(true)).onFalse(setPreAimingCommand(false));
     buttons.button(7).onTrue(intake.retractIntake());
-    buttons.button(10).onTrue(resetBatman());
+    // buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
     buttons.button(8).whileTrue(intake.doTheThing());
     buttons.button(9).whileTrue(antiJam());
-    buttons
-        .button(12)
-        .toggleOnTrue(
-            new InstantCommand(
-                    () -> {
-                      shouldUseQuest = !shouldUseQuest;
-                      if (shouldUseQuest) {
-                        batman.resetPose(new Pose3d(drive.getPose()));
-                      }
-                    })
-                .ignoringDisable(true));
+    buttons.button(5).onTrue(intake.setTooHigh());
+    // buttons
+    //     .button(12)
+    //     .toggleOnTrue(
+    //         new InstantCommand(
+    //                 () -> {
+    //                   shouldUseQuest = !shouldUseQuest;
+    //                   if (shouldUseQuest) {
+    //                     batman.resetPose(new Pose3d(drive.getPose()));
+    //                   }
+    //                 })
+    //             .ignoringDisable(true));
   }
 
   public void disabledPeriodic() {
@@ -336,13 +320,13 @@ public class RobotContainer {
     SmartDashboard.putNumber("Starting Position/Distance to Starting Target", poseDistance);
   }
 
-  public Pose2d getPoseBatman() {
-    return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
-  }
+  // public Pose2d getPoseBatman() {
+  //   return batman.shouldUse() ? batman.getPose2d() : drive.getPose();
+  // }
 
-  public Command resetBatman() { // DO NOT FLIP IF RED
-    return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
-  }
+  // public Command resetBatman() { // DO NOT FLIP IF RED
+  //   return batman.resetQuestPose(() -> new Pose3d(drive.getPose())).ignoringDisable(true);
+  // }
 
   public Command driveRotateAroundRobotCenter() {
     return DriveCommands.joystickDrive(
@@ -365,17 +349,27 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.5, 0.5))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.5, 0.5))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
                 ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
                 : -controller.getRightX(),
         this::turretRotSupplier);
+  }
+
+  public Command driveRebuiltSOMETHING() {
+    return DriveCommands.rebuiltDriveSomething(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX(),
+        this::turretRotSupplier,
+        () -> shooting && trajectorySolver.getIsTargetingHub());
   }
 
   public Command driveTrench() {
@@ -440,6 +434,7 @@ public class RobotContainer {
     return new ParallelCommandGroup(
         setShooting(false),
         shooter.stopShooter(),
+        hotTub.stopSpinner(),
         feeder.stopFeeder(),
         hood.setNotShootingCommand(),
         intake.setNotShooting());

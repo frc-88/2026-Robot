@@ -10,6 +10,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -60,7 +62,7 @@ public class Intake extends SubsystemBase {
   private final DoublePreferenceConstant pivotRollerSpeed =
       new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);
   private final DoublePreferenceConstant deployPositionRotations =
-      new DoublePreferenceConstant("Intake/DeployPosition", 27.6);
+      new DoublePreferenceConstant("Intake/DeployPosition", 27.06);
 
   private boolean isShooting = false;
   private boolean paused = false;
@@ -68,6 +70,7 @@ public class Intake extends SubsystemBase {
   private int stopCounter = 0;
 
   DoubleSupplier m_drivespeed;
+  private Debouncer stallDebouncer = new Debouncer(3.0, DebounceType.kRising);
 
   public Intake(DoubleSupplier speed) {
     m_drivespeed = speed;
@@ -133,6 +136,8 @@ public class Intake extends SubsystemBase {
     intakeRollerFollowerRight.setControl(
         new Follower(Constants.INTAKE_ROLLER_MAIN_LEFT, MotorAlignmentValue.Opposed));
     intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(500);
+
+    deployPositionRotations.setValue(30.0);
   }
 
   private void configureSmartDashboardButtons() {
@@ -140,14 +145,20 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putData("Intake/Deploy", deployIntake());
     SmartDashboard.putData(
         "Intake/SetDeployed",
-        new InstantCommand(() -> intakePivot.setPosition(27.6)).ignoringDisable(true));
+        new InstantCommand(() -> intakePivot.setPosition(deployPositionRotations.getValue()))
+            .ignoringDisable(true));
     SmartDashboard.putData(
         "Intake/SetZero",
         new InstantCommand(() -> intakePivot.setPosition(0.0)).ignoringDisable(true));
+
+    SmartDashboard.putData("Intake/SetTooHigh", setTooHigh());
   }
 
   public void periodic() {
     Logger.recordOutput("Intake/IsShooting", isShooting);
+    // if(isStalledPivot()) {
+    //   intakePivot.setPosition(deployPositionRotations.getValue());
+    // }
   }
 
   @AutoLogOutput
@@ -221,9 +232,17 @@ public class Intake extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean isStalled() {
+  private boolean isStalledRoller() {
     return intakeRollerMainLeft.getStatorCurrent().getValueAsDouble() > 20.0
         && intakeRollerMainLeft.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private boolean isStalledPivot() {
+    return stallDebouncer.calculate(
+        intakePivot.getPosition().getValueAsDouble() > 25.0
+            && intakePivot.getStatorCurrent().getValueAsDouble() > 4.0
+            && intakePivot.getVelocity().getValueAsDouble() < 8.0);
   }
 
   private double intakePivotAngleDegreesToRotations(double pivotAngle) {
@@ -235,11 +254,15 @@ public class Intake extends SubsystemBase {
   }
 
   private void goToRotations(double minionRotations) {
+    if (isStalledPivot() && minionRotations == deployPositionRotations.getValue()) {
+      deployPositionRotations.setValue(intakePivot.getPosition().getValueAsDouble());
+      // intakePivot.setPosition(deployPositionRotations.getValue());
+    }
     intakePivot.setControl(pivotRequest.withPosition(minionRotations));
   }
 
   private void setRollerSpeed(DoubleSupplier speed) {
-    if (isStalled()) {
+    if (isStalledRoller()) {
       stallCounter++;
     } else if (!paused) {
       stallCounter = 0;
@@ -316,7 +339,7 @@ public class Intake extends SubsystemBase {
     } else {
       intakePivot.stopMotor();
     }
-    setRollerSpeed(() -> speed.getValue() / 10.0);
+    setRollerSpeed(() -> speed.getValue() * 1.0);
     setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
 
@@ -346,6 +369,10 @@ public class Intake extends SubsystemBase {
 
   public Command antiJamIntake() {
     return new InstantCommand(() -> antiJam());
+  }
+
+  public Command setTooHigh() {
+    return new InstantCommand(() -> deployPositionRotations.setValue(30.0)).ignoringDisable(true);
   }
 
   public Command runIntake() {
