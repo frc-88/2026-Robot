@@ -54,8 +54,8 @@ public class DriveCommands {
   private static boolean targetSet = false;
   private static double rotationTarget;
   private static double yTarget;
-  private static SlewRateLimiter xLimiter = new SlewRateLimiter(10.0);
-  private static SlewRateLimiter yLimiter = new SlewRateLimiter(10.0);
+  private static SlewRateLimiter xLimiter = new SlewRateLimiter(5.0);
+  private static SlewRateLimiter yLimiter = new SlewRateLimiter(5.0);
   private static SlewRateLimiter rotationLimiter = new SlewRateLimiter(50.0);
 
   private DriveCommands() {}
