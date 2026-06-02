@@ -68,6 +68,9 @@ public class AutoStartPositions {
       case "Right Follow The Leader Wyndham":
         startingPose = new Pose2d(3.560, 0.664, Rotation2d.kZero);
         break;
+      case "HighTideBC":
+        startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
+        break;
 
       default:
         break;
