@@ -71,6 +71,9 @@ public class AutoStartPositions {
       case "HighTideBC":
         startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
         break;
+      case "HighTideBCCenter":
+        startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
+        break;
 
       default:
         break;

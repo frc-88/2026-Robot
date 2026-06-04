@@ -226,7 +226,7 @@ public class RobotContainer {
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
-                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+                    < (trajectorySolver.getTimeOfFlight() + 1 + Constants.FUEL_SCORING_TIME))
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
                     > 25.0

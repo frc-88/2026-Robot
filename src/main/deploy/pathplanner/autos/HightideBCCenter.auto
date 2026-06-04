@@ -87,7 +87,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 0.5
                 }
               },
               {
@@ -131,7 +131,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 2.0
+                  "waitTime": 1.5
                 }
               },
               {
@@ -141,7 +141,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.8
+                        "waitTime": 1.3
                       }
                     },
                     {
@@ -169,7 +169,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LeftHightidedepottoleftdot"
+                  "pathName": "LeftHightidedepottocenterdot"
                 }
               },
               {
