@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  private static final double DEADBAND = 0.01;
   private static final double ANGLE_KP_FAST = 15.0;
   private static final double ANGLE_KD_FAST = 0.04;
 
@@ -66,7 +66,7 @@ public class DriveCommands {
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    // linearMagnitude = linearMagnitude * linearMagnitude;
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
@@ -194,9 +194,9 @@ public class DriveCommands {
           double y = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
           if (shouldSlow.getAsBoolean()) {
-            x = xLimiter.calculate(x);
-            y = yLimiter.calculate(y);
-            omega = rotationLimiter.calculate(omega);
+            // x = xLimiter.calculate(x);
+            // y = yLimiter.calculate(y);
+            // omega = rotationLimiter.calculate(omega);
           }
 
           ChassisSpeeds speeds = new ChassisSpeeds(x, y, omega);

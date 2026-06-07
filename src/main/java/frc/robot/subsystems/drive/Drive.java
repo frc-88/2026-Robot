@@ -370,9 +370,21 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void bcDotWheel() {
+    modules[0].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-135.0)));
+    modules[3].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-135.0)));
+    modules[1].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(135.0)));
+    modules[2].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(135.0)));
+  }
+
   public Command pointForwardsCommand() {
     return new RunCommand(() -> pointForwards(), this);
   }
+
+  public Command bcDotWheelCommand() {
+    return new RunCommand(() -> bcDotWheel(), this);
+  }
+
   /** Stops the drive. */
   public void stop() {
     runVelocityAroundCenter(new ChassisSpeeds());
