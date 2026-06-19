@@ -293,7 +293,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void rollerSpit() {
-    setRollerSpeed(() -> -70.0);
+    setRollerSpeed(() -> -67.0);
   }
 
   private void pivotRollerSpit() {
