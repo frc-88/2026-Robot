@@ -116,7 +116,7 @@ public class TrajectorySolver extends SubsystemBase {
 
     boolean cancelX = false;
     boolean cancelY = false;
-  
+
     if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
             && robotVelocity.getX() > 0.0)
         || (robotPosition.getX() < Constants.FIELD_MARGIN && robotVelocity.getX() < 0.0)) {
