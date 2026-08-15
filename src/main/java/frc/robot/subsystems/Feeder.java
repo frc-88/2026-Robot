@@ -95,6 +95,11 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_feeder.getVelocity().getValue();
   }

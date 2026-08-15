@@ -112,6 +112,11 @@ public class Hood extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return hood.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
     return hood.getVelocity().getValue();
   }

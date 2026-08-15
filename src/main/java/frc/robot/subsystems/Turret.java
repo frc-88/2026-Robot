@@ -192,6 +192,11 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getTurretSupplyCurrent() {
+    return m_turret.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getTurretVelocity() {
     return m_turret.getVelocity().getValue();
   }
@@ -209,6 +214,11 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput
   private Current getRetractomaticCurrent() {
     return m_retractomatic.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRetractomaticSupplyCurrent() {
+    return m_retractomatic.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput
