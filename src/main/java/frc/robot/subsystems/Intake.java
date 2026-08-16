@@ -135,7 +135,10 @@ public class Intake extends SubsystemBase {
 
     intakeRollerFollowerRight.setControl(
         new Follower(Constants.INTAKE_ROLLER_MAIN_LEFT, MotorAlignmentValue.Opposed));
-    intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(500);
+    // Follower's own motorVoltage is only logged; 100 Hz is plenty. Was 500 Hz.
+    // (Note: this does NOT drive follower sync -- the follower listens to the LEADER's
+    // frames. Leader signal enablement is handled in the bus-optimization change.)
+    intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(100);
 
     deployPositionRotations.setValue(30.0);
   }

@@ -83,8 +83,9 @@ public class Shooter extends SubsystemBase {
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     shooterMain.getVelocity().setUpdateFrequency(100);
-    // the motorVoltage signal frequency is effectively the follower update rate
-    shooterMain.getMotorVoltage().setUpdateFrequency(500);
+    // motorVoltage feeds the follower + logging; measured follower tracking is tight
+    // far below 500 Hz, so 100 Hz is ample. Was 500 Hz.
+    shooterMain.getMotorVoltage().setUpdateFrequency(100);
   }
 
   private void configureSmartDashboardButtons() {
