@@ -140,6 +140,29 @@ public class Intake extends SubsystemBase {
     // frames. Leader signal enablement is handled in the bus-optimization change.)
     intakeRollerFollowerRight.getMotorVoltage().setUpdateFrequency(100);
 
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Pivot position/velocity/stator drive MotionMagic gating + pivot stall detection.
+    intakePivot.getPosition().setUpdateFrequency(100);
+    intakePivot.getVelocity().setUpdateFrequency(100);
+    intakePivot.getStatorCurrent().setUpdateFrequency(100);
+    // Roller leader: stator + velocity drive the roller stall/pause logic; DutyCycle +
+    // MotorVoltage + TorqueCurrent must stay enabled on the leader so the follower tracks.
+    intakeRollerMainLeft.getStatorCurrent().setUpdateFrequency(100);
+    intakeRollerMainLeft.getVelocity().setUpdateFrequency(100);
+    intakeRollerMainLeft.getMotorVoltage().setUpdateFrequency(100);
+    intakeRollerMainLeft.getDutyCycle().setUpdateFrequency(100);
+    intakeRollerMainLeft.getTorqueCurrent().setUpdateFrequency(50);
+    // Roller follower (motorVoltage set above) + inner roller: logged telemetry.
+    intakeRollerFollowerRight.getStatorCurrent().setUpdateFrequency(100);
+    intakeRollerFollowerRight.getVelocity().setUpdateFrequency(100);
+    intakeInnerRoller.getStatorCurrent().setUpdateFrequency(100);
+    intakeInnerRoller.getVelocity().setUpdateFrequency(100);
+    intakeInnerRoller.getMotorVoltage().setUpdateFrequency(50);
+    intakePivot.optimizeBusUtilization();
+    intakeRollerMainLeft.optimizeBusUtilization();
+    intakeRollerFollowerRight.optimizeBusUtilization();
+    intakeInnerRoller.optimizeBusUtilization();
+
     deployPositionRotations.setValue(30.0);
   }
 

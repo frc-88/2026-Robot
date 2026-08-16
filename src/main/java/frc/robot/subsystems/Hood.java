@@ -87,6 +87,16 @@ public class Hood extends SubsystemBase {
 
     hood.getConfigurator().apply(hoodConfig);
 
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // (RawPulseWidthPosition is set in the constructor.) StatorCurrent is used by the
+    // hard-stop calibration; position/velocity/voltage/current are logged.
+    hood.getPosition().setUpdateFrequency(100);
+    hood.getVelocity().setUpdateFrequency(100);
+    hood.getStatorCurrent().setUpdateFrequency(100);
+    hood.getMotorVoltage().setUpdateFrequency(50);
+    hood.getTorqueCurrent().setUpdateFrequency(50);
+    hood.optimizeBusUtilization();
+
     setCalibrate();
     // hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
   }

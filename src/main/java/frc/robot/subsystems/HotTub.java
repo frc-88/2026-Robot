@@ -88,6 +88,15 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Stator current + velocity feed the stall indicator; the rest are logged.
+    m_spinner.getPosition().setUpdateFrequency(100);
+    m_spinner.getVelocity().setUpdateFrequency(100);
+    m_spinner.getStatorCurrent().setUpdateFrequency(100);
+    m_spinner.getMotorVoltage().setUpdateFrequency(50);
+    m_spinner.getTorqueCurrent().setUpdateFrequency(50);
+    m_spinner.optimizeBusUtilization();
   }
 
   @AutoLogOutput
