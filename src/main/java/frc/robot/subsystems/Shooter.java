@@ -83,8 +83,23 @@ public class Shooter extends SubsystemBase {
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     shooterMain.getVelocity().setUpdateFrequency(100);
-    // the motorVoltage signal frequency is effectively the follower update rate
-    shooterMain.getMotorVoltage().setUpdateFrequency(500);
+    // motorVoltage feeds the follower + logging; measured follower tracking is tight
+    // far below 500 Hz, so 100 Hz is ample. Was 500 Hz.
+    shooterMain.getMotorVoltage().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Velocity + motorVoltage are set above. Position/torqueCurrent are logged; the
+    // leader must also keep DutyCycle + TorqueCurrent enabled for the follower to track.
+    shooterMain.getPosition().setUpdateFrequency(100);
+    shooterMain.getTorqueCurrent().setUpdateFrequency(50);
+    shooterMain.getDutyCycle().setUpdateFrequency(100);
+    shooterFollower.getMotorVoltage().setUpdateFrequency(50);
+    shooterFollower.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    shooterMain.getStatorCurrent().setUpdateFrequency(50);
+    shooterFollower.getStatorCurrent().setUpdateFrequency(50);
+    shooterMain.optimizeBusUtilization();
+    shooterFollower.optimizeBusUtilization();
   }
 
   private void configureSmartDashboardButtons() {

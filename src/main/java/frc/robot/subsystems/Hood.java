@@ -52,7 +52,9 @@ public class Hood extends SubsystemBase {
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
-    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
+    // Pulse-width is only read in software for calibration/homing (control uses the
+    // internal rotor), so 100 Hz is plenty. Was 1000 Hz -- ~13% of the roboRIO CAN bus.
+    hood.getRawPulseWidthPosition().setUpdateFrequency(100);
     configureMinion();
     configureSmartDashboardButtons();
   }
@@ -84,6 +86,16 @@ public class Hood extends SubsystemBase {
     hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
 
     hood.getConfigurator().apply(hoodConfig);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // (RawPulseWidthPosition is set in the constructor.) StatorCurrent is used by the
+    // hard-stop calibration; position/velocity/voltage/current are logged.
+    hood.getPosition().setUpdateFrequency(100);
+    hood.getVelocity().setUpdateFrequency(100);
+    hood.getStatorCurrent().setUpdateFrequency(100);
+    hood.getMotorVoltage().setUpdateFrequency(50);
+    hood.getTorqueCurrent().setUpdateFrequency(50);
+    hood.optimizeBusUtilization();
 
     setCalibrate();
     // hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));

@@ -77,6 +77,14 @@ public class Feeder extends SubsystemBase {
     m_feeder.getConfigurator().apply(feederConfig);
 
     m_feeder.getVelocity().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    m_feeder.getPosition().setUpdateFrequency(100);
+    m_feeder.getMotorVoltage().setUpdateFrequency(50);
+    m_feeder.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    m_feeder.getStatorCurrent().setUpdateFrequency(50);
+    m_feeder.optimizeBusUtilization();
   }
 
   @AutoLogOutput
