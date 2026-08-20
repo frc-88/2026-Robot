@@ -166,6 +166,16 @@ public class Shooter extends SubsystemBase {
     return shooterFollower.getTorqueCurrent().getValueAsDouble();
   }
 
+  @AutoLogOutput
+  private double getMainSupplyCurrent() {
+    return shooterMain.getSupplyCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerSupplyCurrent() {
+    return shooterFollower.getSupplyCurrent().getValueAsDouble();
+  }
+
   public void periodic() {
     targetVelocity = m_targetSpeed.getAsDouble();
 

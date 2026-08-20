@@ -177,6 +177,11 @@ public class Intake extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getPivotSupplyCurrent() {
+    return intakePivot.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private double getPivotPosition() {
     return intakePivot.getPosition().getValueAsDouble();
   }
@@ -194,6 +199,16 @@ public class Intake extends SubsystemBase {
   @AutoLogOutput
   private Current getRollerFollowerCurrent() {
     return intakeRollerFollowerRight.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRollerMainSupplyCurrent() {
+    return intakeRollerMainLeft.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRollerFollowerSupplyCurrent() {
+    return intakeRollerFollowerRight.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput
@@ -219,6 +234,11 @@ public class Intake extends SubsystemBase {
   @AutoLogOutput
   private Current getPivotRollerCurrent() {
     return intakeInnerRoller.getStatorCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getPivotRollerSupplyCurrent() {
+    return intakeInnerRoller.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput
