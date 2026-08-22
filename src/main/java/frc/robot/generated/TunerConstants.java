@@ -37,7 +37,7 @@ public class TunerConstants {
           .withKI(0)
           .withKD(0)
           .withKS(0)
-          .withKV(0.871); // KV = 0.124 * kDriveGearRatio
+          .withKV(0.871); // KV = 0.124 * kDriveGearRatio newvalue=.871
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
@@ -143,7 +143,8 @@ public class TunerConstants {
   private static final int kFrontLeftEncoderId = 13;
   // private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.120849609375); //CANCoder
   // offset for comp
-  private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.346924); // CANCoder offset for prac
+  private static final Angle kFrontLeftEncoderOffset =
+      Rotations.of(-0.346924); // CANCoder offset for prac
   private static final boolean kFrontLeftSteerMotorInverted = false;
   private static final boolean kFrontLeftEncoderInverted = false;
 

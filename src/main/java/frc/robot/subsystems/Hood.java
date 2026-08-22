@@ -43,7 +43,8 @@ public class Hood extends SubsystemBase {
       new DoublePreferenceConstant("Hood/Target", 24.0);
   public DoublePreferenceConstant encoderOffset20Deg =
       new DoublePreferenceConstant(
-          "Hood/EncoderOffset", 0.199219); // what the SRX encoder reads when hood is at 20 deg
+          "Hood/EncoderOffset",
+          0.585938); // what the SRX encoder reads when hood is at 20 deg comp:0.199219
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
@@ -83,7 +84,8 @@ public class Hood extends SubsystemBase {
         hoodConfigConstants.getMaxAcceleration().getValue();
 
     hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    hoodConfig.CurrentLimits.StatorCurrentLimit =
+        88.0; // changed to 88 for practice robot, comp is 40
 
     hood.getConfigurator().apply(hoodConfig);
 
@@ -102,10 +104,10 @@ public class Hood extends SubsystemBase {
   }
 
   private void configureSmartDashboardButtons() {
-    // SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
+    SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
     SmartDashboard.putData("Hood/HardCalibrate", hardStopCalibrate());
-    // SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
-    // SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
+    SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+    SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
   }
 
   @AutoLogOutput

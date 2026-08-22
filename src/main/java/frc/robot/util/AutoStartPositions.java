@@ -75,6 +75,10 @@ public class AutoStartPositions {
         startingPose = new Pose2d(3.547, 7.406, Rotation2d.kZero);
         break;
 
+      case "Test Track":
+        startingPose = new Pose2d(1.914, 5.982, Rotation2d.kCW_90deg);
+        break;
+
       default:
         break;
     }
