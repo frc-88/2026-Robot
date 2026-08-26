@@ -69,6 +69,9 @@ public final class Constants {
   public static final int TURRET_RETRACTOMATIC_ID = 17;
   public static final int TURRET_CANCODER_ID2 = 3;
 
+  // Battery Fuel Gauge
+  public static final int BATTERY_FUEL_GAUGE = 0;
+
   // Drive
   public static final int BASE_PIGEON = 0;
   // See generated/TunerConstants.java
