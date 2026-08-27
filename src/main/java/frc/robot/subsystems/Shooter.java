@@ -157,6 +157,11 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private double getTargetVelocity() {
+    return targetVelocity;
+  }
+
+  @AutoLogOutput
   private double getPosition() {
     return shooterMain.getPosition().getValueAsDouble();
   }
