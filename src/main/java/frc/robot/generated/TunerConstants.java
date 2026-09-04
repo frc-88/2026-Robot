@@ -22,29 +22,40 @@ public class TunerConstants {
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(100)
+          .withKP(130) // with foc 130 volt 100
           .withKI(0)
-          .withKD(0.5)
-          .withKS(0.1)
-          .withKV(2.49)
+          .withKD(0.5) // foc .5 volt .5
+          .withKS(6.0) // foc 6 volt .1
+          .withKV(22.00) // foc 22 volt 2.49
           .withKA(0)
           .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
       new Slot0Configs()
-          .withKP(1.5)
+          .withKP(70.0) // test with 0.5 then step it up Foc 70
           .withKI(0)
           .withKD(0)
-          .withKS(0)
-          .withKV(0.871); // KV = 0.124 * kDriveGearRatio newvalue=.871
+          .withKS(5.5) // test with ks of .25 foc 5.5
+          .withKV(20); // KV = 0.124 * kDriveGearRatio newvalue=.871 foc 18
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
-  private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
+  // private static final ClosedLoopOutputType kSteerClosedLoopOutput =
+  // ClosedLoopOutputType.Voltage;
   // The closed-loop output type to use for the drive motors;
   // This affects the PID/FF gains for the drive motors
-  private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.Voltage;
+  // private static final ClosedLoopOutputType kDriveClosedLoopOutput =
+  // ClosedLoopOutputType.Voltage;
+
+  // The closed-loop output type to use for the steer motors;
+  // This affects the PID/FF gains for the steer motors
+  private static final ClosedLoopOutputType kSteerClosedLoopOutput =
+      ClosedLoopOutputType.TorqueCurrentFOC;
+  // The closed-loop output type to use for the drive motors;
+  // This affects the PID/FF gains for the drive motors
+  private static final ClosedLoopOutputType kDriveClosedLoopOutput =
+      ClosedLoopOutputType.TorqueCurrentFOC;
 
   // The type of motor used for the drive motor
   private static final DriveMotorArrangement kDriveMotorType =
