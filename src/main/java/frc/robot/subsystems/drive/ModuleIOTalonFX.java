@@ -111,9 +111,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
+    // Allows 50A per motor; after drawing at the limit for 0.5s, drops to 35A sustained.
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.CurrentLimits.SupplyCurrentLimit = 45.0;
-    driveConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
+    driveConfig.CurrentLimits.SupplyCurrentLimit = 50.0;
+    driveConfig.CurrentLimits.SupplyCurrentLowerLimit = 35.0;
+    driveConfig.CurrentLimits.SupplyCurrentLowerTime = 0.5;
 
     driveConfig.MotorOutput.Inverted =
         constants.DriveMotorInverted
@@ -142,6 +144,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    // Azimuth supply current limit: flat 20A per motor.
+    turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    turnConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+    turnConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
     turnConfig.MotorOutput.Inverted =
         constants.SteerMotorInverted
             ? InvertedValue.Clockwise_Positive
