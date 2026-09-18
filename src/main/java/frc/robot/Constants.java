@@ -47,9 +47,9 @@ public final class Constants {
       (28.0 / 12.0) * (3.0) * (4.0) * (48.0 / 16.0);
 
   // Spinner
-  public static final int SPINNER_MAIN = 21;
-  public static final int ROOF_FOLLOW = 99;
-  public static final int FUNNEL_FOLLOW = 98;
+  public static final int SPINNER_MAIN = 19;
+  public static final int ROOF_FOLLOW = 16;
+  public static final int FUNNEL_FOLLOW = 21;
 
   // Feeder
   public static final int FEEDER_MAIN = 4;
