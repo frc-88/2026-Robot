@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -61,6 +62,9 @@ public class Feeder extends SubsystemBase {
   public Feeder(BooleanSupplier OnTarget) {
     m_OnTarget = OnTarget;
     configureTalons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Feeder/Motor", "Feeder motor", m_feeder);
   }
 
   private void configureTalons() {
@@ -77,6 +81,14 @@ public class Feeder extends SubsystemBase {
     m_feeder.getConfigurator().apply(feederConfig);
 
     m_feeder.getVelocity().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    m_feeder.getPosition().setUpdateFrequency(100);
+    m_feeder.getMotorVoltage().setUpdateFrequency(50);
+    m_feeder.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    m_feeder.getStatorCurrent().setUpdateFrequency(50);
+    m_feeder.optimizeBusUtilization();
   }
 
   @AutoLogOutput
@@ -92,6 +104,11 @@ public class Feeder extends SubsystemBase {
   @AutoLogOutput
   private Current getCurrent() {
     return m_feeder.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput

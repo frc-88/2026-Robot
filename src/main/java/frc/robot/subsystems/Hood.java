@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -43,7 +44,8 @@ public class Hood extends SubsystemBase {
       new DoublePreferenceConstant("Hood/Target", 24.0);
   public DoublePreferenceConstant encoderOffset20Deg =
       new DoublePreferenceConstant(
-          "Hood/EncoderOffset", 0.199219); // what the SRX encoder reads when hood is at 20 deg
+          "Hood/EncoderOffset",
+          0.585938); // what the SRX encoder reads when hood is at 20 deg comp:0.199219
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
@@ -52,9 +54,14 @@ public class Hood extends SubsystemBase {
 
   public Hood(DoubleSupplier pitch) {
     m_pitch = pitch;
-    hood.getRawPulseWidthPosition().setUpdateFrequency(1000);
+    // Pulse-width is only read in software for calibration/homing (control uses the
+    // internal rotor), so 100 Hz is plenty. Was 1000 Hz -- ~13% of the roboRIO CAN bus.
+    hood.getRawPulseWidthPosition().setUpdateFrequency(100);
     configureMinion();
     configureSmartDashboardButtons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Hood/Motor", "Hood motor", hood);
   }
 
   private void configureMinion() {
@@ -81,19 +88,30 @@ public class Hood extends SubsystemBase {
         hoodConfigConstants.getMaxAcceleration().getValue();
 
     hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    hoodConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    hoodConfig.CurrentLimits.StatorCurrentLimit =
+        88.0; // changed to 88 for practice robot, comp is 40
 
     hood.getConfigurator().apply(hoodConfig);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // (RawPulseWidthPosition is set in the constructor.) StatorCurrent is used by the
+    // hard-stop calibration; position/velocity/voltage/current are logged.
+    hood.getPosition().setUpdateFrequency(100);
+    hood.getVelocity().setUpdateFrequency(100);
+    hood.getStatorCurrent().setUpdateFrequency(100);
+    hood.getMotorVoltage().setUpdateFrequency(50);
+    hood.getTorqueCurrent().setUpdateFrequency(50);
+    hood.optimizeBusUtilization();
 
     setCalibrate();
     // hood.setPosition(hoodAngleDegreesToRotationsOfMinion(13.5));
   }
 
   private void configureSmartDashboardButtons() {
-    // SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
+    SmartDashboard.putData("Hood/Calibrate", calibrate().ignoringDisable(true));
     SmartDashboard.putData("Hood/HardCalibrate", hardStopCalibrate());
-    // SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
-    // SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
+    SmartDashboard.putData("Hood/SetPosition", setPositionTargeting());
+    SmartDashboard.putData("Hood/SetPositionManual", setPositionManual());
   }
 
   @AutoLogOutput
@@ -109,6 +127,11 @@ public class Hood extends SubsystemBase {
   @AutoLogOutput
   private Current getCurrent() {
     return hood.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return hood.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput

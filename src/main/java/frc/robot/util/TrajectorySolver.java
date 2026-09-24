@@ -258,7 +258,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (isFullField) {
       return 0.78 + 0.0951 * distance;
     } else { // real hub
-      return 0.78 + 0.0951 * distance;
+      return 0.58 + 0.0951 * distance;
     }
   }
 
