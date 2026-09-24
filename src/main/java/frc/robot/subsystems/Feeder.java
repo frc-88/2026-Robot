@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -61,6 +62,9 @@ public class Feeder extends SubsystemBase {
   public Feeder(BooleanSupplier OnTarget) {
     m_OnTarget = OnTarget;
     configureTalons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Feeder/Motor", "Feeder motor", m_feeder);
   }
 
   private void configureTalons() {

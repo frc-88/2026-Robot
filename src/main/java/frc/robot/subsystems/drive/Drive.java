@@ -33,7 +33,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -46,6 +45,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
+import frc.robot.util.health.Fault;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -93,8 +93,19 @@ public class Drive extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final Alert gyroDisconnectedAlert =
-      new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+
+  // Health monitoring, Rung 1 (presence). Same text/type/condition as the Alert this replaces.
+  // gyroInputs.connected is not debounced in the IO layer, so 0.25 s is added here to keep a
+  // single stale sample from latching an error. (Only the warning is debounced; the
+  // kinematics fallback below still reacts to gyroInputs.connected immediately.)
+  @SuppressWarnings("unused")
+  private final Fault gyroDisconnectedFault =
+      new Fault(
+          "Drive/Gyro",
+          "Disconnected gyro, using kinematics as fallback.",
+          AlertType.kError,
+          () -> !gyroInputs.connected && Constants.currentMode != Mode.SIM,
+          0.25);
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private SwerveDriveKinematics kinematicsTurret =
@@ -264,8 +275,7 @@ public class Drive extends SubsystemBase {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
-    // Update gyro alert
-    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    // Gyro disconnect alert is a Fault now, polled by HealthMonitor (see field declaration).
   }
 
   public void setYaw(double yaw) {

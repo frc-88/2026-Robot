@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -69,6 +70,11 @@ public class HotTub extends SubsystemBase {
     m_onTargetRobot = onTargetRobot;
 
     configureTalons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("HotTub/Spinner", "HotTub spinner motor", m_spinner);
+    Fault.disconnected("HotTub/Roof", "HotTub roof motor", m_roof);
+    Fault.disconnected("HotTub/Funnel", "HotTub funnel motor", m_funnel);
     // SmartDashboard.putData("Spinner/RunSpinner", runSpinner());
     // SmartDashboard.putData("Spinner/StopSpinner", stopSpinner());
     // SmartDashboard.putData(

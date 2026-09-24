@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Util;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -96,6 +97,11 @@ public class Turret extends SubsystemBase {
 
     configureMotors();
     configureCANCoder();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Turret/Motor", "Turret motor", m_turret);
+    Fault.disconnected("Turret/Retractomatic", "Turret retractomatic motor", m_retractomatic);
+    Fault.disconnected("Turret/CANcoder", "Turret CANcoder", m_CANcoder);
 
     SmartDashboard.putData("Turret/SyncTurretToEncoder", syncCommand().ignoringDisable(true));
     SmartDashboard.putData("Turret/Aim", aim());

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -58,6 +59,9 @@ public class Hood extends SubsystemBase {
     hood.getRawPulseWidthPosition().setUpdateFrequency(100);
     configureMinion();
     configureSmartDashboardButtons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Hood/Motor", "Hood motor", hood);
   }
 
   private void configureMinion() {
