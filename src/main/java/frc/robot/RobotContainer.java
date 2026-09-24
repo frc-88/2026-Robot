@@ -18,6 +18,8 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,6 +49,8 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import frc.robot.util.health.Fault;
+import frc.robot.util.health.HealthMonitor;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -93,6 +97,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     RobotController.setBrownoutVoltage(6.5);
+    configureHealthFaults();
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
@@ -192,6 +197,57 @@ public class RobotContainer {
     configureDefaultCommands();
     configureDriverController();
     configureButtonBox();
+  }
+
+  // ----- Health monitoring: power (see util/health) -----
+
+  private static final double BATTERY_SAG_VOLTS = 7.0;
+  private static final double BATTERY_SAG_DEBOUNCE_SECONDS = 0.1;
+  // Lowest pre-match resting voltage seen last season.
+  private static final double LOW_RESTING_BATTERY_VOLTS = 12.3;
+
+  private double lastDisabledBatteryVolts = Double.NaN;
+  private double matchStartBatteryVolts = Double.NaN;
+
+  private void configureHealthFaults() {
+    boolean real = Constants.currentMode == Constants.Mode.REAL; // sim battery is a fixed 12 V
+
+    new Fault(
+        "Power/Brownout",
+        "roboRIO brownout: battery fell below the brownout voltage and motor outputs were cut.",
+        AlertType.kError,
+        () -> real && RobotController.isBrownedOut());
+
+    new Fault(
+        "Power/BatterySag",
+        "Battery voltage dropped below " + BATTERY_SAG_VOLTS + " V.",
+        AlertType.kWarning,
+        () -> real && RobotController.getBatteryVoltage() < BATTERY_SAG_VOLTS,
+        BATTERY_SAG_DEBOUNCE_SECONDS);
+
+    // Dashboard-only queue check: only true while disabled, so it never counts toward a match.
+    new Fault(
+        "Power/LowRestingBattery",
+        "Battery below " + LOW_RESTING_BATTERY_VOLTS + " V at rest. Consider swapping it.",
+        AlertType.kWarning,
+        () ->
+            real
+                && DriverStation.isDisabled()
+                && RobotController.getBatteryVoltage() < LOW_RESTING_BATTERY_VOLTS,
+        2.0);
+
+    // Record the resting voltage when auto starts; warn for that match if it was low.
+    HealthMonitor.getInstance()
+        .onScopeStart(
+            () -> {
+              matchStartBatteryVolts = lastDisabledBatteryVolts;
+              Logger.recordOutput("Health/MatchStartBatteryVolts", matchStartBatteryVolts);
+            });
+    new Fault(
+        "Power/LowStartingBattery",
+        "Match started on a low battery (below " + LOW_RESTING_BATTERY_VOLTS + " V at rest).",
+        AlertType.kWarning,
+        () -> real && matchStartBatteryVolts < LOW_RESTING_BATTERY_VOLTS);
   }
 
   private void configureSmartDashboardButtons() {
@@ -296,6 +352,8 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
+    // Health monitoring: resting battery voltage.
+    lastDisabledBatteryVolts = RobotController.getBatteryVoltage();
 
     String autoName = autoChooser.get().getName();
     if (lastName != autoName) {

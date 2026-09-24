@@ -67,6 +67,7 @@ public final class HealthMonitor {
   }
 
   private final List<Fault> faults = new ArrayList<>();
+  private final List<Runnable> scopeStartListeners = new ArrayList<>();
   private final Alert latchedSummaryAlert = new Alert("", AlertType.kInfo);
 
   private double firstLoopTime = Double.NaN;
@@ -91,6 +92,17 @@ public final class HealthMonitor {
     faults.add(fault);
   }
 
+  /**
+   * Registers code to run each time a new match record begins: when auto enables in a real match,
+   * or on every enable on the bench (see {@link ResetScope}). It runs right after the latches are
+   * cleared and before faults are checked that loop, so it can take a snapshot (e.g. the starting
+   * battery voltage) that faults in the new record can use. It does not run on the teleop enable
+   * that continues a match.
+   */
+  public void onScopeStart(Runnable listener) {
+    scopeStartListeners.add(listener);
+  }
+
   /** Call once per loop from {@code robotPeriodic()}, after the command scheduler has run. */
   public void periodic() {
     double now = Timer.getTimestamp();
@@ -107,6 +119,9 @@ public final class HealthMonitor {
       boolean continuesMatch = scope == ResetScope.PER_MATCH && !isAuto && lastEnabledWasAuto;
       if (!continuesMatch) {
         resetLatches();
+        for (Runnable listener : scopeStartListeners) {
+          listener.run();
+        }
       }
       endOfMatchDisplay = null; // re-enabling ends any display in progress
     }
