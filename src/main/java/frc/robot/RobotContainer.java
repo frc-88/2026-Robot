@@ -51,6 +51,7 @@ import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
 import frc.robot.util.health.Fault;
 import frc.robot.util.health.HealthMonitor;
+import frc.robot.util.usage.TreadUsageTracker;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -76,6 +77,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
+  private final TreadUsageTracker treadUsage;
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
@@ -174,6 +176,13 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
+
+    // Wheel-tread odometer: counts how far each wheel travels and warns on the dashboard
+    // ("Maintenance" alerts) when a module is due for a tread inspection. Pit crew records
+    // inspections/replacements from the dashboard "Usage" folder. Not part of the health system.
+    treadUsage =
+        new TreadUsageTracker(
+            drive::getWheelRadiusCharacterizationPositions, TunerConstants.FrontLeft.WheelRadius);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
