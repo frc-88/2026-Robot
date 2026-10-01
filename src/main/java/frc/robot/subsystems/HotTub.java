@@ -108,11 +108,27 @@ public class HotTub extends SubsystemBase {
     m_spinner.getMotorVoltage().setUpdateFrequency(50);
     m_spinner.getTorqueCurrent().setUpdateFrequency(50);
     m_spinner.optimizeBusUtilization();
+
+    m_roof.getPosition().setUpdateFrequency(100);
+    m_roof.getVelocity().setUpdateFrequency(100);
+    m_roof.getStatorCurrent().setUpdateFrequency(100);
+    m_roof.getMotorVoltage().setUpdateFrequency(50);
+    m_roof.getTorqueCurrent().setUpdateFrequency(50);
+    m_roof.optimizeBusUtilization();
+
+    m_funnel.getPosition().setUpdateFrequency(100);
+    m_funnel.getVelocity().setUpdateFrequency(100);
+    m_funnel.getStatorCurrent().setUpdateFrequency(100);
+    m_funnel.getMotorVoltage().setUpdateFrequency(50);
+    m_funnel.getTorqueCurrent().setUpdateFrequency(50);
+    m_funnel.optimizeBusUtilization();
   }
 
   @AutoLogOutput
   public boolean isHealthy() {
-    return m_spinner.isConnected() && m_spinner.isAlive();
+    return (m_spinner.isConnected() && m_spinner.isAlive())
+      && (m_roof.isConnected() && m_roof.isAlive())
+      && (m_funnel.isConnected() && m_funnel.isAlive());
   }
 
   @AutoLogOutput
