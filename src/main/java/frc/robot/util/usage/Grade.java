@@ -27,8 +27,7 @@ public enum Grade {
   }
 
   /**
-   * Finds the grade matching a dashboard label ("Good", "Worn", "Poor"), ignoring upper/lower
-   * case.
+   * Finds the grade matching a dashboard label ("Good", "Worn", "Poor"), ignoring upper/lower case.
    *
    * @return the grade, or {@code null} if the text is not a grade (e.g. the "(select grade)"
    *     placeholder)

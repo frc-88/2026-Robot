@@ -27,8 +27,8 @@ import java.util.Properties;
  * </ul>
  *
  * <p><b>Power-loss safety.</b> The state file is never edited in place. A save writes a new
- * temporary file, forces it onto the flash, copies the current file to the backup, then renames
- * the temporary file over the current one. A rename is all-or-nothing, so a power cut at any point
+ * temporary file, forces it onto the flash, copies the current file to the backup, then renames the
+ * temporary file over the current one. A rename is all-or-nothing, so a power cut at any point
  * leaves either the old or the new file intact, never a half-written one.
  *
  * <p>Methods are {@code synchronized} because the tracker saves on a background thread.
@@ -67,7 +67,9 @@ public final class UsageStore {
 
   private final Path dir;
 
-  /** @param dir folder holding the files; created on the first save if it does not exist */
+  /**
+   * @param dir folder holding the files; created on the first save if it does not exist
+   */
   public UsageStore(Path dir) {
     this.dir = dir;
   }

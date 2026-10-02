@@ -161,7 +161,8 @@ class UsageMeterTest {
     Properties sinceAboveLifetime = copy(saved);
     sinceAboveLifetime.setProperty("Tread/FL.sinceReplacement", "200");
 
-    for (Properties bad : new Properties[] {negative, garbage, badGrade, missing, sinceAboveLifetime}) {
+    for (Properties bad :
+        new Properties[] {negative, garbage, badGrade, missing, sinceAboveLifetime}) {
       UsageMeter meter = newMeter();
       meter.add(7.0);
       assertFalse(meter.readFrom(bad));

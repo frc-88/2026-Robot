@@ -33,8 +33,8 @@ public final class UsageMeter {
   public static final String UNKNOWN_LABEL = "unknown";
 
   /**
-   * How far a part may go before its first inspection, and after each inspection grade. All
-   * values are in the meter's unit (meters, for tread).
+   * How far a part may go before its first inspection, and after each inspection grade. All values
+   * are in the meter's unit (meters, for tread).
    */
   public record Schedule(
       double firstInspection, double afterGood, double afterWorn, double afterPoor) {
@@ -71,8 +71,8 @@ public final class UsageMeter {
   }
 
   /**
-   * Adds usage. Zero, negative, NaN, and infinite amounts are ignored, so a bad sensor reading
-   * can never make the count go backwards or become unreadable.
+   * Adds usage. Zero, negative, NaN, and infinite amounts are ignored, so a bad sensor reading can
+   * never make the count go backwards or become unreadable.
    */
   public void add(double amount) {
     if (!(amount > 0.0) || Double.isInfinite(amount)) {

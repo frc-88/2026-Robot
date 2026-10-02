@@ -3,6 +3,7 @@ package frc.robot.util.health;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,10 @@ import org.littletonrobotics.junction.Logger;
  *   <li>keeps a latch answering "did anything go wrong this match?", reset at the start of each
  *       match (or each enable on the bench — see {@link ResetScope});
  *   <li>at the end of the match, if anything latched, publishes the most urgent latched type (error
- *       beats warning) through {@link #getEndOfMatchDisplay()} for {@link #DISPLAY_SECONDS}.
+ *       beats warning) through {@link #getEndOfMatchDisplay()} for {@link #DISPLAY_SECONDS};
+ *   <li>saves the match record to the roboRIO (WPILib {@link Preferences}) as it changes, so it
+ *       survives a power-off. At the next boot it is shown again through {@link
+ *       #getPreviousRunDisplay()} and a dashboard alert, until the next enable starts a new record.
  * </ol>
  *
  * <p>This class is generic: it knows nothing about CAN, motors, or LEDs. It only reads robot mode
@@ -38,6 +42,18 @@ public final class HealthMonitor {
 
   /** How long {@link #getEndOfMatchDisplay()} reports a result after the match ends. */
   public static final double DISPLAY_SECONDS = 5.0;
+
+  /**
+   * If the first enable after boot comes this soon after robot code starts, with the field system
+   * attached, robot code must have restarted mid-match (in a normal match, code has been running
+   * for minutes before auto). Logged as {@code Health/RestartedMidMatch}.
+   */
+  public static final double MID_MATCH_RESTART_WINDOW_SECONDS = 5.0;
+
+  /** Preferences keys for the saved record. Stored on the roboRIO, so they survive power-off. */
+  private static final String SAVED_RECORD_KEY = "Health/SavedRecord";
+
+  private static final String SAVED_RECORD_TYPE_KEY = "Health/SavedRecordType";
 
   /**
    * When the latch is cleared.
@@ -69,6 +85,7 @@ public final class HealthMonitor {
   private final List<Fault> faults = new ArrayList<>();
   private final List<Runnable> scopeStartListeners = new ArrayList<>();
   private final Alert latchedSummaryAlert = new Alert("", AlertType.kInfo);
+  private final Alert previousRunAlert = new Alert("", AlertType.kInfo);
 
   private double firstLoopTime = Double.NaN;
   private boolean wasEnabled = false;
@@ -79,7 +96,27 @@ public final class HealthMonitor {
   private double displayUntil = 0.0;
   private String lastSummary = "";
 
-  private HealthMonitor() {}
+  // Saved record / previous-run replay
+  private final boolean persistenceEnabled = !Logger.hasReplaySource();
+  private final String bootRecord; // record found at boot; never cleared, logged for evidence
+  private AlertType previousRunDisplay = null;
+  private boolean hasEnabledSinceBoot = false;
+  private boolean restartedMidMatch = false;
+  private String recordLabel = "";
+  private String lastSavedRecord = "";
+  private boolean bootRecordLogged = false;
+
+  private HealthMonitor() {
+    // Load the record saved before the last power-off / restart, if any, and replay it.
+    bootRecord = persistenceEnabled ? Preferences.getString(SAVED_RECORD_KEY, "") : "";
+    lastSavedRecord = bootRecord;
+    if (!bootRecord.isEmpty()) {
+      String savedType = Preferences.getString(SAVED_RECORD_TYPE_KEY, "");
+      previousRunDisplay = savedType.equals("ERROR") ? AlertType.kError : AlertType.kWarning;
+      previousRunAlert.setText("Before last power-off/restart - " + bootRecord);
+      previousRunAlert.set(true);
+    }
+  }
 
   /** Called from the {@link Fault} constructor. */
   void register(Fault fault) {
@@ -116,9 +153,18 @@ public final class HealthMonitor {
     if (enabled && !wasEnabled) {
       boolean isAuto = DriverStation.isAutonomous();
       scope = DriverStation.isFMSAttached() ? ResetScope.PER_MATCH : ResetScope.PER_ENABLE;
+      if (scope == ResetScope.PER_MATCH
+          && !hasEnabledSinceBoot
+          && now - firstLoopTime < MID_MATCH_RESTART_WINDOW_SECONDS) {
+        // Log-only: the record from before the restart is in Health/PreviousRun.
+        restartedMidMatch = true;
+      }
+      hasEnabledSinceBoot = true;
       boolean continuesMatch = scope == ResetScope.PER_MATCH && !isAuto && lastEnabledWasAuto;
       if (!continuesMatch) {
         resetLatches();
+        recordLabel = buildRecordLabel();
+        clearSavedRecord(); // a new run starts fresh: nothing carries over from a past one
         for (Runnable listener : scopeStartListeners) {
           listener.run();
         }
@@ -169,6 +215,19 @@ public final class HealthMonitor {
     return endOfMatchDisplay;
   }
 
+  /**
+   * What a display should show for a record carried over from before the last power-off or code
+   * restart.
+   *
+   * <p>Returns the most urgent type from the saved record ({@link AlertType#kError} or {@link
+   * AlertType#kWarning}) from boot until the next enable starts a new record, and null otherwise.
+   * Kept separate from {@link #getEndOfMatchDisplay()} so the display can show "carried over from
+   * last time" differently from "just happened".
+   */
+  public AlertType getPreviousRunDisplay() {
+    return previousRunDisplay;
+  }
+
   /** True if any fault is active right now. */
   public boolean anyActive() {
     return highestActive() != null;
@@ -215,6 +274,47 @@ public final class HealthMonitor {
 
   // ----- Internals -----
 
+  /** "bench" without the field system, otherwise e.g. "NECMP2 Q52". */
+  private static String buildRecordLabel() {
+    if (!DriverStation.isFMSAttached()) {
+      return "bench";
+    }
+    String type;
+    switch (DriverStation.getMatchType()) {
+      case Practice:
+        type = "P";
+        break;
+      case Qualification:
+        type = "Q";
+        break;
+      case Elimination:
+        type = "E";
+        break;
+      default:
+        type = "M";
+        break;
+    }
+    String event = DriverStation.getEventName();
+    return (event.isEmpty() ? "" : event + " ") + type + DriverStation.getMatchNumber();
+  }
+
+  /** Ends any previous-run replay and erases the saved record. */
+  private void clearSavedRecord() {
+    previousRunDisplay = null;
+    previousRunAlert.set(false);
+    saveRecord("", null);
+  }
+
+  /** Writes the record to the roboRIO only when it changes (a few writes per match at most). */
+  private void saveRecord(String record, AlertType type) {
+    if (!persistenceEnabled || record.equals(lastSavedRecord)) {
+      return;
+    }
+    Preferences.setString(SAVED_RECORD_KEY, record);
+    Preferences.setString(SAVED_RECORD_TYPE_KEY, type == null ? "" : nameOf(type));
+    lastSavedRecord = record;
+  }
+
   private void logAndPublish(boolean inGrace) {
     List<String> active = new ArrayList<>();
     List<String> latched = new ArrayList<>();
@@ -238,15 +338,29 @@ public final class HealthMonitor {
     Logger.recordOutput("Health/LatchedFaults", latched.toArray(new String[0]));
     Logger.recordOutput("Health/HighestLatched", nameOf(highestLatched()));
     Logger.recordOutput("Health/EndOfMatchDisplay", nameOf(endOfMatchDisplay));
+    Logger.recordOutput("Health/PreviousRunDisplay", nameOf(previousRunDisplay));
+    Logger.recordOutput("Health/RestartedMidMatch", restartedMidMatch);
+    if (!bootRecordLogged) {
+      Logger.recordOutput("Health/PreviousRun", bootRecord);
+      bootRecordLogged = true;
+    }
 
     // Keep the latched list visible on the dashboard after the underlying alerts clear, so the
     // pit crew can see what happened during the match without opening a log.
     String since = scope == ResetScope.PER_MATCH ? "this match" : "since last enable";
-    String summary = latched.isEmpty() ? "" : "Faults " + since + ": " + String.join(", ", latched);
+    String list = String.join(", ", latched);
+    String summary = latched.isEmpty() ? "" : "Faults " + since + " (" + recordLabel + "): " + list;
     if (!summary.equals(lastSummary)) {
       latchedSummaryAlert.setText(summary);
       latchedSummaryAlert.set(!summary.isEmpty());
       lastSummary = summary;
+    }
+
+    // Save as faults are recorded, not just at match end, so a power loss mid-match keeps them.
+    // Nothing is saved before the first enable: the in-memory record is empty until then, and the
+    // saved record from before power-off must survive until a new run starts.
+    if (hasEnabledSinceBoot) {
+      saveRecord(latched.isEmpty() ? "" : recordLabel + ": " + list, highestLatched());
     }
   }
 

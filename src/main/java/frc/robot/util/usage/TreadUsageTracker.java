@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Wheel-tread odometer: counts how far each swerve wheel has travelled, warns on the dashboard
- * when a module is due for a tread inspection, and records inspections and replacements.
+ * Wheel-tread odometer: counts how far each swerve wheel has travelled, warns on the dashboard when
+ * a module is due for a tread inspection, and records inspections and replacements.
  *
  * <p>Design: {@code component-usage-tracker-design.md} in the FRC 2026 Robot project.
  *
@@ -51,8 +51,8 @@ import org.littletonrobotics.junction.Logger;
  *       design. That module's count goes back to zero.
  * </ul>
  *
- * <p>Both actions add a row to {@code /home/lvuser/usage/service-log.csv}, and "Last Action" on
- * the dashboard confirms what was recorded.
+ * <p>Both actions add a row to {@code /home/lvuser/usage/service-log.csv}, and "Last Action" on the
+ * dashboard confirms what was recorded.
  *
  * <h2>Deliberately NOT part of the health system</h2>
  *
@@ -71,7 +71,10 @@ import org.littletonrobotics.junction.Logger;
  * </ul>
  */
 public class TreadUsageTracker extends SubsystemBase {
-  /** Module order matches {@code Drive}: 0 = front left, 1 = front right, 2 = back left, 3 = back right. */
+  /**
+   * Module order matches {@code Drive}: 0 = front left, 1 = front right, 2 = back left, 3 = back
+   * right.
+   */
   private static final String[] MODULE_NAMES = {"FL", "FR", "BL", "BR"};
 
   /**
@@ -331,7 +334,8 @@ public class TreadUsageTracker extends SubsystemBase {
               meter.getSinceReplacement() / 1000.0,
               meter.getNextInspectionAt() / 1000.0));
     }
-    finishAction(rows, "Inspection recorded (" + grade.label() + "): " + String.join("; ", summary));
+    finishAction(
+        rows, "Inspection recorded (" + grade.label() + "): " + String.join("; ", summary));
   }
 
   private void recordReplacement() {
@@ -353,13 +357,17 @@ public class TreadUsageTracker extends SubsystemBase {
       meter.replaced(newLabel);
       rows.add(serviceRow(i, "replaced", "", reached, oldLabel, newLabel));
       summary.add(
-          String.format("%s (old %s reached %.2f km)", MODULE_NAMES[i], oldLabel, reached / 1000.0));
+          String.format(
+              "%s (old %s reached %.2f km)", MODULE_NAMES[i], oldLabel, reached / 1000.0));
     }
     finishAction(
-        rows, "Replacement recorded, new tread \"" + newLabel + "\": " + String.join("; ", summary));
+        rows,
+        "Replacement recorded, new tread \"" + newLabel + "\": " + String.join("; ", summary));
   }
 
-  /** The modules picked on the dashboard, or null (with a status message) if nothing can be done. */
+  /**
+   * The modules picked on the dashboard, or null (with a status message) if nothing can be done.
+   */
   private int[] selectedModulesOrNull() {
     if (!DriverStation.isDisabled()) {
       setStatus("Not recorded: disable the robot first.");
@@ -395,8 +403,8 @@ public class TreadUsageTracker extends SubsystemBase {
   }
 
   /**
-   * One service-log row. {@code distance} is the "since replacement" distance at the moment of
-   * the action (for a replacement, how far the old tread got).
+   * One service-log row. {@code distance} is the "since replacement" distance at the moment of the
+   * action (for a replacement, how far the old tread got).
    */
   private String serviceRow(
       int module, String action, String grade, double distance, String oldLabel, String newLabel) {
@@ -490,7 +498,9 @@ public class TreadUsageTracker extends SubsystemBase {
     }
   }
 
-  /** One readable line per module, e.g. "1.23 km since replacement; inspect at 2.00 km; tread-A". */
+  /**
+   * One readable line per module, e.g. "1.23 km since replacement; inspect at 2.00 km; tread-A".
+   */
   private void publishDashboardSummary() {
     for (int i = 0; i < MODULE_NAMES.length; i++) {
       UsageMeter meter = meters[i];
