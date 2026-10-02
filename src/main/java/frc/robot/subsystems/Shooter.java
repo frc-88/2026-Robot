@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -62,6 +63,10 @@ public class Shooter extends SubsystemBase {
     m_targetSpeed = speed;
     configureTalons();
     configureSmartDashboardButtons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Shooter/Main", "Shooter main motor", shooterMain);
+    Fault.disconnected("Shooter/Follower", "Shooter follower motor", shooterFollower);
   }
 
   private void configureTalons() {
@@ -83,8 +88,23 @@ public class Shooter extends SubsystemBase {
     shooterFollower.setControl(new Follower(Constants.SHOOTER_MAIN, MotorAlignmentValue.Opposed));
 
     shooterMain.getVelocity().setUpdateFrequency(100);
-    // the motorVoltage signal frequency is effectively the follower update rate
-    shooterMain.getMotorVoltage().setUpdateFrequency(500);
+    // motorVoltage feeds the follower + logging; measured follower tracking is tight
+    // far below 500 Hz, so 100 Hz is ample. Was 500 Hz.
+    shooterMain.getMotorVoltage().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Velocity + motorVoltage are set above. Position/torqueCurrent are logged; the
+    // leader must also keep DutyCycle + TorqueCurrent enabled for the follower to track.
+    shooterMain.getPosition().setUpdateFrequency(100);
+    shooterMain.getTorqueCurrent().setUpdateFrequency(50);
+    shooterMain.getDutyCycle().setUpdateFrequency(100);
+    shooterFollower.getMotorVoltage().setUpdateFrequency(50);
+    shooterFollower.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    shooterMain.getStatorCurrent().setUpdateFrequency(50);
+    shooterFollower.getStatorCurrent().setUpdateFrequency(50);
+    shooterMain.optimizeBusUtilization();
+    shooterFollower.optimizeBusUtilization();
   }
 
   private void configureSmartDashboardButtons() {
@@ -164,6 +184,16 @@ public class Shooter extends SubsystemBase {
   @AutoLogOutput
   private double getFollowerCurrent() {
     return shooterFollower.getTorqueCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getMainSupplyCurrent() {
+    return shooterMain.getSupplyCurrent().getValueAsDouble();
+  }
+
+  @AutoLogOutput
+  private double getFollowerSupplyCurrent() {
+    return shooterFollower.getSupplyCurrent().getValueAsDouble();
   }
 
   public void periodic() {
