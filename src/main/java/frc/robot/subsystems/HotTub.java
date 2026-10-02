@@ -46,11 +46,11 @@ public class HotTub extends SubsystemBase {
 
   // preferences
   private final DoublePreferenceConstant p_spinnerSpeed =
-      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 90.0);
+      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
   private final DoublePreferenceConstant p_roofSpeed =
-      new DoublePreferenceConstant("Spinner/RoofSpeed", 90.0);
+      new DoublePreferenceConstant("Spinner/RoofSpeed", 100.0);
   private final DoublePreferenceConstant p_funnelSpeed =
-      new DoublePreferenceConstant("Spinner/FunnelSpeed", 90.0);
+      new DoublePreferenceConstant("Spinner/FunnelSpeed", 100.0);
 
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
