@@ -49,6 +49,7 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import frc.robot.util.health.CanBusFaults;
 import frc.robot.util.health.Fault;
 import frc.robot.util.health.HealthMonitor;
 import frc.robot.util.usage.TreadUsageTracker;
@@ -257,6 +258,8 @@ public class RobotContainer {
         "Match started on a low battery (below " + LOW_RESTING_BATTERY_VOLTS + " V at rest).",
         AlertType.kWarning,
         () -> real && matchStartBatteryVolts < LOW_RESTING_BATTERY_VOLTS);
+
+    CanBusFaults.create(real);
   }
 
   private void configureSmartDashboardButtons() {
