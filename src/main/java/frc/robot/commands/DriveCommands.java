@@ -84,10 +84,11 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
-          // System.out.println("yes");
+          System.out.println("jotsyickdrive");
           // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+          Logger.recordOutput("Drive/commandedvelocity", linearVelocity);
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -192,6 +193,8 @@ public class DriveCommands {
 
           double x = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
           double y = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
+
+          Logger.recordOutput("Drive/commandedvelocity", Math.hypot(x, y));
 
           if (shouldSlow.getAsBoolean()) {
             // x = xLimiter.calculate(x);
