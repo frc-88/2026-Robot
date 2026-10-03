@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Targeting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 1 (2mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 2 (2mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 3 (3mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 4 (3mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 5 (4mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 6 (4mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 7 (4.5mps)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Loop 8 (4.5mps)"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

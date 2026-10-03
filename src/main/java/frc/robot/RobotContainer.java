@@ -226,7 +226,7 @@ public class RobotContainer {
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
-                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+                    < (trajectorySolver.getTimeOfFlight() + 1 + Constants.FUEL_SCORING_TIME))
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
                     > 25.0
@@ -237,11 +237,7 @@ public class RobotContainer {
 
   private void configureDriverController() {
 
-    controller
-        .x()
-        .onTrue(
-            driveAtAngle(() -> Rotation2d.fromDegrees(90.0))
-                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+    controller.x().whileTrue(drive.bcDotWheelCommand());
 
     controller
         .a()
@@ -365,8 +361,14 @@ public class RobotContainer {
   public Command driveRebuiltSOMETHING() {
     return DriveCommands.rebuiltDriveSomething(
         drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftY() * 0.65
+                : -controller.getLeftY(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftX() * 0.65
+                : -controller.getLeftX(),
         () -> -controller.getRightX(),
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());

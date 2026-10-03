@@ -6,10 +6,12 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -34,6 +36,8 @@ import org.littletonrobotics.junction.Logger;
 public class HotTub extends SubsystemBase {
   // motors & devices
   private final TalonFX m_spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
+  private final TalonFX m_roof = new TalonFX(Constants.ROOF_FOLLOW, CANBus.roboRIO());
+  private final TalonFX m_funnel = new TalonFX(Constants.FUNNEL_FOLLOW, CANBus.roboRIO());
 
   // output requests
   private final VelocityVoltage m_request = new VelocityVoltage(0.0);
@@ -45,7 +49,7 @@ public class HotTub extends SubsystemBase {
       new DoublePreferenceConstant("Spinner/SpinnerSpeed", 90.0);
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.011, 0., 0.);
+          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.11, 0., 0.);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -88,6 +92,22 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
+
+    spinnerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    m_roof.getConfigurator().apply(spinnerConfig);
+    m_funnel.getConfigurator().apply(spinnerConfig);
+
+    m_roof.setControl(new Follower(Constants.SPINNER_MAIN, MotorAlignmentValue.Opposed));
+    m_funnel.setControl(new Follower(Constants.SPINNER_MAIN, MotorAlignmentValue.Opposed));
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Stator current + velocity feed the stall indicator; the rest are logged.
+    m_spinner.getPosition().setUpdateFrequency(100);
+    m_spinner.getVelocity().setUpdateFrequency(100);
+    m_spinner.getStatorCurrent().setUpdateFrequency(100);
+    m_spinner.getMotorVoltage().setUpdateFrequency(50);
+    m_spinner.getTorqueCurrent().setUpdateFrequency(50);
+    m_spinner.optimizeBusUtilization();
   }
 
   @AutoLogOutput
@@ -103,6 +123,11 @@ public class HotTub extends SubsystemBase {
   @AutoLogOutput
   private Current getCurrent() {
     return m_spinner.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return m_spinner.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput
