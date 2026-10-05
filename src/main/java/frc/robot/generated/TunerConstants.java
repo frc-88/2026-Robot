@@ -152,7 +152,7 @@ public class TunerConstants {
   private static final int kFrontLeftDriveMotorId = 12;
   private static final int kFrontLeftSteerMotorId = 13;
   private static final int kFrontLeftEncoderId = 13;
-  private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.120849609375); // CANCoder
+  private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.124756); // CANCoder
   // offset for comp
   // private static final Angle kFrontLeftEncoderOffset =      Rotations.of(-0.346924); // CANCoder
   // offset for prac
@@ -180,7 +180,7 @@ public class TunerConstants {
   private static final int kBackLeftDriveMotorId = 11;
   private static final int kBackLeftSteerMotorId = 10;
   private static final int kBackLeftEncoderId = 10;
-  private static final Angle kBackLeftEncoderOffset = Rotations.of(0.006103515625); // CANCoder
+  private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.156006); // CANCoder
   // offset for comp
   // private static final Angle kBackLeftEncoderOffset = Rotations.of(0.284180); // CANCoder offset
   // for prac

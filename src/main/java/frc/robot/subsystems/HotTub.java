@@ -46,7 +46,12 @@ public class HotTub extends SubsystemBase {
 
   // preferences
   private final DoublePreferenceConstant p_spinnerSpeed =
-      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 90.0);
+      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
+  private final DoublePreferenceConstant p_roofSpeed =
+      new DoublePreferenceConstant("Spinner/RoofSpeed", 100.0);
+  private final DoublePreferenceConstant p_funnelSpeed =
+      new DoublePreferenceConstant("Spinner/FunnelSpeed", 100.0);
+
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
           "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.11, 0., 0.);
@@ -59,7 +64,7 @@ public class HotTub extends SubsystemBase {
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
               (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
-          new SysIdRoutine.Mechanism(this::setVoltage, null, this));
+          new SysIdRoutine.Mechanism(this::setSpinnerVoltage, null, this));
 
   private final BooleanSupplier m_onTargetRobot;
 
@@ -108,15 +113,32 @@ public class HotTub extends SubsystemBase {
     m_spinner.getMotorVoltage().setUpdateFrequency(50);
     m_spinner.getTorqueCurrent().setUpdateFrequency(50);
     m_spinner.optimizeBusUtilization();
+
+    m_roof.getPosition().setUpdateFrequency(100);
+    m_roof.getVelocity().setUpdateFrequency(100);
+    m_roof.getStatorCurrent().setUpdateFrequency(100);
+    m_roof.getMotorVoltage().setUpdateFrequency(50);
+    m_roof.getTorqueCurrent().setUpdateFrequency(50);
+    m_roof.optimizeBusUtilization();
+
+    m_funnel.getPosition().setUpdateFrequency(100);
+    m_funnel.getVelocity().setUpdateFrequency(100);
+    m_funnel.getStatorCurrent().setUpdateFrequency(100);
+    m_funnel.getMotorVoltage().setUpdateFrequency(50);
+    m_funnel.getTorqueCurrent().setUpdateFrequency(50);
+    m_funnel.optimizeBusUtilization();
   }
 
   @AutoLogOutput
   public boolean isHealthy() {
-    return m_spinner.isConnected() && m_spinner.isAlive();
+    return (m_spinner.isConnected() && m_spinner.isAlive())
+        && (m_roof.isConnected() && m_roof.isAlive())
+        && (m_funnel.isConnected() && m_funnel.isAlive());
   }
 
   @AutoLogOutput
-  private Voltage getVoltage() {
+  private Voltage
+      getVoltage() { // TODO: Change these logging functions to separately log all three motors
     return m_spinner.getMotorVoltage().getValue();
   }
 
@@ -146,8 +168,16 @@ public class HotTub extends SubsystemBase {
     return m_spinner.getPosition().getValue();
   }
 
-  private void setVoltage(Voltage volts) {
+  private void setSpinnerVoltage(Voltage volts) {
     m_spinner.setControl(m_voltReq.withOutput(volts));
+  }
+
+  private void setRoofVoltage(Voltage volts) {
+    m_roof.setControl(m_voltReq.withOutput(volts));
+  }
+
+  private void setFunnelVoltage(Voltage volts) {
+    m_funnel.setControl(m_voltReq.withOutput(volts));
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
@@ -158,20 +188,43 @@ public class HotTub extends SubsystemBase {
     m_spinner.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
-  private void stopSpinnerMotors() {
+  private void setRoofSpeed(DoubleSupplier speed) {
+    if (speed.getAsDouble() == 0.0) {
+      m_roof.stopMotor();
+      return;
+    }
+    m_roof.setControl(m_request.withVelocity(speed.getAsDouble()));
+  }
+
+  private void setFunnelSpeed(DoubleSupplier speed) {
+    if (speed.getAsDouble() == 0.0) {
+      m_funnel.stopMotor();
+      return;
+    }
+    m_funnel.setControl(m_request.withVelocity(speed.getAsDouble()));
+  }
+
+  private void stopAllMotors() {
     m_spinner.stopMotor();
+    m_roof.stopMotor();
+    m_funnel.stopMotor();
   }
 
   private void antiJam() {
     m_spinner.setControl(antiJamRequest.withOutput(-1.0));
+    m_roof.setControl(antiJamRequest.withOutput(-1.0));
+    m_funnel.setControl(antiJamRequest.withOutput(-1.0));
   }
 
   public void periodic() {}
 
   public Command runSpinner() {
     return new RunCommand(
-        () ->
-            setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
+        () -> {
+          setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0);
+          setRoofSpeed((() -> m_onTargetRobot.getAsBoolean() ? p_roofSpeed.getValue() : 0.0));
+          setFunnelSpeed((() -> m_onTargetRobot.getAsBoolean() ? p_funnelSpeed.getValue() : 0.0));
+        },
         this);
   }
 
@@ -180,7 +233,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> stopSpinnerMotors(), this);
+    return new RunCommand(() -> stopAllMotors(), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
