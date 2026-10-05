@@ -192,14 +192,36 @@ public class HotTub extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private boolean isStalled() {
+  private boolean isSpinnerStalled() {
     return m_spinner.getStatorCurrent().getValueAsDouble() > 55.0
         && m_spinner.getVelocity().getValueAsDouble() < 8.0;
   }
 
   @AutoLogOutput
-  private Angle getPosition() {
+  private boolean isRoofStalled() {
+    return m_roof.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_roof.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private boolean isFunnelStalled() {
+    return m_funnel.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_funnel.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private Angle getSpinnerPosition() {
     return m_spinner.getPosition().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getRoofPosition() {
+    return m_roof.getPosition().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getFunnelPosition() {
+    return m_funnel.getPosition().getValue();
   }
 
   private void setSpinnerVoltage(Voltage volts) {
