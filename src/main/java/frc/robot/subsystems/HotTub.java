@@ -6,12 +6,10 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -102,9 +100,6 @@ public class HotTub extends SubsystemBase {
     m_roof.getConfigurator().apply(spinnerConfig);
     m_funnel.getConfigurator().apply(spinnerConfig);
 
-    m_roof.setControl(new Follower(Constants.SPINNER_MAIN, MotorAlignmentValue.Opposed));
-    m_funnel.setControl(new Follower(Constants.SPINNER_MAIN, MotorAlignmentValue.Opposed));
-
     // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
     // Stator current + velocity feed the stall indicator; the rest are logged.
     m_spinner.getPosition().setUpdateFrequency(100);
@@ -137,24 +132,63 @@ public class HotTub extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private Voltage
-      getVoltage() { // TODO: Change these logging functions to separately log all three motors
+  private Voltage getSpinnerVoltage() {
     return m_spinner.getMotorVoltage().getValue();
   }
 
   @AutoLogOutput
-  private Current getCurrent() {
+  private Voltage getRoofVoltage() {
+    return m_roof.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Voltage getFunnelVoltage() {
+    return m_funnel.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSpinnerCurrent() {
     return m_spinner.getTorqueCurrent().getValue();
   }
 
   @AutoLogOutput
-  private Current getSupplyCurrent() {
+  private Current getRoofCurrent() {
+    return m_roof.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getFunnelCurrent() {
+    return m_funnel.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSpinnerSupplyCurrent() {
     return m_spinner.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput
-  private AngularVelocity getVelocity() {
+  private Current getRoofSupplyCurrent() {
+    return m_roof.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getFunnelSupplyCurrent() {
+    return m_funnel.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getSpinnerVelocity() {
     return m_spinner.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getRoofVelocity() {
+    return m_roof.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getFunnelVelocity() {
+    return m_funnel.getVelocity().getValue();
   }
 
   @AutoLogOutput
