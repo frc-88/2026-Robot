@@ -44,7 +44,7 @@ public class Hood extends SubsystemBase {
   public DoublePreferenceConstant encoderOffset20Deg =
       new DoublePreferenceConstant(
           "Hood/EncoderOffset",
-          0.585938); // what the SRX encoder reads when hood is at 20 deg comp:0.199219
+          0.199219); // what the SRX encoder reads when hood is at 20 deg comp:0.199219
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;

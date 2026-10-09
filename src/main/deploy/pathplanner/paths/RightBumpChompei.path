@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 4.330533233760855,
-        "y": 0.4934354267475021
+        "y": 0.49343542674750207
       },
       "isLocked": false,
       "linkedName": "RightTrenchIntakeBack"
@@ -109,8 +109,8 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.3369345037137157,
-      "maxWaypointRelativePos": 3.173531397704241,
+      "minWaypointRelativePos": 1.099000908265225,
+      "maxWaypointRelativePos": 2.9427792915531397,
       "constraints": {
         "maxVelocity": 3.0,
         "maxAcceleration": 2.5,
