@@ -14,6 +14,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -87,6 +88,15 @@ public class RobotContainer {
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
+
+  // Falling-edge debounce on the turret's on-target check. Coming on target passes through
+  // immediately; going off target must persist this long before the feed gate drops. Filters
+  // the short turret.onTarget() flicker (median 0.08 s) that chopped the feeder and HotTub
+  // on and off ~64 times per match at NECMP/CMP.
+  private static final double ON_TARGET_DEBOUNCE_SEC = 0.2;
+  private final Debouncer onTargetDebouncer =
+      new Debouncer(ON_TARGET_DEBOUNCE_SEC, Debouncer.DebounceType.kFalling);
+
   private String lastName = null;
   private boolean isPreAiming;
 
@@ -218,15 +228,21 @@ public class RobotContainer {
 
   @AutoLogOutput
   public boolean onTargetRobot() {
+    // Run the debouncer on every call, before the override early-return, so its timer always
+    // reflects the turret's current state. It is time-based, so multiple calls per loop
+    // (feeder, HotTub, AutoLog) are harmless.
+    boolean turretOnTargetDebounced = onTargetDebouncer.calculate(turret.onTarget());
+    Logger.recordOutput("RobotContainer/TurretOnTargetDebounced", turretOnTargetDebounced);
+
     if (shooting && shootOverride) {
       return true;
     }
-    return turret.onTarget()
+    return turretOnTargetDebounced
         && shooting
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
-                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+                    < (trajectorySolver.getTimeOfFlight() + 1 + Constants.FUEL_SCORING_TIME))
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
                     > 25.0
@@ -237,11 +253,7 @@ public class RobotContainer {
 
   private void configureDriverController() {
 
-    controller
-        .x()
-        .onTrue(
-            driveAtAngle(() -> Rotation2d.fromDegrees(90.0))
-                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+    controller.x().whileTrue(drive.bcDotWheelCommand());
 
     controller
         .a()
@@ -349,15 +361,15 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.50, 0.50))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.50, 0.50))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.65, 0.65))
                 : -controller.getRightX(),
         this::turretRotSupplier);
   }
@@ -365,8 +377,14 @@ public class RobotContainer {
   public Command driveRebuiltSOMETHING() {
     return DriveCommands.rebuiltDriveSomething(
         drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftY() * 0.65
+                : -controller.getLeftY(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftX() * 0.65
+                : -controller.getLeftX(),
         () -> -controller.getRightX(),
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());

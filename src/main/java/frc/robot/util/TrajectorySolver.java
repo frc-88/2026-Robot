@@ -258,7 +258,7 @@ public class TrajectorySolver extends SubsystemBase {
     if (isFullField) {
       return 0.78 + 0.0951 * distance;
     } else { // real hub
-      return 0.78 + 0.0951 * distance;
+      return 0.58 + 0.0951 * distance;
     }
   }
 
@@ -292,7 +292,7 @@ public class TrajectorySolver extends SubsystemBase {
       if (isFullField) {
         return 100.0;
       } else { // real hub
-        return /* OLD BLACK WHEELS: 25.7 + 3.81 * distance; */ 26.1 + 3.86 * distance;
+        return /* BEFORE BC FINALS: 26.1 + 3.86 * distance; */ 25.7 + 3.86 * distance;
       }
     }
   }

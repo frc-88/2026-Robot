@@ -73,10 +73,21 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kS = p_feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    feederConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    feederConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+    feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    feederConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
+    feederConfig.CurrentLimits.SupplyCurrentLowerLimit = 60.0;
     m_feeder.getConfigurator().apply(feederConfig);
 
     m_feeder.getVelocity().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    m_feeder.getPosition().setUpdateFrequency(100);
+    m_feeder.getMotorVoltage().setUpdateFrequency(50);
+    m_feeder.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    m_feeder.getStatorCurrent().setUpdateFrequency(50);
+    m_feeder.optimizeBusUtilization();
   }
 
   @AutoLogOutput
@@ -92,6 +103,11 @@ public class Feeder extends SubsystemBase {
   @AutoLogOutput
   private Current getCurrent() {
     return m_feeder.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput

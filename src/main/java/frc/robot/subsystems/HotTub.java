@@ -34,6 +34,8 @@ import org.littletonrobotics.junction.Logger;
 public class HotTub extends SubsystemBase {
   // motors & devices
   private final TalonFX m_spinner = new TalonFX(Constants.SPINNER_MAIN, CANBus.roboRIO());
+  private final TalonFX m_roof = new TalonFX(Constants.ROOF_FOLLOW, CANBus.roboRIO());
+  private final TalonFX m_funnel = new TalonFX(Constants.FUNNEL_FOLLOW, CANBus.roboRIO());
 
   // output requests
   private final VelocityVoltage m_request = new VelocityVoltage(0.0);
@@ -42,10 +44,15 @@ public class HotTub extends SubsystemBase {
 
   // preferences
   private final DoublePreferenceConstant p_spinnerSpeed =
-      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 90.0);
+      new DoublePreferenceConstant("Spinner/SpinnerSpeed", 100.0);
+  private final DoublePreferenceConstant p_roofSpeed =
+      new DoublePreferenceConstant("Spinner/RoofSpeed", 100.0);
+  private final DoublePreferenceConstant p_funnelSpeed =
+      new DoublePreferenceConstant("Spinner/FunnelSpeed", 100.0);
+
   private final MotionMagicPIDPreferenceConstants p_spinnerConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.011, 0., 0.);
+          "Spinner/SpinnerMotors", 0., 0., 0., 0., 0., 0., 0.11, 0., 0.);
 
   private final SysIdRoutine m_sysIdRoutine =
       new SysIdRoutine(
@@ -55,7 +62,7 @@ public class HotTub extends SubsystemBase {
               null, // Use default timeout (10 s)
               // Log state with Phoenix SignalLogger class
               (state) -> Logger.recordOutput("Spinner/SysIdTestState", state.toString())),
-          new SysIdRoutine.Mechanism(this::setVoltage, null, this));
+          new SysIdRoutine.Mechanism(this::setSpinnerVoltage, null, this));
 
   private final BooleanSupplier m_onTargetRobot;
 
@@ -88,41 +95,145 @@ public class HotTub extends SubsystemBase {
     spinnerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     spinnerConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     m_spinner.getConfigurator().apply(spinnerConfig);
+
+    spinnerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    m_roof.getConfigurator().apply(spinnerConfig);
+    m_funnel.getConfigurator().apply(spinnerConfig);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Stator current + velocity feed the stall indicator; the rest are logged.
+    m_spinner.getPosition().setUpdateFrequency(100);
+    m_spinner.getVelocity().setUpdateFrequency(100);
+    m_spinner.getStatorCurrent().setUpdateFrequency(100);
+    m_spinner.getMotorVoltage().setUpdateFrequency(50);
+    m_spinner.getTorqueCurrent().setUpdateFrequency(50);
+    m_spinner.optimizeBusUtilization();
+
+    m_roof.getPosition().setUpdateFrequency(100);
+    m_roof.getVelocity().setUpdateFrequency(100);
+    m_roof.getStatorCurrent().setUpdateFrequency(100);
+    m_roof.getMotorVoltage().setUpdateFrequency(50);
+    m_roof.getTorqueCurrent().setUpdateFrequency(50);
+    m_roof.optimizeBusUtilization();
+
+    m_funnel.getPosition().setUpdateFrequency(100);
+    m_funnel.getVelocity().setUpdateFrequency(100);
+    m_funnel.getStatorCurrent().setUpdateFrequency(100);
+    m_funnel.getMotorVoltage().setUpdateFrequency(50);
+    m_funnel.getTorqueCurrent().setUpdateFrequency(50);
+    m_funnel.optimizeBusUtilization();
   }
 
   @AutoLogOutput
   public boolean isHealthy() {
-    return m_spinner.isConnected() && m_spinner.isAlive();
+    return (m_spinner.isConnected() && m_spinner.isAlive())
+        && (m_roof.isConnected() && m_roof.isAlive())
+        && (m_funnel.isConnected() && m_funnel.isAlive());
   }
 
   @AutoLogOutput
-  private Voltage getVoltage() {
+  private Voltage getSpinnerVoltage() {
     return m_spinner.getMotorVoltage().getValue();
   }
 
   @AutoLogOutput
-  private Current getCurrent() {
+  private Voltage getRoofVoltage() {
+    return m_roof.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Voltage getFunnelVoltage() {
+    return m_funnel.getMotorVoltage().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSpinnerCurrent() {
     return m_spinner.getTorqueCurrent().getValue();
   }
 
   @AutoLogOutput
-  private AngularVelocity getVelocity() {
+  private Current getRoofCurrent() {
+    return m_roof.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getFunnelCurrent() {
+    return m_funnel.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getSpinnerSupplyCurrent() {
+    return m_spinner.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRoofSupplyCurrent() {
+    return m_roof.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getFunnelSupplyCurrent() {
+    return m_funnel.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getSpinnerVelocity() {
     return m_spinner.getVelocity().getValue();
   }
 
   @AutoLogOutput
-  private boolean isStalled() {
+  private AngularVelocity getRoofVelocity() {
+    return m_roof.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private AngularVelocity getFunnelVelocity() {
+    return m_funnel.getVelocity().getValue();
+  }
+
+  @AutoLogOutput
+  private boolean isSpinnerStalled() {
     return m_spinner.getStatorCurrent().getValueAsDouble() > 55.0
         && m_spinner.getVelocity().getValueAsDouble() < 8.0;
   }
 
   @AutoLogOutput
-  private Angle getPosition() {
+  private boolean isRoofStalled() {
+    return m_roof.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_roof.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private boolean isFunnelStalled() {
+    return m_funnel.getStatorCurrent().getValueAsDouble() > 55.0
+        && m_funnel.getVelocity().getValueAsDouble() < 8.0;
+  }
+
+  @AutoLogOutput
+  private Angle getSpinnerPosition() {
     return m_spinner.getPosition().getValue();
   }
 
-  private void setVoltage(Voltage volts) {
+  @AutoLogOutput
+  private Angle getRoofPosition() {
+    return m_roof.getPosition().getValue();
+  }
+
+  @AutoLogOutput
+  private Angle getFunnelPosition() {
+    return m_funnel.getPosition().getValue();
+  }
+
+  private void setSpinnerVoltage(Voltage volts) {
     m_spinner.setControl(m_voltReq.withOutput(volts));
+  }
+
+  private void setRoofVoltage(Voltage volts) {
+    m_roof.setControl(m_voltReq.withOutput(volts));
+  }
+
+  private void setFunnelVoltage(Voltage volts) {
+    m_funnel.setControl(m_voltReq.withOutput(volts));
   }
 
   private void setSpinnerSpeed(DoubleSupplier speed) {
@@ -133,20 +244,43 @@ public class HotTub extends SubsystemBase {
     m_spinner.setControl(m_request.withVelocity(speed.getAsDouble()));
   }
 
-  private void stopSpinnerMotors() {
+  private void setRoofSpeed(DoubleSupplier speed) {
+    if (speed.getAsDouble() == 0.0) {
+      m_roof.stopMotor();
+      return;
+    }
+    m_roof.setControl(m_request.withVelocity(speed.getAsDouble()));
+  }
+
+  private void setFunnelSpeed(DoubleSupplier speed) {
+    if (speed.getAsDouble() == 0.0) {
+      m_funnel.stopMotor();
+      return;
+    }
+    m_funnel.setControl(m_request.withVelocity(speed.getAsDouble()));
+  }
+
+  private void stopAllMotors() {
     m_spinner.stopMotor();
+    m_roof.stopMotor();
+    m_funnel.stopMotor();
   }
 
   private void antiJam() {
     m_spinner.setControl(antiJamRequest.withOutput(-1.0));
+    m_roof.setControl(antiJamRequest.withOutput(-1.0));
+    m_funnel.setControl(antiJamRequest.withOutput(-1.0));
   }
 
   public void periodic() {}
 
   public Command runSpinner() {
     return new RunCommand(
-        () ->
-            setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0),
+        () -> {
+          setSpinnerSpeed(() -> m_onTargetRobot.getAsBoolean() ? p_spinnerSpeed.getValue() : 0.0);
+          setRoofSpeed((() -> m_onTargetRobot.getAsBoolean() ? p_roofSpeed.getValue() : 0.0));
+          setFunnelSpeed((() -> m_onTargetRobot.getAsBoolean() ? p_funnelSpeed.getValue() : 0.0));
+        },
         this);
   }
 
@@ -155,7 +289,7 @@ public class HotTub extends SubsystemBase {
   }
 
   public Command stopSpinner() {
-    return new RunCommand(() -> stopSpinnerMotors(), this);
+    return new RunCommand(() -> stopAllMotors(), this);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
