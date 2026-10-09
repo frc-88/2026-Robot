@@ -361,15 +361,15 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.50, 0.50))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.50, 0.50))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.65, 0.65))
                 : -controller.getRightX(),
         this::turretRotSupplier);
   }
