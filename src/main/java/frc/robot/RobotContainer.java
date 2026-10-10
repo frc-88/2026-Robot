@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.BatteryFuelGauge;
 import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
@@ -74,6 +75,7 @@ public class RobotContainer {
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
   // private final Climber climber = new Climber();
+  private final BatteryFuelGauge batteryFuelGauge = new BatteryFuelGauge();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
 

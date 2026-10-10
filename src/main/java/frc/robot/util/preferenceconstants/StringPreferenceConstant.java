@@ -1,0 +1,43 @@
+package frc.robot.util.preferenceconstants;
+
+import edu.wpi.first.wpilibj.Preferences;
+import java.util.Objects;
+
+/** Preferences constant for double values */
+public class StringPreferenceConstant extends BasePreferenceConstant<String> {
+
+  String name;
+  String defaultValue;
+
+  /**
+   * Constructor. Will call update() once.
+   *
+   * @param name The name to be used as a key in WPILib preferences
+   * @param defaultValue The value that will be set as default if the value doesn't exist in WPILib
+   *     preferences
+   */
+  public StringPreferenceConstant(String name, String defaultValue) {
+    this.name = Objects.requireNonNull(name);
+    this.defaultValue = Objects.requireNonNull(defaultValue);
+    if (!Preferences.containsKey(name)) {
+      this.initValue(defaultValue);
+    } else {
+      update();
+    }
+  }
+
+  @Override
+  protected String getFromPreferences() {
+    return Preferences.getString(name, defaultValue);
+  }
+
+  @Override
+  protected void setInPreferences(String value) {
+    Preferences.setString(name, value);
+  }
+
+  @Override
+  protected void initInPreferences(String value) {
+    Preferences.initString(name, value);
+  }
+}
