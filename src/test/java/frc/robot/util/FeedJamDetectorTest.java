@@ -21,7 +21,12 @@ public class FeedJamDetectorTest {
 
   /** Runs from t0 to t1 with fixed inputs; shots every shotEvery seconds (0 = none). */
   private static State run(
-      FeedJamDetector det, double t0, double t1, boolean gate, double shotEvery, double[] v,
+      FeedJamDetector det,
+      double t0,
+      double t1,
+      boolean gate,
+      double shotEvery,
+      double[] v,
       double[] i) {
     State s = State.IDLE;
     double nextShot = t0 + 0.3;

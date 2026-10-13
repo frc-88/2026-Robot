@@ -14,15 +14,15 @@ package frc.robot.util;
  * </ul>
  *
  * <p>A bogged motor on its own is not a jam. On the October feeder, bogged is normal while balls
- * are flowing. And a motor that bogs for a moment usually clears itself. The detector only calls
- * a jam once no ball has come out for {@code starveSec} of feeding <i>and</i> a stage has been
- * bogged for at least {@code bogHoldSec}. Once called, the jam stays latched until a ball comes
- * out or the shoot command ends, so a motor hovering around its threshold doesn't flip the state
- * between jammed and empty.
+ * are flowing. And a motor that bogs for a moment usually clears itself. The detector only calls a
+ * jam once no ball has come out for {@code starveSec} of feeding <i>and</i> a stage has been bogged
+ * for at least {@code bogHoldSec}. Once called, the jam stays latched until a ball comes out or the
+ * shoot command ends, so a motor hovering around its threshold doesn't flip the state between
+ * jammed and empty.
  *
- * <p>Logged anti-jam presses in 2026 showed jams at both stages: the HotTub spinner stalled (0
- * rps, ~60 A, feeder spinning freely) at NECMP and CMP, and the feeder bogged (15-45 rps, 55-90 A,
- * floor spinning freely) in the October practices.
+ * <p>Logged anti-jam presses in 2026 showed jams at both stages: the HotTub spinner stalled (0 rps,
+ * ~60 A, feeder spinning freely) at NECMP and CMP, and the feeder bogged (15-45 rps, 55-90 A, floor
+ * spinning freely) in the October practices.
  *
  * <p>No WPILib dependencies, so it can be unit tested and mirrored by the offline tool.
  */
