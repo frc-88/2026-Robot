@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Dashboard;
+import frc.robot.subsystems.FeedPathMonitor;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
@@ -75,6 +76,7 @@ public class RobotContainer {
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
   private final ShotCounter shotCounter;
+  private final FeedPathMonitor feedPathMonitor;
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
@@ -192,6 +194,17 @@ public class RobotContainer {
             trajectorySolver::getIsTargetingHub,
             trajectorySolver::getIsFullField,
             dashboard::getIsHubActive);
+    // Watch-only: flowing / empty / jammed, from shots plus feeder and floor-spinner load.
+    // Constructed after shotCounter so it sees this loop's shot.
+    feedPathMonitor =
+        new FeedPathMonitor(
+            this::isShooting,
+            this::onTargetRobot,
+            shotCounter::shotThisLoop,
+            feeder::getVelocityRps,
+            feeder::getTorqueCurrentAmps,
+            hotTub::getSpinnerVelocityRps,
+            hotTub::getSpinnerTorqueCurrentAmps);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
@@ -238,6 +251,7 @@ public class RobotContainer {
   /** Called from Robot at the start of autonomous and teleop. */
   public void shotCounterModeStart(boolean autonomous) {
     shotCounter.onModeStart(autonomous);
+    feedPathMonitor.onModeStart(autonomous);
   }
 
   public void startTargeting() {
