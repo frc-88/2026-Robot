@@ -100,6 +100,7 @@ public class ShotCounter extends SubsystemBase {
   private int lastCategory = -1;
   private double lastShotTimeForBurst = Double.NEGATIVE_INFINITY;
   private int shotsSinceBoot = 0;
+  private boolean shotThisLoop = false;
 
   private double lastLoopTime = Double.NaN;
   private double lastAutoEndTime = Double.NEGATIVE_INFINITY;
@@ -199,6 +200,7 @@ public class ShotCounter extends SubsystemBase {
       lastCategory = category;
     }
 
+    shotThisLoop = shot;
     log(shot, category);
   }
 
@@ -246,6 +248,11 @@ public class ShotCounter extends SubsystemBase {
   }
 
   /** Shots since the code started. Resets on reboot; the usage tracker should persist it. */
+  /** True if a ball was detected on the most recent loop. */
+  public boolean shotThisLoop() {
+    return shotThisLoop;
+  }
+
   public int getShotsSinceBoot() {
     return shotsSinceBoot;
   }

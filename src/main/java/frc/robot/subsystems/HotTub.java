@@ -224,6 +224,16 @@ public class HotTub extends SubsystemBase {
     return m_funnel.getPosition().getValue();
   }
 
+  /** Floor spinner velocity in rps, for FeedPathMonitor. */
+  public double getSpinnerVelocityRps() {
+    return m_spinner.getVelocity().getValueAsDouble();
+  }
+
+  /** Floor spinner torque current in amps, for FeedPathMonitor. */
+  public double getSpinnerTorqueCurrentAmps() {
+    return m_spinner.getTorqueCurrent().getValueAsDouble();
+  }
+
   private void setSpinnerVoltage(Voltage volts) {
     m_spinner.setControl(m_voltReq.withOutput(volts));
   }

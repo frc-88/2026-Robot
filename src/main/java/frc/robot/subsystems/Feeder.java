@@ -120,6 +120,16 @@ public class Feeder extends SubsystemBase {
     return m_feeder.getPosition().getValue();
   }
 
+  /** Feeder velocity in rps, for FeedPathMonitor. */
+  public double getVelocityRps() {
+    return m_feeder.getVelocity().getValueAsDouble();
+  }
+
+  /** Feeder torque current in amps, for FeedPathMonitor. */
+  public double getTorqueCurrentAmps() {
+    return m_feeder.getTorqueCurrent().getValueAsDouble();
+  }
+
   private void setVoltage(Voltage volts) {
     m_feeder.setControl(m_voltReq.withOutput(volts));
   }
