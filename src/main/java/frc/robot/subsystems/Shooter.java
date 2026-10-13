@@ -152,7 +152,7 @@ public class Shooter extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private double getVelocity() {
+  public double getVelocity() {
     return shooterMain.getVelocity().getValueAsDouble();
   }
 

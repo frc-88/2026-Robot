@@ -34,6 +34,7 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.HotTub;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShotCounter;
 import frc.robot.subsystems.Simulation;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.drive.Drive;
@@ -73,6 +74,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
+  private final ShotCounter shotCounter;
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
@@ -179,6 +181,17 @@ public class RobotContainer {
     hood = new Hood(trajectorySolver::getAngle);
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
+    // Watch-only: counts balls from shooter speed dips. Constructed after the trajectory solver
+    // and shooter so its periodic() sees this loop's setpoint.
+    shotCounter =
+        new ShotCounter(
+            shooter::getVelocity,
+            trajectorySolver::getShootSpeed,
+            this::isShooting,
+            this::onTargetRobot,
+            trajectorySolver::getIsTargetingHub,
+            trajectorySolver::getIsFullField,
+            dashboard::getIsHubActive);
 
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
@@ -220,6 +233,11 @@ public class RobotContainer {
     hood.setDefaultCommand(hood.setPositionTargeting());
     turret.setDefaultCommand(turret.aim());
     drive.setDefaultCommand(driveRebuiltSOMETHING());
+  }
+
+  /** Called from Robot at the start of autonomous and teleop. */
+  public void shotCounterModeStart(boolean autonomous) {
+    shotCounter.onModeStart(autonomous);
   }
 
   public void startTargeting() {

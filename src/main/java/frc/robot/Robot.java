@@ -105,6 +105,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_robotContainer.shotCounterModeStart(true);
     autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -127,6 +128,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    m_robotContainer.shotCounterModeStart(false);
     m_robotContainer.startTargeting();
     m_robotContainer.stopShooting();
     m_robotContainer.stopHood();
