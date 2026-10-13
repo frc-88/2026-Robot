@@ -19,15 +19,14 @@ package frc.robot.util;
  *       less than {@code hangoverSec}, since balls already in the path still come out), and the
  *       flywheel is above {@code minVelocity}.
  *   <li>Keep the highest error seen over the last {@code windowSec}.
- *   <li>If the error falls at least {@code dipThreshold} below that peak, count one shot, as
- *       long as: the peak wasn't more than {@code overspeedMargin} above setpoint, the speed is
- *       now at least {@code belowSetpoint} under setpoint, and the last shot was at least {@code
+ *   <li>If the error falls at least {@code dipThreshold} below that peak, count one shot, as long
+ *       as: the peak wasn't more than {@code overspeedMargin} above setpoint, the speed is now at
+ *       least {@code belowSetpoint} under setpoint, and the last shot was at least {@code
  *       lockoutSec} ago. The first two rules reject a flywheel that is above its setpoint and
  *       slowing back down to it (after the setpoint drops), which looks like a dip but isn't a
  *       ball; a ball always pulls the flywheel below its setpoint.
- *   <li>After counting, wait for the error to climb {@code rearmThreshold} back up from the
- *       bottom of the dip before another shot can be counted. This stops one long dip from
- *       counting twice.
+ *   <li>After counting, wait for the error to climb {@code rearmThreshold} back up from the bottom
+ *       of the dip before another shot can be counted. This stops one long dip from counting twice.
  * </ol>
  */
 public class ShotDetector {

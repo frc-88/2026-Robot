@@ -46,7 +46,13 @@ public class ShotCounter extends SubsystemBase {
   public static final int SHUTTLE_FULL = 2;
   private static final String[] CATEGORY_NAMES = {"Hub", "ShuttleMid", "ShuttleFull"};
   private static final String[] KEY_SUFFIXES = {
-    "/Auto", "/Teleop", "/Total", "/FeedSeconds", "/TriggerSeconds", "/BPSFeed", "/BPSTrigger",
+    "/Auto",
+    "/Teleop",
+    "/Total",
+    "/FeedSeconds",
+    "/TriggerSeconds",
+    "/BPSFeed",
+    "/BPSTrigger",
     "/BPSFlow"
   };
   // Log keys built once, so periodic() doesn't create new strings every loop.
@@ -176,8 +182,7 @@ public class ShotCounter extends SubsystemBase {
       feedSec[phase][category] += dt;
     }
 
-    boolean shot =
-        detector.update(now, velocity.getAsDouble(), setpoint.getAsDouble(), on, gate);
+    boolean shot = detector.update(now, velocity.getAsDouble(), setpoint.getAsDouble(), on, gate);
 
     if (shot) {
       shots[phase][category]++;
