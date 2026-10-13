@@ -99,6 +99,12 @@ public class TrajectorySolver extends SubsystemBase {
     return isTargetingHub;
   }
 
+  /** True when aiming at a shuttle target from the opponent's zone (shooter commanded to 100). */
+  @AutoLogOutput
+  public boolean getIsFullField() {
+    return isFullField;
+  }
+
   public double getSimTarget() {
     return turretToProjectedTarget.getAngle().getDegrees();
   }
