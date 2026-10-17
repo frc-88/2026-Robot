@@ -222,10 +222,12 @@ public class RobotContainer {
   private void configureHealthFaults() {
     boolean real = Constants.currentMode == Constants.Mode.REAL; // sim battery is a fixed 12 V
 
+    // Warning, not error: brownouts happened in most NERD 2026 matches and would have turned
+    // every end-of-match result into an error, hiding the device dropouts.
     new Fault(
         "Power/Brownout",
         "roboRIO brownout: battery fell below the brownout voltage and motor outputs were cut.",
-        AlertType.kError,
+        AlertType.kWarning,
         () -> real && RobotController.isBrownedOut());
 
     new Fault(

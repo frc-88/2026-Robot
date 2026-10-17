@@ -32,10 +32,14 @@ public final class CanBusFaults {
   /** Either error count at or above this is an error: the bus is close to error-passive (128). */
   public static final int SEVERE_ERROR_COUNT = 96;
 
-  /** Utilization (0 to 1) above which the bus is getting crowded. TODO: confirm from logs. */
-  public static final double HIGH_UTILIZATION = 0.70;
+  /**
+   * Utilization (0 to 1) above which the bus is getting crowded. Set from logs: at 85% for 2 s this
+   * never fired in NERD 2026 matches (after the CAN fix) but fired in 9 of 10 Newton 2026 matches
+   * (before it). 70% fired in every full NERD match.
+   */
+  public static final double HIGH_UTILIZATION = 0.85;
 
-  /** How long utilization must stay high; single ~0.5 s spikes are normal. TODO: from logs. */
+  /** How long utilization must stay high; single ~0.5 s spikes are normal. */
   public static final double HIGH_UTILIZATION_SECONDS = 2.0;
 
   // Bus-off and transmit-full are running totals, so the checks look for an increase.

@@ -36,6 +36,12 @@ import java.util.function.BooleanSupplier;
  * <p>Faults are observers only. Reading the condition must never command hardware.
  */
 public class Fault {
+  /**
+   * How long {@link #disconnected} must read disconnected before it counts. Removes single-loop
+   * blips and still catches every real dropout seen at NERD 2026 (the shortest lasted ~0.25 s).
+   */
+  public static final double DISCONNECT_DEBOUNCE_SECONDS = 0.1;
+
   private final String key;
   private final String logKey;
   private final String message;
@@ -96,9 +102,10 @@ public class Fault {
    * Always an error ({@link AlertType#kError}).
    *
    * <p>Uses {@link ParentDevice#isConnected()}, which reports disconnected once the device's
-   * Version frame has not been seen for 0.5 s — that latency window is already the debounce, so no
-   * extra debounce is added. Reading it only checks the RIO-side signal cache; it puts nothing on
-   * the CAN bus.
+   * Version frame has not been seen for 0.5 s. Reading it only checks the RIO-side signal cache; it
+   * puts nothing on the CAN bus. A {@link #DISCONNECT_DEBOUNCE_SECONDS} debounce is added on top:
+   * the NERD 2026 logs showed {@code isConnected()} reading false for a single 20-40 ms loop with
+   * the device otherwise fine, and those blips would latch an error by themselves.
    *
    * <p>Only evaluated on a real robot. In sim and log replay these hardware objects have no device
    * behind them and would always read disconnected.
@@ -112,7 +119,8 @@ public class Fault {
         key,
         description + " disconnected (CAN ID " + device.getDeviceID() + ").",
         AlertType.kError,
-        () -> Constants.currentMode == Mode.REAL && !device.isConnected());
+        () -> Constants.currentMode == Mode.REAL && !device.isConnected(),
+        DISCONNECT_DEBOUNCE_SECONDS);
   }
 
   /**
