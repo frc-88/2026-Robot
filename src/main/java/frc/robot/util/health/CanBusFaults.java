@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj.RobotController;
  * <p><b>Reading the error counts:</b> they are not totals. Each one rises with every error and
  * falls by 1 with every frame that gets through cleanly, so it shows recent trouble, not a match
  * total. Under the CAN standard a transmit error adds 8 and a receive error usually adds 1. At 128
- * the controller becomes "error-passive" and struggles to send and receive (Newton Q23 reached 128
- * and the shooter dropped off the bus). 96 is the "error warning" limit many CAN controllers use,
+ * the controller becomes "error-passive" and struggles to send and receive.
+ * 96 is the "error warning" limit many CAN controllers use,
  * one step before that.
  */
 public final class CanBusFaults {
@@ -33,9 +33,7 @@ public final class CanBusFaults {
   public static final int SEVERE_ERROR_COUNT = 96;
 
   /**
-   * Utilization (0 to 1) above which the bus is getting crowded. Set from logs: at 85% for 2 s this
-   * never fired in NERD 2026 matches (after the CAN fix) but fired in 9 of 10 Newton 2026 matches
-   * (before it). 70% fired in every full NERD match.
+   * Utilization (0 to 1) above which the bus is getting crowded. Set from 2026 log data
    */
   public static final double HIGH_UTILIZATION = 0.85;
 

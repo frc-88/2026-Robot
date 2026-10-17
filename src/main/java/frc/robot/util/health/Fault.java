@@ -38,7 +38,7 @@ import java.util.function.BooleanSupplier;
 public class Fault {
   /**
    * How long {@link #disconnected} must read disconnected before it counts. Removes single-loop
-   * blips and still catches every real dropout seen at NERD 2026 (the shortest lasted ~0.25 s).
+   * blips and still catches real dropouts
    */
   public static final double DISCONNECT_DEBOUNCE_SECONDS = 0.1;
 
