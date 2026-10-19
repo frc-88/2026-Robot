@@ -292,7 +292,7 @@ public class TrajectorySolver extends SubsystemBase {
       if (isFullField) {
         return 100.0;
       } else { // real hub
-        return /* BEFORE BC FINALS: 26.1 + 3.86 * distance; */ 25.7 + 3.86 * distance;
+        return /* BEFORE BC FINALS: 26.1 + 3.86 * distance; */ 23.7 + 3.86 * distance;
       }
     }
   }

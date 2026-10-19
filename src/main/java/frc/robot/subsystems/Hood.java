@@ -38,13 +38,14 @@ public class Hood extends SubsystemBase {
   // preferences
   private final MotionMagicPIDPreferenceConstants hoodConfigConstants =
       new MotionMagicPIDPreferenceConstants(
-          "Hood/HoodMotor", 100., 250., 0., 8.0, 0., 0., 0.08, 0.45, 0.);
+          "Hood/HoodMotor", 100., 250., 0., 8.0, 0., 0., 0.04, 0.35, 0.);
   private final DoublePreferenceConstant targetPos =
       new DoublePreferenceConstant("Hood/Target", 24.0);
   public DoublePreferenceConstant encoderOffset20Deg =
       new DoublePreferenceConstant(
           "Hood/EncoderOffset",
-          0.199219); // what the SRX encoder reads when hood is at 20 deg comp:0.199219
+          0.351807); // what the SRX encoder reads when hood is at 20 deg comp:0.199219 changed to
+  // 351807 before NERD
 
   private final DoubleSupplier m_pitch;
   private double m_targetPitch = 0.0;
