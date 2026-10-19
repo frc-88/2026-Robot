@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -76,6 +77,12 @@ public class Intake extends SubsystemBase {
     m_drivespeed = speed;
     configureTalons();
     configureSmartDashboardButtons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Intake/Pivot", "Intake pivot motor", intakePivot);
+    Fault.disconnected("Intake/RollerLeft", "Intake left roller motor", intakeRollerMainLeft);
+    Fault.disconnected(
+        "Intake/RollerRight", "Intake right roller motor", intakeRollerFollowerRight);
 
     intakePivot.setPosition(0.0);
   }

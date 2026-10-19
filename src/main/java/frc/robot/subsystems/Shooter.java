@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.DoubleSupplier;
@@ -62,6 +63,10 @@ public class Shooter extends SubsystemBase {
     m_targetSpeed = speed;
     configureTalons();
     configureSmartDashboardButtons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Shooter/Main", "Shooter main motor", shooterMain);
+    Fault.disconnected("Shooter/Follower", "Shooter follower motor", shooterFollower);
   }
 
   private void configureTalons() {
