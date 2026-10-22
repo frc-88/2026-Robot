@@ -27,9 +27,8 @@ import java.util.ArrayDeque;
  * <p><b>Reading the error counts:</b> they are not totals. Each one rises with every error and
  * falls by 1 with every frame that gets through cleanly, so it shows recent trouble, not a match
  * total. Under the CAN standard a transmit error adds 8 and a receive error usually adds 1. At 128
- * the controller becomes "error-passive" and struggles to send and receive.
- * 96 is the "error warning" limit many CAN controllers use,
- * one step before that.
+ * the controller becomes "error-passive" and struggles to send and receive. 96 is the "error
+ * warning" limit many CAN controllers use, one step before that.
  */
 public final class CanBusFaults {
   /** Either error count at or above this is an error: the bus is close to error-passive (128). */
@@ -43,9 +42,7 @@ public final class CanBusFaults {
 
   public static final double RATE_WINDOW_SECONDS = 60.0;
 
-  /**
-   * Utilization (0 to 1) above which the bus is getting crowded. Set from 2026 log data
-   */
+  /** Utilization (0 to 1) above which the bus is getting crowded. Set from 2026 log data */
   public static final double HIGH_UTILIZATION = 0.85;
 
   /** How long utilization must stay high; single ~0.5 s spikes are normal. */
