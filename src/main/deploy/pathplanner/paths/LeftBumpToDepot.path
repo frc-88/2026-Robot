@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2104698795180724,
-        "y": 5.827144578313253
+        "x": 2.8228245363766047,
+        "y": 5.619985734664765
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3916668468067304,
-        "y": 5.831698060555826
+        "x": 2.0040215036652627,
+        "y": 5.624539216907339
       },
       "isLocked": false,
       "linkedName": "LeftBumpEnd"
@@ -73,7 +73,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftBumpToDepotEnd"
     }
   ],
   "rotationTargets": [

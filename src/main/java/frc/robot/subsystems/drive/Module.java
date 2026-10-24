@@ -14,8 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.util.health.Fault;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -26,9 +26,6 @@ public class Module {
           TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
       constants;
 
-  private final Alert driveDisconnectedAlert;
-  private final Alert turnDisconnectedAlert;
-  private final Alert turnEncoderDisconnectedAlert;
   private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
   public Module(
@@ -39,17 +36,26 @@ public class Module {
     this.io = io;
     this.index = index;
     this.constants = constants;
-    driveDisconnectedAlert =
-        new Alert(
-            "Disconnected drive motor on module " + Integer.toString(index) + ".",
-            AlertType.kError);
-    turnDisconnectedAlert =
-        new Alert(
-            "Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
-    turnEncoderDisconnectedAlert =
-        new Alert(
-            "Disconnected turn encoder on module " + Integer.toString(index) + ".",
-            AlertType.kError);
+
+    // Health monitoring, Rung 1 (presence). These were plain Alerts set in periodic(); as Faults
+    // they keep the same text and alert type but also feed the per-match latch. The connected flags
+    // come from the IO layer (already debounced there), so they work in log replay too.
+    String module = "Drive/Module" + Integer.toString(index);
+    new Fault(
+        module + "/DriveMotor",
+        "Disconnected drive motor on module " + Integer.toString(index) + ".",
+        AlertType.kError,
+        () -> !inputs.driveConnected);
+    new Fault(
+        module + "/TurnMotor",
+        "Disconnected turn motor on module " + Integer.toString(index) + ".",
+        AlertType.kError,
+        () -> !inputs.turnConnected);
+    new Fault(
+        module + "/TurnEncoder",
+        "Disconnected turn encoder on module " + Integer.toString(index) + ".",
+        AlertType.kError,
+        () -> !inputs.turnEncoderConnected);
   }
 
   public void periodic() {
@@ -65,10 +71,7 @@ public class Module {
       odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
     }
 
-    // Update alerts
-    driveDisconnectedAlert.set(!inputs.driveConnected);
-    turnDisconnectedAlert.set(!inputs.turnConnected);
-    turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
+    // Disconnect alerts are Faults now, polled by HealthMonitor (see constructor).
   }
 
   /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */

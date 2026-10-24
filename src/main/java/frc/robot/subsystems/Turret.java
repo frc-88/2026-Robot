@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Util;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -97,6 +98,11 @@ public class Turret extends SubsystemBase {
     configureMotors();
     configureCANCoder();
 
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Turret/Motor", "Turret motor", m_turret);
+    Fault.disconnected("Turret/Retractomatic", "Turret retractomatic motor", m_retractomatic);
+    Fault.disconnected("Turret/CANcoder", "Turret CANcoder", m_CANcoder);
+
     SmartDashboard.putData("Turret/SyncTurretToEncoder", syncCommand().ignoringDisable(true));
     SmartDashboard.putData("Turret/Aim", aim());
     SmartDashboard.putData("Turret/Start Targeting", startTargeting());
@@ -144,6 +150,22 @@ public class Turret extends SubsystemBase {
     TalonFXConfiguration retractomaticCfg = new TalonFXConfiguration();
     retractomaticCfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     m_retractomatic.getConfigurator().apply(retractomaticCfg);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    // Turret position drives aiming / on-target / circumnavigation; velocity feeds the
+    // retractomatic tether logic. Voltage/current are logged.
+    m_turret.getPosition().setUpdateFrequency(100);
+    m_turret.getVelocity().setUpdateFrequency(100);
+    m_turret.getMotorVoltage().setUpdateFrequency(50);
+    m_turret.getTorqueCurrent().setUpdateFrequency(50);
+    m_retractomatic.getVelocity().setUpdateFrequency(50);
+    m_retractomatic.getMotorVoltage().setUpdateFrequency(50);
+    m_retractomatic.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    m_turret.getStatorCurrent().setUpdateFrequency(50);
+    m_retractomatic.getStatorCurrent().setUpdateFrequency(50);
+    m_turret.optimizeBusUtilization();
+    m_retractomatic.optimizeBusUtilization();
   }
 
   private void configureCANCoder() {
@@ -152,6 +174,12 @@ public class Turret extends SubsystemBase {
     CANCoderCfg.MagnetSensor.MagnetOffset = p_CANcoderOffset.getValue();
 
     m_CANcoder.getConfigurator().apply(CANCoderCfg);
+
+    // --- CAN bus optimization ---
+    // AbsolutePosition seeds the turret zero and the sync check; magnet health is monitored.
+    m_CANcoder.getAbsolutePosition().setUpdateFrequency(100);
+    m_CANcoder.getMagnetHealth().setUpdateFrequency(20);
+    m_CANcoder.optimizeBusUtilization();
   }
 
   private void sync() {
@@ -192,6 +220,11 @@ public class Turret extends SubsystemBase {
   }
 
   @AutoLogOutput
+  private Current getTurretSupplyCurrent() {
+    return m_turret.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getTurretVelocity() {
     return m_turret.getVelocity().getValue();
   }
@@ -209,6 +242,11 @@ public class Turret extends SubsystemBase {
   @AutoLogOutput
   private Current getRetractomaticCurrent() {
     return m_retractomatic.getTorqueCurrent().getValue();
+  }
+
+  @AutoLogOutput
+  private Current getRetractomaticSupplyCurrent() {
+    return m_retractomatic.getSupplyCurrent().getValue();
   }
 
   @AutoLogOutput

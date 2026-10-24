@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  private static final double DEADBAND = 0.01;
   private static final double ANGLE_KP_FAST = 15.0;
   private static final double ANGLE_KD_FAST = 0.04;
 
@@ -54,10 +54,9 @@ public class DriveCommands {
   private static boolean targetSet = false;
   private static double rotationTarget;
   private static double yTarget;
-
-  private static SlewRateLimiter xLimiter = new SlewRateLimiter(5.0, -10000000.0, 0.0);
-  private static SlewRateLimiter yLimiter = new SlewRateLimiter(5.0, -10000000.0, 0.0);
-  private static SlewRateLimiter rotationLimiter = new SlewRateLimiter(8.0, -1000000.0, 0.0);
+  private static SlewRateLimiter xLimiter = new SlewRateLimiter(5.0);
+  private static SlewRateLimiter yLimiter = new SlewRateLimiter(5.0);
+  private static SlewRateLimiter rotationLimiter = new SlewRateLimiter(50.0);
 
   private DriveCommands() {}
 
@@ -67,7 +66,7 @@ public class DriveCommands {
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    // linearMagnitude = linearMagnitude * linearMagnitude;
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
@@ -85,10 +84,11 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
-          // System.out.println("yes");
+          System.out.println("jotsyickdrive");
           // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+          Logger.recordOutput("Drive/commandedvelocity", linearVelocity);
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -194,51 +194,12 @@ public class DriveCommands {
           double x = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
           double y = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
+          Logger.recordOutput("Drive/commandedvelocity", Math.hypot(x, y));
+
           if (shouldSlow.getAsBoolean()) {
-
-            double val =
-                MathUtil.clamp(
-                    x,
-                    -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
-                    0.65 * drive.getMaxLinearSpeedMetersPerSec());
-            x =
-                Math.copySign(
-                    xLimiter.calculate(
-                        Math.abs(
-                            MathUtil.clamp(
-                                x,
-                                -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
-                                0.65 * drive.getMaxLinearSpeedMetersPerSec()))),
-                    val);
-
-            val =
-                MathUtil.clamp(
-                    y,
-                    -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
-                    0.65 * drive.getMaxLinearSpeedMetersPerSec());
-            y =
-                Math.copySign(
-                    yLimiter.calculate(
-                        Math.abs(
-                            MathUtil.clamp(
-                                y,
-                                -0.65 * drive.getMaxLinearSpeedMetersPerSec(),
-                                0.65 * drive.getMaxLinearSpeedMetersPerSec()))),
-                    val);
-            val =
-                MathUtil.clamp(
-                    omega,
-                    -0.75 * drive.getMaxAngularSpeedRadPerSec(),
-                    0.75 * drive.getMaxAngularSpeedRadPerSec());
-            omega =
-                Math.copySign(
-                    rotationLimiter.calculate(
-                        Math.abs(
-                            MathUtil.clamp(
-                                omega,
-                                -0.75 * drive.getMaxAngularSpeedRadPerSec(),
-                                0.75 * drive.getMaxAngularSpeedRadPerSec()))),
-                    val);
+            // x = xLimiter.calculate(x);
+            // y = yLimiter.calculate(y);
+            // omega = rotationLimiter.calculate(omega);
           }
 
           ChassisSpeeds speeds = new ChassisSpeeds(x, y, omega);
