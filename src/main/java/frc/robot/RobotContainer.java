@@ -361,7 +361,7 @@ public class RobotContainer {
     buttons.button(7).onTrue(intake.retractIntake());
     // buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
-    buttons.button(8).whileTrue(intake.doTheThing());
+    buttons.button(8).whileTrue(intake.doTheThing()).onFalse(intake.deployIntake());
     buttons.button(9).whileTrue(antiJam());
     buttons.button(5).onTrue(intake.setTooHigh());
     // buttons
@@ -451,13 +451,13 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? -controller.getLeftY() * 0.50
+                ? -controller.getLeftY() * 0.25
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? -controller.getLeftX() * 0.50
+                ? -controller.getLeftX() * 0.25
                 : -controller.getLeftX(),
-        () -> -controller.getRightX(),
+        () -> -controller.getRightX() * 0.625,
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());
   }
