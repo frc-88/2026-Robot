@@ -48,4 +48,10 @@ public interface ModuleIO {
 
   /** Run the turn motor to the specified rotation. */
   public default void setTurnPosition(Rotation2d rotation) {}
+
+  /**
+   * Run the drive motor at the specified voltage, whatever the closed-loop output type. Used by the
+   * systems check, which needs volts (setDriveOpenLoop is amps under TorqueCurrentFOC).
+   */
+  public default void setDriveVoltage(double volts) {}
 }

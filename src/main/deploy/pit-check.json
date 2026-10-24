@@ -1,0 +1,196 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Pit: Health",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Health faults (check before enabling)",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 768.0,
+            "height": 640.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "Previous run",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Health/PreviousRunDisplay",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Highest latched",
+            "x": 768.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Health/HighestLatched",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Battery (V)",
+            "x": 768.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/AdvantageKit/SystemStats/BatteryVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 9.0,
+              "max_value": 13.5
+            }
+          },
+          {
+            "title": "Maintenance",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 256.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Maintenance",
+              "period": 0.06
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pit: Systems Check",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Check",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/Select",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Run (Test mode, enabled)",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/Run",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "State",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 640.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/State",
+              "period": 0.06,
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "Operator question",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 896.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/Prompt",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Yes",
+            "x": 896.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/Yes",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "No",
+            "x": 1024.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck/No",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "Results",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 896.0,
+            "height": 512.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/SystemsCheck Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "Battery (V)",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/AdvantageKit/SystemStats/BatteryVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 9.0,
+              "max_value": 13.5
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

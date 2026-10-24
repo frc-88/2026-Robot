@@ -24,8 +24,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -53,7 +55,10 @@ import frc.robot.util.Util;
 import frc.robot.util.health.CanBusFaults;
 import frc.robot.util.health.Fault;
 import frc.robot.util.health.HealthMonitor;
+import frc.robot.util.systemscheck.DriveCheck;
+import frc.robot.util.systemscheck.SystemsCheck;
 import frc.robot.util.usage.TreadUsageTracker;
+import java.util.Map;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -80,6 +85,7 @@ public class RobotContainer {
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
   private final TreadUsageTracker treadUsage;
+  private final SystemsCheck systemsCheck;
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
@@ -195,6 +201,20 @@ public class RobotContainer {
         new TreadUsageTracker(
             drive::getWheelRadiusCharacterizationPositions, TunerConstants.FrontLeft.WheelRadius);
 
+    // Pit systems check: Test mode only, started from the dashboard (see util/systemscheck).
+    // Each entry says how to hold that subsystem still while a check uses a different one.
+    systemsCheck =
+        new SystemsCheck(
+            Map.<Subsystem, Supplier<Command>>of(
+                drive, () -> Commands.run(drive::stop, drive),
+                turret, () -> Commands.idle(turret), // holds its last position target
+                hood, () -> Commands.idle(hood), // holds its last position target
+                shooter, shooter::stopShooter,
+                feeder, feeder::stopFeeder,
+                hotTub, hotTub::stopSpinner,
+                intake, intake::stopIntake)); // stops the roller; pivot holds its last target
+    systemsCheck.addCheck("Drive", check -> DriveCheck.build(drive, check));
+
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
     NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
@@ -279,6 +299,7 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     SmartDashboard.putData(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    SmartDashboard.putData("SystemsCheck/Run", systemsCheck.runCommand());
     // SmartDashboard.putData("Batman/SetPose", resetBatman());
   }
 

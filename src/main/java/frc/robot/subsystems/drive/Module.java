@@ -91,6 +91,12 @@ public class Module {
     io.setTurnPosition(Rotation2d.kZero);
   }
 
+  /** Runs the drive motor at a fixed voltage while holding zero degrees. Systems check only. */
+  public void runDriveVoltage(double volts) {
+    io.setDriveVoltage(volts);
+    io.setTurnPosition(Rotation2d.kZero);
+  }
+
   /** Disables all outputs to motors. */
   public void stop() {
     io.setDriveOpenLoop(0.0);
@@ -135,6 +141,21 @@ public class Module {
   /** Returns the module position in radians. */
   public double getWheelRadiusCharacterizationPosition() {
     return inputs.drivePositionRad;
+  }
+
+  /** Returns the drive motor's applied output voltage. */
+  public double getDriveAppliedVolts() {
+    return inputs.driveAppliedVolts;
+  }
+
+  /** Returns the drive motor's stator current in amps. */
+  public double getDriveStatorCurrentAmps() {
+    return inputs.driveCurrentAmps;
+  }
+
+  /** True when the drive motor, turn motor and turn encoder are all connected. */
+  public boolean isConnected() {
+    return inputs.driveConnected && inputs.turnConnected && inputs.turnEncoderConnected;
   }
 
   /** Returns the module velocity in rotations/sec (Phoenix native units). */

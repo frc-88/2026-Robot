@@ -249,6 +249,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
+  public void setDriveVoltage(double volts) {
+    driveTalon.setControl(voltageRequest.withOutput(volts));
+  }
+
+  @Override
   public void setTurnOpenLoop(double output) {
     turnTalon.setControl(
         switch (constants.SteerMotorClosedLoopOutput) {

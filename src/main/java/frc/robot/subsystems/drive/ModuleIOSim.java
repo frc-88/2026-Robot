@@ -118,6 +118,11 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+  public void setDriveVoltage(double volts) {
+    setDriveOpenLoop(volts); // sim open loop is already volts
+  }
+
+  @Override
   public void setTurnOpenLoop(double output) {
     turnClosedLoop = false;
     turnAppliedVolts = output;

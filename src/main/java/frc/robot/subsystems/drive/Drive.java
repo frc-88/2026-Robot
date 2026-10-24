@@ -378,6 +378,31 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  // ----- Systems check (Test mode, robot on blocks; see util/systemscheck) -----
+
+  /** Runs every drive motor at a fixed voltage with the modules at zero degrees. */
+  public void runDriveVoltage(double volts) {
+    for (int i = 0; i < 4; i++) {
+      modules[i].runDriveVoltage(volts);
+    }
+  }
+
+  public double getModuleVelocityMetersPerSec(int index) {
+    return modules[index].getVelocityMetersPerSec();
+  }
+
+  public double getModuleDriveAppliedVolts(int index) {
+    return modules[index].getDriveAppliedVolts();
+  }
+
+  public double getModuleDriveStatorCurrentAmps(int index) {
+    return modules[index].getDriveStatorCurrentAmps();
+  }
+
+  public boolean isModuleConnected(int index) {
+    return modules[index].isConnected();
+  }
+
   public void pointForwards() {
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(new SwerveModuleState(0.0, Rotation2d.fromDegrees(90)));
