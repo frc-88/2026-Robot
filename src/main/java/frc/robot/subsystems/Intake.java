@@ -64,6 +64,8 @@ public class Intake extends SubsystemBase {
   new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);*/
   private final DoublePreferenceConstant deployPositionRotations =
       new DoublePreferenceConstant("Intake/DeployPosition", 27.06);
+  private final DoublePreferenceConstant deployThingRotations =
+      new DoublePreferenceConstant("Intake/ThingPosition", 20.06);
 
   private boolean isShooting = false;
   private boolean paused = false;
@@ -387,12 +389,13 @@ public class Intake extends SubsystemBase {
   }
 
   private void theThing() {
-    if (intakePivot.getPosition().getValueAsDouble() > 5.0) {
+    /*     if (intakePivot.getPosition().getValueAsDouble() > 5.0) {
       intakePivot.setControl(theThingRequest.withOutput(-3.0));
     } else {
       intakePivot.stopMotor();
-    }
-    setRollerSpeed(() -> speed.getValue() * 1.0);
+    } */
+    goToRotations(deployThingRotations.getValue());
+    setRollerSpeed();
     // setPivotRollerSpeed(() -> pivotRollerSpeed.getValue());
   }
 
