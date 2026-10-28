@@ -37,23 +37,29 @@ public class Module {
     this.index = index;
     this.constants = constants;
 
-    // Health monitoring, Rung 1 (presence). These were plain Alerts set in periodic(); as Faults
-    // they keep the same text and alert type but also feed the per-match latch. The connected flags
-    // come from the IO layer (already debounced there), so they work in log replay too.
-    String module = "Drive/Module" + Integer.toString(index);
+    // Health monitoring, Rung 1 (presence). The connected flags come from the IO layer (already
+    // debounced there), so they work in log replay too. Keys and messages name the corner (e.g.
+    // Drive/FrontRight/TurnEncoder) so the pit crew can find the device without knowing the module
+    // numbering. The corner comes from the module's location (WPILib robot frame: +X forward, +Y
+    // left), not its index, so it can't drift from the order the modules are created in.
+    boolean front = constants.LocationX >= 0;
+    boolean left = constants.LocationY >= 0;
+    String module = "Drive/" + (front ? "Front" : "Back") + (left ? "Left" : "Right");
+    String name =
+        (front ? "Front" : "Back") + "-" + (left ? "left" : "right") + " module (" + index + ")";
     new Fault(
         module + "/DriveMotor",
-        "Disconnected drive motor on module " + Integer.toString(index) + ".",
+        name + " drive motor disconnected (CAN ID " + constants.DriveMotorId + ").",
         AlertType.kError,
         () -> !inputs.driveConnected);
     new Fault(
         module + "/TurnMotor",
-        "Disconnected turn motor on module " + Integer.toString(index) + ".",
+        name + " turn motor disconnected (CAN ID " + constants.SteerMotorId + ").",
         AlertType.kError,
         () -> !inputs.turnConnected);
     new Fault(
         module + "/TurnEncoder",
-        "Disconnected turn encoder on module " + Integer.toString(index) + ".",
+        name + " turn encoder disconnected (CAN ID " + constants.EncoderId + ").",
         AlertType.kError,
         () -> !inputs.turnEncoderConnected);
   }
