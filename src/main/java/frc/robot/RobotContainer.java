@@ -100,7 +100,7 @@ public class RobotContainer {
   // immediately; going off target must persist this long before the feed gate drops. Filters
   // the short turret.onTarget() flicker (median 0.08 s) that chopped the feeder and HotTub
   // on and off ~64 times per match at NECMP/CMP.
-  private static final double ON_TARGET_DEBOUNCE_SEC = 0.2;
+  private static final double ON_TARGET_DEBOUNCE_SEC = 0.0;
   private final Debouncer onTargetDebouncer =
       new Debouncer(ON_TARGET_DEBOUNCE_SEC, Debouncer.DebounceType.kFalling);
 

@@ -123,7 +123,7 @@ public class Turret extends SubsystemBase {
 
     // sync();
     // CommandScheduler.getInstance().schedule(syncCommand().ignoringDisable(true));
-    m_turret.setPosition(0.0);
+    m_turret.setPosition(0.25);
   }
 
   private void configureMotors() {
