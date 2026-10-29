@@ -82,7 +82,16 @@ public final class HealthMonitor {
     return instance;
   }
 
+  /**
+   * Alert group that lists only the error-level faults active right now (live, not latched). Shown
+   * on the dashboard next to the {@code Health/NoErrors} light so the drive team can see what is
+   * wrong before a match.
+   */
+  public static final String ACTIVE_ERRORS_GROUP = "Health Errors";
+
   private final List<Fault> faults = new ArrayList<>();
+  private final List<Fault> errorFaults = new ArrayList<>();
+  private final List<Alert> activeErrorAlerts = new ArrayList<>(); // parallel to errorFaults
   private final List<Runnable> scopeStartListeners = new ArrayList<>();
   private final Alert latchedSummaryAlert = new Alert("", AlertType.kInfo);
   private final Alert previousRunAlert = new Alert("", AlertType.kInfo);
@@ -127,6 +136,10 @@ public final class HealthMonitor {
       }
     }
     faults.add(fault);
+    if (fault.getType() == AlertType.kError) {
+      errorFaults.add(fault);
+      activeErrorAlerts.add(new Alert(ACTIVE_ERRORS_GROUP, fault.getMessage(), AlertType.kError));
+    }
   }
 
   /**
@@ -340,6 +353,16 @@ public final class HealthMonitor {
     Logger.recordOutput("Health/EndOfMatchDisplay", nameOf(endOfMatchDisplay));
     Logger.recordOutput("Health/PreviousRunDisplay", nameOf(previousRunDisplay));
     Logger.recordOutput("Health/RestartedMidMatch", restartedMidMatch);
+
+    // Live (not latched) error status for the pre-match dashboard light and its list. Green only
+    // once faults have actually been checked (after the startup grace) and no error is active.
+    boolean errorActive = false;
+    for (int i = 0; i < errorFaults.size(); i++) {
+      boolean on = errorFaults.get(i).isActive();
+      activeErrorAlerts.get(i).set(on);
+      errorActive |= on;
+    }
+    Logger.recordOutput("Health/NoErrors", !inGrace && !errorActive);
     if (!bootRecordLogged) {
       Logger.recordOutput("Health/PreviousRun", bootRecord);
       bootRecordLogged = true;
