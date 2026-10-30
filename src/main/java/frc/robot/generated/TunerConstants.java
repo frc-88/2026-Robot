@@ -24,7 +24,7 @@ public class TunerConstants {
   // private final LoggedNetworkNumber steerkp = new LoggedNetworkNumber("/Tuning/Steer/kP", 100.0);
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(100) // with foc 130 volt 100
+          .withKP(100.0) // with foc 130 volt 100
           .withKI(0)
           .withKD(0.5) // foc .5 volt .5
           .withKS(0.1) // foc 6 volt .1

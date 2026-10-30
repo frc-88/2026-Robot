@@ -457,7 +457,10 @@ public class RobotContainer {
             shooting && trajectorySolver.getIsTargetingHub()
                 ? -controller.getLeftX() * 0.5
                 : -controller.getLeftX(),
-        () -> -controller.getRightX() * 1.0,
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getRightX() * 0.75
+                : -controller.getRightX() * 1.0,
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());
   }

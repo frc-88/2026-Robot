@@ -250,6 +250,8 @@ public class Drive extends SubsystemBase {
       boolean cancelY = false;
       Pose2d robotPosition = getPose();
       Translation2d robotVelocity = getChassisSpeedsFieldRelative().getTranslation();
+      Logger.recordOutput(
+          "Drive/Actual", -1.0 * Math.hypot(robotVelocity.getX(), robotVelocity.getY()));
 
       if ((robotPosition.getX() > Constants.FIELD_LENGTH - Constants.FIELD_MARGIN
               && robotVelocity.getX() > 0.0)
