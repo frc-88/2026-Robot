@@ -14,10 +14,13 @@ import static frc.robot.subsystems.vision.VisionConstants.camera2Name;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,6 +50,10 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AutoStartPositions;
 import frc.robot.util.TrajectorySolver;
 import frc.robot.util.Util;
+import frc.robot.util.health.CanBusFaults;
+import frc.robot.util.health.Fault;
+import frc.robot.util.health.HealthMonitor;
+import frc.robot.util.usage.TreadUsageTracker;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -72,6 +79,7 @@ public class RobotContainer {
   private final Vision vision;
   private final Simulation simulation;
   private final Dashboard dashboard = new Dashboard();
+  private final TreadUsageTracker treadUsage;
   // private final Climber climber = new Climber();
 
   private final AutoStartPositions autoStartPositions = new AutoStartPositions();
@@ -87,12 +95,22 @@ public class RobotContainer {
   private boolean shooting = false;
   private boolean shouldUseQuest = false;
   private boolean shootOverride = false;
+
+  // Falling-edge debounce on the turret's on-target check. Coming on target passes through
+  // immediately; going off target must persist this long before the feed gate drops. Filters
+  // the short turret.onTarget() flicker (median 0.08 s) that chopped the feeder and HotTub
+  // on and off ~64 times per match at NECMP/CMP.
+  private static final double ON_TARGET_DEBOUNCE_SEC = 0.0;
+  private final Debouncer onTargetDebouncer =
+      new Debouncer(ON_TARGET_DEBOUNCE_SEC, Debouncer.DebounceType.kFalling);
+
   private String lastName = null;
   private boolean isPreAiming;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     RobotController.setBrownoutVoltage(6.5);
+    configureHealthFaults();
     GyroIO gyro;
 
     // TODO Disable diagnostic server if in COMP mode?
@@ -170,6 +188,13 @@ public class RobotContainer {
     shooter = new Shooter(trajectorySolver::getShootSpeed);
     intake = new Intake(drive::getSpeed);
 
+    // Wheel-tread odometer: counts how far each wheel travels and warns on the dashboard
+    // ("Maintenance" alerts) when a module is due for a tread inspection. Pit crew records
+    // inspections/replacements from the dashboard "Usage" folder. Not part of the health system.
+    treadUsage =
+        new TreadUsageTracker(
+            drive::getWheelRadiusCharacterizationPositions, TunerConstants.FrontLeft.WheelRadius);
+
     NamedCommands.registerCommand("Intake Out", intake.deployIntake());
     NamedCommands.registerCommand("Intake In", intake.retractIntake());
     NamedCommands.registerCommand("Intake The Thing", intake.doTheThing());
@@ -192,6 +217,61 @@ public class RobotContainer {
     configureDefaultCommands();
     configureDriverController();
     configureButtonBox();
+  }
+
+  // ----- Health monitoring: power (see util/health) -----
+
+  private static final double BATTERY_SAG_VOLTS = 7.0;
+  private static final double BATTERY_SAG_DEBOUNCE_SECONDS = 0.1;
+  // Lowest pre-match resting voltage seen last season.
+  private static final double LOW_RESTING_BATTERY_VOLTS = 12.3;
+
+  private double lastDisabledBatteryVolts = Double.NaN;
+  private double matchStartBatteryVolts = Double.NaN;
+
+  private void configureHealthFaults() {
+    boolean real = Constants.currentMode == Constants.Mode.REAL; // sim battery is a fixed 12 V
+
+    // Warning, not error: brownouts happened in most NERD 2026 matches and would have turned
+    // every end-of-match result into an error, hiding the device dropouts.
+    new Fault(
+        "Power/Brownout",
+        "roboRIO brownout: battery fell below the brownout voltage and motor outputs were cut.",
+        AlertType.kWarning,
+        () -> real && RobotController.isBrownedOut());
+
+    new Fault(
+        "Power/BatterySag",
+        "Battery voltage dropped below " + BATTERY_SAG_VOLTS + " V.",
+        AlertType.kWarning,
+        () -> real && RobotController.getBatteryVoltage() < BATTERY_SAG_VOLTS,
+        BATTERY_SAG_DEBOUNCE_SECONDS);
+
+    // Dashboard-only queue check: only true while disabled, so it never counts toward a match.
+    new Fault(
+        "Power/LowRestingBattery",
+        "Battery below " + LOW_RESTING_BATTERY_VOLTS + " V at rest. Consider swapping it.",
+        AlertType.kWarning,
+        () ->
+            real
+                && DriverStation.isDisabled()
+                && RobotController.getBatteryVoltage() < LOW_RESTING_BATTERY_VOLTS,
+        2.0);
+
+    // Record the resting voltage when auto starts; warn for that match if it was low.
+    HealthMonitor.getInstance()
+        .onScopeStart(
+            () -> {
+              matchStartBatteryVolts = lastDisabledBatteryVolts;
+              Logger.recordOutput("Health/MatchStartBatteryVolts", matchStartBatteryVolts);
+            });
+    new Fault(
+        "Power/LowStartingBattery",
+        "Match started on a low battery (below " + LOW_RESTING_BATTERY_VOLTS + " V at rest).",
+        AlertType.kWarning,
+        () -> real && matchStartBatteryVolts < LOW_RESTING_BATTERY_VOLTS);
+
+    CanBusFaults.create(real);
   }
 
   private void configureSmartDashboardButtons() {
@@ -218,15 +298,21 @@ public class RobotContainer {
 
   @AutoLogOutput
   public boolean onTargetRobot() {
+    // Run the debouncer on every call, before the override early-return, so its timer always
+    // reflects the turret's current state. It is time-based, so multiple calls per loop
+    // (feeder, HotTub, AutoLog) are harmless.
+    boolean turretOnTargetDebounced = onTargetDebouncer.calculate(turret.onTarget());
+    Logger.recordOutput("RobotContainer/TurretOnTargetDebounced", turretOnTargetDebounced);
+
     if (shooting && shootOverride) {
       return true;
     }
-    return turret.onTarget()
+    return turretOnTargetDebounced
         && shooting
         && (dashboard.getIsHubActive()
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
-                    < (trajectorySolver.getTimeOfFlight() + Constants.FUEL_SCORING_TIME))
+                    < (trajectorySolver.getTimeOfFlight() + 1 + Constants.FUEL_SCORING_TIME))
             || (dashboard.getIsHubActive() == false
                 && dashboard.getPeriodTimeRemaining()
                     > 25.0
@@ -237,11 +323,7 @@ public class RobotContainer {
 
   private void configureDriverController() {
 
-    controller
-        .x()
-        .onTrue(
-            driveAtAngle(() -> Rotation2d.fromDegrees(90.0))
-                .until(() -> MathUtil.applyDeadband(-controller.getRightX(), 0.1) != 0.0));
+    controller.x().whileTrue(drive.bcDotWheelCommand());
 
     controller
         .a()
@@ -279,7 +361,7 @@ public class RobotContainer {
     buttons.button(7).onTrue(intake.retractIntake());
     // buttons.button(10).onTrue(resetBatman());
     buttons.button(3).whileTrue(turret.syncCommand().ignoringDisable(true));
-    buttons.button(8).whileTrue(intake.doTheThing());
+    buttons.button(8).whileTrue(intake.doTheThing()).onFalse(intake.deployIntake());
     buttons.button(9).whileTrue(antiJam());
     buttons.button(5).onTrue(intake.setTooHigh());
     // buttons
@@ -296,6 +378,8 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
+    // Health monitoring: resting battery voltage.
+    lastDisabledBatteryVolts = RobotController.getBatteryVoltage();
 
     String autoName = autoChooser.get().getName();
     if (lastName != autoName) {
@@ -349,15 +433,15 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.65, 0.65))
+                ? xLimiter.calculate(MathUtil.clamp(-controller.getLeftY(), -0.50, 0.50))
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.65, 0.65))
+                ? yLimiter.calculate(MathUtil.clamp(-controller.getLeftX(), -0.50, 0.50))
                 : -controller.getLeftX(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.75, 0.75))
+                ? rotationLimiter.calculate(MathUtil.clamp(-controller.getRightX(), -0.65, 0.65))
                 : -controller.getRightX(),
         this::turretRotSupplier);
   }
@@ -365,9 +449,18 @@ public class RobotContainer {
   public Command driveRebuiltSOMETHING() {
     return DriveCommands.rebuiltDriveSomething(
         drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
-        () -> -controller.getRightX(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftY() * 0.5
+                : -controller.getLeftY(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getLeftX() * 0.5
+                : -controller.getLeftX(),
+        () ->
+            shooting && trajectorySolver.getIsTargetingHub()
+                ? -controller.getRightX() * 0.75
+                : -controller.getRightX() * 1.0,
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());
   }

@@ -23,10 +23,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.util.health.Fault;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -40,7 +40,6 @@ public class Vision extends SubsystemBase {
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
-  private final Alert[] disconnectedAlerts;
   private Pose3d currentPose = new Pose3d();
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
@@ -53,12 +52,15 @@ public class Vision extends SubsystemBase {
       inputs[i] = new VisionIOInputsAutoLogged();
     }
 
-    // Initialize disconnected alerts
-    this.disconnectedAlerts = new Alert[io.length];
+    // Disconnected alerts. Health monitoring, Rung 1 (presence): same text and alert type as the
+    // Alerts these replace, now polled by HealthMonitor and fed into the per-match latch.
     for (int i = 0; i < inputs.length; i++) {
-      disconnectedAlerts[i] =
-          new Alert(
-              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+      final int cameraIndex = i;
+      new Fault(
+          "Vision/Camera" + Integer.toString(i),
+          "Vision camera " + Integer.toString(i) + " is disconnected.",
+          AlertType.kWarning,
+          () -> !inputs[cameraIndex].connected);
     }
   }
 
@@ -90,9 +92,6 @@ public class Vision extends SubsystemBase {
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-      // Update disconnected alert
-      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
-
       // Initialize logging values
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
