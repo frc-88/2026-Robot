@@ -451,13 +451,13 @@ public class RobotContainer {
         drive,
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? -controller.getLeftY() * 0.25
+                ? -controller.getLeftY() * 0.5
                 : -controller.getLeftY(),
         () ->
             shooting && trajectorySolver.getIsTargetingHub()
-                ? -controller.getLeftX() * 0.25
+                ? -controller.getLeftX() * 0.5
                 : -controller.getLeftX(),
-        () -> -controller.getRightX() * 0.625,
+        () -> -controller.getRightX() * 1.0,
         this::turretRotSupplier,
         () -> shooting && trajectorySolver.getIsTargetingHub());
   }

@@ -20,6 +20,8 @@ public class TunerConstants {
 
   // The steer motor uses any SwerveModule.SteerRequestType control request with the
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
+
+  // private final LoggedNetworkNumber steerkp = new LoggedNetworkNumber("/Tuning/Steer/kP", 100.0);
   private static final Slot0Configs steerGains =
       new Slot0Configs()
           .withKP(100) // with foc 130 volt 100
