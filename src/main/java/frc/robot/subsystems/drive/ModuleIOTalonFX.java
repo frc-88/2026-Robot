@@ -112,7 +112,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.CurrentLimits.SupplyCurrentLimit = 45.0;
+    driveConfig.CurrentLimits.SupplyCurrentLimit = 35.0; // PreBoB changing from 45 to 35
     driveConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
 
     driveConfig.MotorOutput.Inverted =
@@ -142,6 +142,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    turnConfig.CurrentLimits.SupplyCurrentLimit = 25.0; // PreBoB adding in this limit 25
+    turnConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
     turnConfig.MotorOutput.Inverted =
         constants.SteerMotorInverted
             ? InvertedValue.Clockwise_Positive
