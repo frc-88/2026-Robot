@@ -110,7 +110,7 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput
-  private Current getSupplyCurrent() {
+  public Current getSupplyCurrent() {
     return m_feeder.getSupplyCurrent().getValue();
   }
 

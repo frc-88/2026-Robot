@@ -9,7 +9,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.util.Units;
@@ -59,7 +58,7 @@ public class Intake extends SubsystemBase {
       "Intake/IntakePivotRollerMotor", 50., 1000., 0., 0.5, 0., 0., 0.098, 0., 0.); */
   private final DoublePreferenceConstant targetPosition =
       new DoublePreferenceConstant("Intake/PivotTarget", 0.);
-  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 80.0);
+  private final DoublePreferenceConstant speed = new DoublePreferenceConstant("Intake/Speed", 90.0);
   /*private final DoublePreferenceConstant pivotRollerSpeed =
   new DoublePreferenceConstant("Intake/PivotRollerSpeed", 78.0);*/
   private final DoublePreferenceConstant deployPositionRotations =
@@ -370,10 +369,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void setRollerSpeed() {
-    setRollerSpeed(
-        () ->
+    setRollerSpeed(() -> 90.0 /* () ->
             MathUtil.clamp(
-                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 90.0, 120.0));
+                (m_drivespeed.getAsDouble() / (Math.PI * Units.inchesToMeters(1))), 90.0, 120.0) */);
   }
 
   public void intakeIn() {
