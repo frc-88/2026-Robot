@@ -21,13 +21,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Dashboard;
@@ -217,6 +220,7 @@ public class RobotContainer {
     configureDefaultCommands();
     configureDriverController();
     configureButtonBox();
+    configureFeederProtection();
   }
 
   // ----- Health monitoring: power (see util/health) -----
@@ -375,6 +379,18 @@ public class RobotContainer {
     //                   }
     //                 })
     //             .ignoringDisable(true));
+  }
+
+  private void configureFeederProtection() {
+    new Trigger(() -> feeder.getFeederSupplyCurrent() > 55.0)
+        .debounce(0.5, Debouncer.DebounceType.kRising)
+        .onTrue(
+            antiJam()
+                .withTimeout(0.5)
+                .alongWith(
+                    Commands.startEnd(
+                        () -> controller.setRumble(RumbleType.kBothRumble, 1.0),
+                        () -> controller.setRumble(RumbleType.kBothRumble, 0.0))));
   }
 
   public void disabledPeriodic() {

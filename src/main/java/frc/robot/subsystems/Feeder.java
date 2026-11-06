@@ -124,6 +124,10 @@ public class Feeder extends SubsystemBase {
     return m_feeder.getPosition().getValue();
   }
 
+  public double getFeederSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValueAsDouble();
+  }
+
   private void setVoltage(Voltage volts) {
     m_feeder.setControl(m_voltReq.withOutput(volts));
   }
