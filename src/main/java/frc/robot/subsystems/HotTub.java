@@ -212,10 +212,15 @@ public class HotTub extends SubsystemBase {
   // jam threshold values from 11/5 practice logs
   private static final double FUNNEL_JAM_CURRENT_AMPS = 25.0;
 
-  /** True when balls are jammed against the funnel, upstream of the feeder. */
+  /**
+   * True when balls are jammed against the funnel, upstream of the feeder. Only meaningful while
+   * the funnel runs in reverse (negative applied voltage): run forward, it stalls against the queue
+   * of balls during normal feeding (10/24 River Rage logs), so a stall there is not a jam.
+   */
   @AutoLogOutput
   public boolean isFunnelJammed() {
-    return Math.abs(m_funnel.getTorqueCurrent().getValueAsDouble()) > FUNNEL_JAM_CURRENT_AMPS;
+    return m_funnel.getMotorVoltage().getValueAsDouble() < 0.0
+        && Math.abs(m_funnel.getTorqueCurrent().getValueAsDouble()) > FUNNEL_JAM_CURRENT_AMPS;
   }
 
   @AutoLogOutput
