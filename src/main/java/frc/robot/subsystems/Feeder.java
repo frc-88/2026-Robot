@@ -128,6 +128,17 @@ public class Feeder extends SubsystemBase {
     return m_feeder.getSupplyCurrent().getValueAsDouble();
   }
 
+  // Jam thresholds from the Nov 5-6 practice logs
+  private static final double JAM_TORQUE_CURRENT_AMPS = 100.0;
+  private static final double JAM_MAX_VELOCITY_RPS = 35.0;
+
+  /** True when the feeder is pushing hard but barely turning: a ball binding in the feeder. */
+  @AutoLogOutput
+  public boolean isJammed() {
+    return m_feeder.getTorqueCurrent().getValueAsDouble() > JAM_TORQUE_CURRENT_AMPS
+        && m_feeder.getVelocity().getValueAsDouble() < JAM_MAX_VELOCITY_RPS;
+  }
+
   private void setVoltage(Voltage volts) {
     m_feeder.setControl(m_voltReq.withOutput(volts));
   }

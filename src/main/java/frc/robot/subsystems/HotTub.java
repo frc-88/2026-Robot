@@ -209,6 +209,15 @@ public class HotTub extends SubsystemBase {
         && m_roof.getVelocity().getValueAsDouble() < 8.0;
   }
 
+  // jam threshold values from 11/5 practice logs
+  private static final double FUNNEL_JAM_CURRENT_AMPS = 25.0;
+
+  /** True when balls are jammed against the funnel, upstream of the feeder. */
+  @AutoLogOutput
+  public boolean isFunnelJammed() {
+    return Math.abs(m_funnel.getTorqueCurrent().getValueAsDouble()) > FUNNEL_JAM_CURRENT_AMPS;
+  }
+
   @AutoLogOutput
   private boolean isFunnelStalled() {
     return m_funnel.getStatorCurrent().getValueAsDouble() > 55.0
