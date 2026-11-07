@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.util.health.Fault;
 import frc.robot.util.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.util.preferenceconstants.MotionMagicPIDPreferenceConstants;
 import java.util.function.BooleanSupplier;
@@ -61,6 +62,9 @@ public class Feeder extends SubsystemBase {
   public Feeder(BooleanSupplier OnTarget) {
     m_OnTarget = OnTarget;
     configureTalons();
+
+    // Health monitoring, Rung 1 (presence). Observe-only: does not affect control.
+    Fault.disconnected("Feeder/Motor", "Feeder motor", m_feeder);
   }
 
   private void configureTalons() {
@@ -73,10 +77,21 @@ public class Feeder extends SubsystemBase {
     feederConfig.Slot0.kS = p_feederConfigConstants.getKS().getValue();
     feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    feederConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    feederConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+    feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    feederConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
+    feederConfig.CurrentLimits.SupplyCurrentLowerLimit = 60.0;
     m_feeder.getConfigurator().apply(feederConfig);
 
     m_feeder.getVelocity().setUpdateFrequency(100);
+
+    // --- CAN bus optimization: keep only what this subsystem reads, disable the rest ---
+    m_feeder.getPosition().setUpdateFrequency(100);
+    m_feeder.getMotorVoltage().setUpdateFrequency(50);
+    m_feeder.getTorqueCurrent().setUpdateFrequency(50);
+    // Stator current kept enabled for the all-motors stator-current logging.
+    m_feeder.getStatorCurrent().setUpdateFrequency(50);
+    m_feeder.optimizeBusUtilization();
   }
 
   @AutoLogOutput
@@ -95,6 +110,11 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput
+  public Current getSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValue();
+  }
+
+  @AutoLogOutput
   private AngularVelocity getVelocity() {
     return m_feeder.getVelocity().getValue();
   }
@@ -102,6 +122,21 @@ public class Feeder extends SubsystemBase {
   @AutoLogOutput
   private Angle getPosition() {
     return m_feeder.getPosition().getValue();
+  }
+
+  public double getFeederSupplyCurrent() {
+    return m_feeder.getSupplyCurrent().getValueAsDouble();
+  }
+
+  // Jam thresholds from the Nov 5-6 practice logs
+  private static final double JAM_TORQUE_CURRENT_AMPS = 100.0;
+  private static final double JAM_MAX_VELOCITY_RPS = 35.0;
+
+  /** True when the feeder is pushing hard but barely turning: a ball binding in the feeder. */
+  @AutoLogOutput
+  public boolean isJammed() {
+    return m_feeder.getTorqueCurrent().getValueAsDouble() > JAM_TORQUE_CURRENT_AMPS
+        && m_feeder.getVelocity().getValueAsDouble() < JAM_MAX_VELOCITY_RPS;
   }
 
   private void setVoltage(Voltage volts) {
