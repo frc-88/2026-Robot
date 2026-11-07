@@ -385,11 +385,17 @@ public class RobotContainer {
     // Auto anti-jam. Either signal alone means balls are stuck:
     //  - feeder.isJammed(): ball binding in the feeder (high torque current, feeder barely turning)
     //  - hotTub.isFunnelJammed(): balls wedged at the funnel; the feeder can look normal here
-    // Only while shooting. The 0.3 s debounce is on the combined condition so a jam that flickers
-    // between the two signals still counts; in normal flow these blips last <= 0.18 s.
+    // Only while shooting, and only in teleop: in auto, antiJam() takes the shooter, feeder and
+    // HotTub away from the PathPlanner routine, which cancels the whole auto (it does not resume).
+    // The 0.3 s debounce is on the combined condition so a jam that flickers between the two
+    // signals still counts; in normal flow these blips last <= 0.18 s.
     // Replayed on the Nov 5-6 practice logs: 0 fires while balls were flowing (old supply-current
     // trigger: 13) and 6/6 video-confirmed jams caught (old: 2/6). See jam-review-1105, section 10.
-    new Trigger(() -> isShooting() && (feeder.isJammed() || hotTub.isFunnelJammed()))
+    new Trigger(
+            () ->
+                DriverStation.isTeleopEnabled()
+                    && isShooting()
+                    && (feeder.isJammed() || hotTub.isFunnelJammed()))
         .debounce(0.3, Debouncer.DebounceType.kRising)
         .onTrue(
             antiJam()
